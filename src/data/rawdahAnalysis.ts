@@ -1,4 +1,4 @@
-// Rawdah Showroom Detailed Analysis Data - Summary Analysis & Comparison Tab
+// Rawdah Showroom Detailed Analysis Data - Enhanced from Summary Analysis Tab
 
 export interface MonthlyComparison {
   month: string;
@@ -9,6 +9,7 @@ export interface MonthlyComparison {
   winner: 'RAWDAH' | 'RUBEN';
 }
 
+// 2025 Comparison: Rawdah vs Ruben (Without G8)
 export const monthlyComparisonData: MonthlyComparison[] = [
   { month: 'January', ruben: 8899.44, rawdah: 8330.6, difference: 6.4, savingsSAR: 568.84, winner: 'RAWDAH' },
   { month: 'February', ruben: 10174.19, rawdah: 8178.88, difference: 19.6, savingsSAR: 1995.31, winner: 'RAWDAH' },
@@ -24,6 +25,77 @@ export const monthlyComparisonData: MonthlyComparison[] = [
   { month: 'December', ruben: 8895.4, rawdah: 7089.68, difference: 20.3, savingsSAR: 1805.72, winner: 'RAWDAH' },
 ];
 
+// NEW: 2024 vs 2025 Year-over-Year Comparison
+export interface YearlyComparison {
+  month: string;
+  year2024: number;
+  year2025: number;
+  percentDiff: number;
+  actualDiff: number;
+  savingsSAR: number;
+}
+
+export const yearlyComparisonData: YearlyComparison[] = [
+  { month: 'January', year2024: 8282.3, year2025: 8598.6, percentDiff: -3.82, actualDiff: -3.60, savingsSAR: 0 },
+  { month: 'February', year2024: 12040.5, year2025: 8652.88, percentDiff: 28.14, actualDiff: 27.72, savingsSAR: 3387.62 },
+  { month: 'March', year2024: 13302.37, year2025: 14845.66, percentDiff: -11.60, actualDiff: -12.33, savingsSAR: 0 },
+  { month: 'April', year2024: 15845.44, year2025: 19993.72, percentDiff: -26.18, actualDiff: -30.65, savingsSAR: 0 },
+  { month: 'May', year2024: 23852.75, year2025: 24201.06, percentDiff: -1.46, actualDiff: -1.68, savingsSAR: 0 },
+  { month: 'June', year2024: 23474.42, year2025: 25349.77, percentDiff: 7.73, actualDiff: 8.93, savingsSAR: 2124.65 },
+  { month: 'July', year2024: 29544.57, year2025: 27989.65, percentDiff: 5.29, actualDiff: 6.22, savingsSAR: 1564.32 },
+  { month: 'August', year2024: 30436.45, year2025: 27691.22, percentDiff: 9.02, actualDiff: 10.30, savingsSAR: 2745.23 },
+  { month: 'September', year2024: 23550.8, year2025: 21854.71, percentDiff: 7.20, actualDiff: 8.10, savingsSAR: 1696.09 },
+  { month: 'October', year2024: 16136.34, year2025: 15193.52, percentDiff: 5.84, actualDiff: 6.27, savingsSAR: 942.82 },
+  { month: 'November', year2024: 11937.78, year2025: 11649.4, percentDiff: 2.41, actualDiff: 2.52, savingsSAR: 287.38 },
+  { month: 'December', year2024: 7623.95, year2025: 7369.27, percentDiff: 3.34, actualDiff: 2.41, savingsSAR: 254.68 },
+];
+
+// Energy Cost Summary
+export const energyCostSummary = {
+  totalBill2023: 203246,
+  totalBill2024: 220028,
+  yearOverYearIncrease: 8.25,
+  increaseAmount: 16782,
+  overallSavingsExcludingIssueMonths: 9, // 9% decrease when excluding March/April
+  yearlySavings2024vs2025: 13003.29,
+  yearlySavingsPercent: 9.06,
+};
+
+// Demand Comparison - Before/After SCC Installation
+export interface DemandSnapshot {
+  date: string;
+  year: number;
+  label: string;
+  totalDailyConsumption: number;
+  avgKwh: number;
+  status: string;
+}
+
+export const demandSnapshots: DemandSnapshot[] = [
+  { date: '21-Oct-23', year: 2023, label: 'Prior to SCC Installation', totalDailyConsumption: 495, avgKwh: 33, status: 'baseline' },
+  { date: '21-Oct-24', year: 2024, label: 'After SCC Installation (Old Filters)', totalDailyConsumption: 218, avgKwh: 15, status: 'improved' },
+  { date: '21-Oct-25', year: 2025, label: 'New Filters + Better Efficiency', totalDailyConsumption: 189, avgKwh: 12.5, status: 'optimized' },
+];
+
+// Unit-Level Comparisons (G1, G3, F3, F4)
+export interface UnitComparison {
+  unit: string;
+  date2024: string;
+  date2025: string;
+  kw2024: number;
+  avgKwh2024: number;
+  kw2025: number;
+  avgKwh2025: number;
+  reduction: number;
+}
+
+export const unitComparisons: UnitComparison[] = [
+  { unit: 'G1', date2024: 'Oct 12 2024', date2025: 'Oct 12 2025', kw2024: 478, avgKwh2024: 33, kw2025: 214, avgKwh2025: 15, reduction: 55.2 },
+  { unit: 'G3', date2024: 'Oct 12 2024', date2025: 'Oct 12 2025', kw2024: 327, avgKwh2024: 22.5, kw2025: 217, avgKwh2025: 15, reduction: 33.6 },
+  { unit: 'F3', date2024: 'Oct 16 2024', date2025: 'Oct 16 2025', kw2024: 477, avgKwh2024: 33, kw2025: 234, avgKwh2025: 15, reduction: 50.9 },
+  { unit: 'F4', date2024: 'Oct 20 2024', date2025: 'Oct 20 2025', kw2024: 465, avgKwh2024: 31, kw2025: 290, avgKwh2025: 20, reduction: 37.6 },
+];
+
 export const summaryStats = {
   avgSavingsPercent: 11.11,
   totalAnnualSavings: 17671.82,
@@ -34,8 +106,11 @@ export const summaryStats = {
 
 export const keyInsights = [
   'The largest savings were achieved in June (18.7%) and December (20.3%)',
-  'Rawdah Showroom consistently outperformed Ruben in energy efficiency',
-  'Recorded lower consumption in 9 out of 12 months',
+  'Rawdah Showroom consistently outperformed Ruben in energy efficiency, recording lower consumption in 9 out of 12 months',
+  'Only March and April saw higher RAWDAH consumption due to maintenance issues, system updates and operational differences',
+  'During high-load summer months (May-August), Rawdah consistently demonstrated stronger energy performance, highlighting better operational efficiency under peak demand conditions',
+  'Rawdah remains the more energy-efficient showroom, delivering meaningful cost savings and more stable performance throughout the year—particularly during peak cooling periods',
+  'Continued monitoring and adopting RAWDAH\'s operational strategies could further enhance RUBEN\'s performance and overall cost efficiency',
 ];
 
 export interface UnitObservation {
@@ -134,3 +209,10 @@ export const operatingHoursImpact = {
   additionalConsumption: 3004, // kWh
   additionalCost: 1000, // SAR
 };
+
+// System Monitoring Notes
+export const systemMonitoringNotes = [
+  'We monitor the system daily for any irregularities and carry out preventive maintenance.',
+  'We also maintain a quick response time to rectify issues before being reported by staff at the location.',
+  'We actively implement smart energy-saving tactics.',
+];
