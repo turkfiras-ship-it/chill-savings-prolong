@@ -114,7 +114,7 @@ export function ROIAnalysis() {
       </div>
 
       {/* AC Replacement Savings Highlight */}
-      <div className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+      <div className="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-6 text-white">
         <div className="flex items-center gap-2 mb-4">
           <Timer className="h-6 w-6" />
           <h3 className="text-xl font-bold">AC Unit Lifespan Extension Savings</h3>
