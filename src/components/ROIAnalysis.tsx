@@ -16,11 +16,13 @@ import {
 import {
   systemConfig,
   maintenanceSavings,
-  lifespanSavings,
   downtimeSavings,
   energySavings,
   calculateTotalSavings,
   calculateROI,
+  calculateReplacementSavings,
+  lifespanExtension,
+  acReplacementCosts,
 } from "@/data/roiCalculations";
 import {
   Table,
@@ -41,27 +43,33 @@ import {
   Shield,
   CheckCircle,
   ArrowRight,
+  Timer,
 } from "lucide-react";
 
 export function ROIAnalysis() {
   const savings = calculateTotalSavings();
   const roi = calculateROI();
+  const replacement = calculateReplacementSavings();
 
-  // Pie chart data for savings breakdown
+  // Pie chart data for savings breakdown (annual operational + annualized replacement)
   const pieData = [
     { name: 'Energy Savings', value: savings.energySavings, color: 'hsl(152, 60%, 40%)' },
     { name: 'Maintenance Savings', value: savings.maintenanceSavings, color: 'hsl(220, 70%, 50%)' },
-    { name: 'Lifespan Savings', value: savings.lifespanSavings, color: 'hsl(38, 92%, 50%)' },
     { name: 'Downtime Avoidance', value: savings.downtimeSavings, color: 'hsl(280, 60%, 55%)' },
+    { name: 'Lifespan Extension', value: savings.replacementSavingsAnnualized, color: 'hsl(38, 92%, 50%)' },
   ];
 
   // ROI timeline data
-  const roiTimelineData = Array.from({ length: 11 }, (_, year) => ({
-    year,
-    cumulativeSavings: year * savings.totalAnnualSavings,
-    investment: systemConfig.totalSystemCost,
-    netProfit: (year * savings.totalAnnualSavings) - systemConfig.totalSystemCost,
-  }));
+  const roiTimelineData = Array.from({ length: 11 }, (_, year) => {
+    // Add replacement savings bonus at year 10
+    const replacementBonus = year >= 10 ? replacement.avgTotal : (year >= 5 ? replacement.fiveYearProrated : 0);
+    return {
+      year,
+      cumulativeSavings: (year * savings.annualOperationalSavings) + replacementBonus,
+      investment: systemConfig.totalSystemCost,
+      netProfit: (year * savings.annualOperationalSavings) + replacementBonus - systemConfig.totalSystemCost,
+    };
+  });
 
   // Maintenance savings chart data
   const maintenanceChartData = maintenanceSavings.map(item => ({
@@ -88,19 +96,64 @@ export function ROIAnalysis() {
             <p className="text-xs opacity-70">{systemConfig.numberOfUnits} units × {systemConfig.costPerUnit.toLocaleString()} SAR</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
-            <p className="text-sm opacity-80">Annual Savings</p>
-            <p className="text-2xl font-bold">{Math.round(savings.totalAnnualSavings).toLocaleString()} SAR</p>
-            <p className="text-xs opacity-70">Total operational savings</p>
+            <p className="text-sm opacity-80">Annual Operational Savings</p>
+            <p className="text-2xl font-bold">{Math.round(savings.annualOperationalSavings).toLocaleString()} SAR</p>
+            <p className="text-xs opacity-70">Recurring yearly savings</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
             <p className="text-sm opacity-80">Payback Period</p>
             <p className="text-2xl font-bold">{roi.paybackPeriodYears.toFixed(1)} Years</p>
-            <p className="text-xs opacity-70">~{Math.round(roi.paybackPeriodYears * 12)} months</p>
+            <p className="text-xs opacity-70">~{Math.round(roi.paybackPeriodMonths)} months</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
             <p className="text-sm opacity-80">5-Year ROI</p>
             <p className="text-2xl font-bold">{roi.fiveYearROI.toFixed(0)}%</p>
-            <p className="text-xs opacity-70">Net profit: {Math.round(roi.netProfitFiveYears).toLocaleString()} SAR</p>
+            <p className="text-xs opacity-70">Net profit: {Math.round(roi.fiveYearNetProfit).toLocaleString()} SAR</p>
+          </div>
+        </div>
+      </div>
+
+      {/* AC Replacement Savings Highlight */}
+      <div className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white">
+        <div className="flex items-center gap-2 mb-4">
+          <Timer className="h-6 w-6" />
+          <h3 className="text-xl font-bold">AC Unit Lifespan Extension Savings</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p className="text-white/90 mb-4">
+              Your system extends AC lifespan from <strong>{lifespanExtension.normalLifespan} years</strong> to{' '}
+              <strong>{lifespanExtension.extendedLifespan} years</strong>, saving one full replacement cycle.
+            </p>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center bg-white/10 rounded-lg p-3">
+                <span>Normal replacement cycle:</span>
+                <span className="font-bold">Every {lifespanExtension.normalLifespan} years</span>
+              </div>
+              <div className="flex justify-between items-center bg-white/20 rounded-lg p-3">
+                <span>With power saving system:</span>
+                <span className="font-bold">Every {lifespanExtension.extendedLifespan} years</span>
+              </div>
+              <div className="flex justify-between items-center bg-white/30 rounded-lg p-3">
+                <span>Years extended:</span>
+                <span className="font-bold text-lg">+{lifespanExtension.yearsExtended} years</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white/10 rounded-lg p-4">
+            <p className="text-sm opacity-80 mb-2">Replacement Cost Avoided</p>
+            <p className="text-sm opacity-70 mb-1">Cost per new AC unit: {acReplacementCosts.minCostPerUnit.toLocaleString()} - {acReplacementCosts.maxCostPerUnit.toLocaleString()} SAR</p>
+            
+            <div className="mt-4 p-4 bg-white/20 rounded-lg">
+              <p className="text-sm opacity-80">Total Savings ({systemConfig.numberOfUnits} units × avg. {acReplacementCosts.avgCostPerUnit.toLocaleString()} SAR)</p>
+              <p className="text-4xl font-bold mt-1">{replacement.avgTotal.toLocaleString()} SAR</p>
+              <p className="text-sm opacity-80 mt-2">
+                Range: {replacement.minTotal.toLocaleString()} - {replacement.maxTotal.toLocaleString()} SAR
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -112,10 +165,14 @@ export function ROIAnalysis() {
             <span className="text-sm text-muted-foreground">5-Year Total Savings</span>
             <Calendar className="h-4 w-4 text-savings" />
           </div>
-          <p className="text-3xl font-bold text-savings">{Math.round(roi.fiveYearSavings).toLocaleString()} SAR</p>
+          <p className="text-3xl font-bold text-savings">{Math.round(roi.fiveYearTotalSavings).toLocaleString()} SAR</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Net Profit: <span className="text-savings font-medium">{Math.round(roi.netProfitFiveYears).toLocaleString()} SAR</span>
+            Net Profit: <span className="text-savings font-medium">{Math.round(roi.fiveYearNetProfit).toLocaleString()} SAR</span>
           </p>
+          <div className="mt-2 text-xs text-muted-foreground">
+            <p>Operational: {Math.round(roi.fiveYearOperationalSavings).toLocaleString()} SAR</p>
+            <p>Lifespan (prorated): {Math.round(roi.fiveYearReplacementSavings).toLocaleString()} SAR</p>
+          </div>
         </div>
         
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-energy">
@@ -123,18 +180,22 @@ export function ROIAnalysis() {
             <span className="text-sm text-muted-foreground">10-Year Total Savings</span>
             <TrendingUp className="h-4 w-4 text-energy" />
           </div>
-          <p className="text-3xl font-bold text-energy">{Math.round(savings.totalAnnualSavings * 10).toLocaleString()} SAR</p>
+          <p className="text-3xl font-bold text-energy">{Math.round(roi.tenYearTotalSavings).toLocaleString()} SAR</p>
           <p className="text-sm text-muted-foreground mt-1">
             ROI: <span className="text-energy font-medium">{roi.tenYearROI.toFixed(0)}%</span>
           </p>
+          <div className="mt-2 text-xs text-muted-foreground">
+            <p>Operational: {Math.round(roi.tenYearOperationalSavings).toLocaleString()} SAR</p>
+            <p>Replacement avoided: {Math.round(roi.tenYearReplacementSavings).toLocaleString()} SAR</p>
+          </div>
         </div>
         
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-purple-500">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm text-muted-foreground">Monthly Savings</span>
+            <span className="text-sm text-muted-foreground">Monthly Operational Savings</span>
             <DollarSign className="h-4 w-4 text-purple-500" />
           </div>
-          <p className="text-3xl font-bold text-purple-500">{Math.round(savings.totalAnnualSavings / 12).toLocaleString()} SAR</p>
+          <p className="text-3xl font-bold text-purple-500">{Math.round(savings.annualOperationalSavings / 12).toLocaleString()} SAR</p>
           <p className="text-sm text-muted-foreground mt-1">
             Average per month
           </p>
@@ -146,7 +207,7 @@ export function ROIAnalysis() {
         {/* Pie Chart */}
         <div className="rounded-xl bg-card p-6 card-elevated">
           <h3 className="text-xl font-semibold mb-1">Annual Savings Breakdown</h3>
-          <p className="text-sm text-muted-foreground mb-4">Distribution by category</p>
+          <p className="text-sm text-muted-foreground mb-4">Distribution by category (annualized)</p>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -171,7 +232,7 @@ export function ROIAnalysis() {
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => [`${value.toLocaleString()} SAR/year`, '']}
+                  formatter={(value: number) => [`${Math.round(value).toLocaleString()} SAR/year`, '']}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -194,15 +255,15 @@ export function ROIAnalysis() {
                 <div className="text-right">
                   <p className="font-bold">{Math.round(item.value).toLocaleString()} SAR</p>
                   <p className="text-xs text-muted-foreground">
-                    {((item.value / savings.totalAnnualSavings) * 100).toFixed(1)}% of total
+                    {((item.value / savings.totalAnnualSavingsWithReplacement) * 100).toFixed(1)}% of total
                   </p>
                 </div>
               </div>
             ))}
             <div className="flex items-center justify-between p-3 rounded-lg bg-savings/10 border border-savings/20 mt-4">
-              <span className="font-semibold text-savings">Total Annual Savings</span>
+              <span className="font-semibold text-savings">Total Annual Savings (incl. annualized lifespan)</span>
               <span className="font-bold text-savings text-lg">
-                {Math.round(savings.totalAnnualSavings).toLocaleString()} SAR
+                {Math.round(savings.totalAnnualSavingsWithReplacement).toLocaleString()} SAR
               </span>
             </div>
           </div>
@@ -267,7 +328,7 @@ export function ROIAnalysis() {
           <p className="text-sm text-muted-foreground">
             The system investment of <strong>{systemConfig.totalSystemCost.toLocaleString()} SAR</strong> will be 
             fully recovered in approximately <strong>{roi.paybackPeriodYears.toFixed(1)} years</strong>. 
-            After year {Math.ceil(roi.paybackPeriodYears)}, all savings are pure profit.
+            By year 10, you'll also avoid AC replacement costs of <strong>{replacement.avgTotal.toLocaleString()} SAR</strong>.
           </p>
         </div>
       </div>
@@ -316,28 +377,7 @@ export function ROIAnalysis() {
                 </TableRow>
               ))}
               
-              {/* Additional savings rows */}
-              <TableRow className="hover:bg-muted/30 transition-colors">
-                <TableCell>
-                  <div>
-                    <p className="font-medium">Equipment Lifespan Extension</p>
-                    <p className="text-xs text-muted-foreground">Avoided AC replacements over 20 years</p>
-                  </div>
-                </TableCell>
-                <TableCell className="text-right tabular-nums text-destructive">
-                  ~{Math.round(lifespanSavings.replacementsWithout * 7 * 45000 / 20).toLocaleString()} SAR/yr
-                </TableCell>
-                <TableCell className="text-right tabular-nums">
-                  ~{Math.round(lifespanSavings.replacementsWith * 7 * 45000 / 20).toLocaleString()} SAR/yr
-                </TableCell>
-                <TableCell className="text-right tabular-nums text-savings font-medium">
-                  {Math.round(lifespanSavings.annualizedSavings).toLocaleString()} SAR
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground max-w-[200px]">
-                  Extends AC life from 10 to 15-20 years
-                </TableCell>
-              </TableRow>
-              
+              {/* Downtime Row */}
               <TableRow className="hover:bg-muted/30 transition-colors">
                 <TableCell>
                   <div>
@@ -381,15 +421,44 @@ export function ROIAnalysis() {
                 </TableCell>
               </TableRow>
 
+              {/* AC Replacement Row */}
+              <TableRow className="hover:bg-muted/30 transition-colors bg-amber-500/5">
+                <TableCell>
+                  <div>
+                    <p className="font-medium">AC Unit Replacement (Avoided)</p>
+                    <p className="text-xs text-muted-foreground">
+                      Lifespan extended: {lifespanExtension.normalLifespan}→{lifespanExtension.extendedLifespan} years
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell className="text-right tabular-nums text-destructive">
+                  {replacement.avgTotal.toLocaleString()} SAR
+                  <p className="text-xs">(at year 10)</p>
+                </TableCell>
+                <TableCell className="text-right tabular-nums text-savings">
+                  0 SAR
+                  <p className="text-xs">(at year 10)</p>
+                </TableCell>
+                <TableCell className="text-right tabular-nums text-amber-600 font-bold">
+                  {replacement.avgTotal.toLocaleString()} SAR
+                  <p className="text-xs font-normal">one-time at year 10</p>
+                </TableCell>
+                <TableCell className="text-xs text-muted-foreground max-w-[200px]">
+                  {systemConfig.numberOfUnits} units × {acReplacementCosts.avgCostPerUnit.toLocaleString()} SAR avoided
+                </TableCell>
+              </TableRow>
+
               {/* Total Row */}
               <TableRow className="bg-muted/70 font-bold border-t-2">
-                <TableCell>TOTAL ANNUAL SAVINGS</TableCell>
+                <TableCell>TOTAL ANNUAL OPERATIONAL SAVINGS</TableCell>
                 <TableCell></TableCell>
                 <TableCell></TableCell>
                 <TableCell className="text-right tabular-nums text-savings text-lg">
-                  {Math.round(savings.totalAnnualSavings).toLocaleString()} SAR
+                  {Math.round(savings.annualOperationalSavings).toLocaleString()} SAR
                 </TableCell>
-                <TableCell></TableCell>
+                <TableCell className="text-xs font-normal text-muted-foreground">
+                  + {replacement.avgTotal.toLocaleString()} SAR at year 10
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>
@@ -409,12 +478,12 @@ export function ROIAnalysis() {
             <p className="text-2xl font-bold">{systemConfig.totalSystemCost.toLocaleString()} SAR</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
-            <p className="text-sm opacity-80">5-Year Savings</p>
-            <p className="text-2xl font-bold">{Math.round(roi.fiveYearSavings).toLocaleString()} SAR</p>
+            <p className="text-sm opacity-80">5-Year Total Savings</p>
+            <p className="text-2xl font-bold">{Math.round(roi.fiveYearTotalSavings).toLocaleString()} SAR</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
             <p className="text-sm opacity-80">Net Profit (5 Years)</p>
-            <p className="text-2xl font-bold">{Math.round(roi.netProfitFiveYears).toLocaleString()} SAR</p>
+            <p className="text-2xl font-bold">{Math.round(roi.fiveYearNetProfit).toLocaleString()} SAR</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
             <p className="text-sm opacity-80">Return on Investment</p>
@@ -427,7 +496,8 @@ export function ROIAnalysis() {
           <div>
             <p className="font-semibold">Investment Fully Recovered in {roi.paybackPeriodYears.toFixed(1)} Years</p>
             <p className="text-sm opacity-90">
-              After payback, you gain <strong>{Math.round(savings.totalAnnualSavings).toLocaleString()} SAR</strong> in pure profit every year
+              After payback, you gain <strong>{Math.round(savings.annualOperationalSavings).toLocaleString()} SAR</strong> in pure profit every year, 
+              plus <strong>{replacement.avgTotal.toLocaleString()} SAR</strong> saved at the 10-year mark by avoiding AC replacement.
             </p>
           </div>
         </div>

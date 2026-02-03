@@ -4,9 +4,64 @@
 export const systemConfig = {
   numberOfUnits: 7,
   unitCapacity: 25, // tons
-  costPerUnit: 18000, // SAR
+  costPerUnit: 18000, // SAR - your cost
   totalSystemCost: 7 * 18000, // 126,000 SAR
   roiTargetYears: 5,
+};
+
+// AC Replacement Cost Range
+export const acReplacementCosts = {
+  minCostPerUnit: 45000, // SAR
+  maxCostPerUnit: 65000, // SAR
+  avgCostPerUnit: 55000, // SAR (average)
+};
+
+// Lifespan Extension Details
+export const lifespanExtension = {
+  normalLifespan: 10, // years - client's current replacement cycle
+  extendedLifespan: 15, // years - with power saving system
+  yearsExtended: 5, // additional years gained
+  
+  // Calculate replacement savings
+  // In 30 years: Without system = 2 replacements (year 10, 20), With system = 1 replacement (year 15)
+  // This means 1 full replacement cycle is avoided
+  replacementsWithoutOver30Years: 2, // at year 10 and year 20
+  replacementsWithOver30Years: 1, // at year 15
+  replacementsSaved: 1, // one full cycle saved
+};
+
+// Calculate AC Replacement Savings
+export const calculateReplacementSavings = () => {
+  const unitsCount = systemConfig.numberOfUnits;
+  const avgCost = acReplacementCosts.avgCostPerUnit;
+  const minCost = acReplacementCosts.minCostPerUnit;
+  const maxCost = acReplacementCosts.maxCostPerUnit;
+  
+  // One full replacement cycle saved over the lifespan
+  const totalSavingsMin = unitsCount * minCost; // 7 × 45,000 = 315,000 SAR
+  const totalSavingsMax = unitsCount * maxCost; // 7 × 65,000 = 455,000 SAR
+  const totalSavingsAvg = unitsCount * avgCost; // 7 × 55,000 = 385,000 SAR
+  
+  // Annualized over 30 years (the calculation period)
+  const annualizedSavings = totalSavingsAvg / 30;
+  
+  // But more relevant: This savings is realized when you DON'T replace at year 10
+  // So by year 10, you've "saved" the full replacement cost
+  // For 5-year ROI calculation, we can prorate: 5/10 of the savings = 50%
+  const fiveYearProrated = totalSavingsAvg * 0.5;
+  
+  return {
+    minTotal: totalSavingsMin,
+    maxTotal: totalSavingsMax,
+    avgTotal: totalSavingsAvg,
+    annualized: annualizedSavings,
+    fiveYearProrated,
+    perUnit: {
+      min: minCost,
+      max: maxCost,
+      avg: avgCost,
+    },
+  };
 };
 
 // Energy Savings (from analysis)
@@ -78,19 +133,6 @@ export const maintenanceSavings: CostSavingCategory[] = [
   },
 ];
 
-// AC Lifespan Extension Savings
-export const lifespanSavings = {
-  normalLifespan: 10, // years
-  extendedLifespan: 17.5, // average of 15-20 years
-  replacementCostPerUnit: 45000, // SAR for 25-ton package unit
-  numberOfUnits: 7,
-  // Over 20 years: Without system = 2 replacements, With system = ~1.14 replacements
-  replacementsWithout: 2,
-  replacementsWith: 1.14,
-  totalSavingsOver20Years: (2 - 1.14) * 7 * 45000, // ~270,900 SAR over 20 years
-  annualizedSavings: ((2 - 1.14) * 7 * 45000) / 20, // ~13,545 SAR per year
-};
-
 // Downtime Cost Avoidance
 export const downtimeSavings = {
   averageDowntimeHoursWithout: 24, // hours per year
@@ -103,39 +145,93 @@ export const downtimeSavings = {
 // Calculate totals
 export const calculateTotalSavings = () => {
   const maintenanceTotal = maintenanceSavings.reduce((sum, item) => sum + item.annualSavings, 0);
-  const lifespanAnnual = lifespanSavings.annualizedSavings;
+  const replacementSavings = calculateReplacementSavings();
   const downtimeAnnual = downtimeSavings.annualSavings;
   const energyAnnual = energySavings.annualSavingsRawdah;
+
+  // Annual operational savings (excluding the one-time replacement savings)
+  const annualOperationalSavings = energyAnnual + maintenanceTotal + downtimeAnnual;
+  
+  // The replacement savings is a major one-time benefit
+  const replacementBenefit = replacementSavings.avgTotal;
 
   return {
     energySavings: energyAnnual,
     maintenanceSavings: maintenanceTotal,
-    lifespanSavings: lifespanAnnual,
     downtimeSavings: downtimeAnnual,
-    totalAnnualSavings: energyAnnual + maintenanceTotal + lifespanAnnual + downtimeAnnual,
+    annualOperationalSavings, // recurring yearly savings
+    replacementSavingsTotal: replacementBenefit, // one-time savings (avoided at year 10)
+    replacementSavingsAnnualized: replacementSavings.annualized,
+    totalAnnualSavingsWithReplacement: annualOperationalSavings + replacementSavings.annualized,
   };
 };
 
 // ROI Calculations
 export const calculateROI = () => {
   const savings = calculateTotalSavings();
+  const replacement = calculateReplacementSavings();
   const systemCost = systemConfig.totalSystemCost;
   const years = systemConfig.roiTargetYears;
   
+  // 5-Year Calculation
+  // Annual operational savings × 5 years + prorated replacement savings
+  const fiveYearOperational = savings.annualOperationalSavings * years;
+  const fiveYearWithReplacement = fiveYearOperational + replacement.fiveYearProrated;
+  
+  // 10-Year Calculation  
+  // By year 10, you've avoided the full replacement cost
+  const tenYearOperational = savings.annualOperationalSavings * 10;
+  const tenYearWithReplacement = tenYearOperational + replacement.avgTotal;
+  
   return {
     systemCost,
-    annualSavings: savings.totalAnnualSavings,
-    fiveYearSavings: savings.totalAnnualSavings * years,
-    paybackPeriodYears: systemCost / savings.totalAnnualSavings,
-    fiveYearROI: ((savings.totalAnnualSavings * years - systemCost) / systemCost) * 100,
-    tenYearROI: ((savings.totalAnnualSavings * 10 - systemCost) / systemCost) * 100,
-    netProfitFiveYears: savings.totalAnnualSavings * years - systemCost,
-    netProfitTenYears: savings.totalAnnualSavings * 10 - systemCost,
+    
+    // Annual savings (operational only)
+    annualOperationalSavings: savings.annualOperationalSavings,
+    
+    // 5-Year projections
+    fiveYearOperationalSavings: fiveYearOperational,
+    fiveYearReplacementSavings: replacement.fiveYearProrated,
+    fiveYearTotalSavings: fiveYearWithReplacement,
+    fiveYearNetProfit: fiveYearWithReplacement - systemCost,
+    fiveYearROI: ((fiveYearWithReplacement - systemCost) / systemCost) * 100,
+    
+    // 10-Year projections (includes full replacement cost avoided)
+    tenYearOperationalSavings: tenYearOperational,
+    tenYearReplacementSavings: replacement.avgTotal,
+    tenYearTotalSavings: tenYearWithReplacement,
+    tenYearNetProfit: tenYearWithReplacement - systemCost,
+    tenYearROI: ((tenYearWithReplacement - systemCost) / systemCost) * 100,
+    
+    // Payback calculation
+    paybackPeriodYears: systemCost / savings.annualOperationalSavings,
+    paybackPeriodMonths: (systemCost / savings.annualOperationalSavings) * 12,
+    
+    // Breakdown by category
     breakdownByCategory: {
-      energy: { annual: savings.energySavings, fiveYear: savings.energySavings * 5 },
-      maintenance: { annual: savings.maintenanceSavings, fiveYear: savings.maintenanceSavings * 5 },
-      lifespan: { annual: savings.lifespanSavings, fiveYear: savings.lifespanSavings * 5 },
-      downtime: { annual: savings.downtimeSavings, fiveYear: savings.downtimeSavings * 5 },
+      energy: { annual: savings.energySavings, fiveYear: savings.energySavings * 5, tenYear: savings.energySavings * 10 },
+      maintenance: { annual: savings.maintenanceSavings, fiveYear: savings.maintenanceSavings * 5, tenYear: savings.maintenanceSavings * 10 },
+      downtime: { annual: savings.downtimeSavings, fiveYear: savings.downtimeSavings * 5, tenYear: savings.downtimeSavings * 10 },
+      replacement: { 
+        total: replacement.avgTotal, 
+        fiveYearProrated: replacement.fiveYearProrated, 
+        tenYear: replacement.avgTotal,
+        range: `${replacement.minTotal.toLocaleString()} - ${replacement.maxTotal.toLocaleString()} SAR`,
+      },
+    },
+    
+    // Replacement details
+    replacementDetails: {
+      unitsCount: systemConfig.numberOfUnits,
+      normalLifespan: lifespanExtension.normalLifespan,
+      extendedLifespan: lifespanExtension.extendedLifespan,
+      yearsExtended: lifespanExtension.yearsExtended,
+      costPerUnitMin: acReplacementCosts.minCostPerUnit,
+      costPerUnitMax: acReplacementCosts.maxCostPerUnit,
+      costPerUnitAvg: acReplacementCosts.avgCostPerUnit,
+      totalSavingsMin: replacement.minTotal,
+      totalSavingsMax: replacement.maxTotal,
+      totalSavingsAvg: replacement.avgTotal,
     },
   };
 };
