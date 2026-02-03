@@ -6,7 +6,8 @@ import {
   Leaf,
   BadgePercent,
   Clock,
-  Wrench
+  Wrench,
+  Target
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ShowroomTable } from "@/components/ShowroomTable";
@@ -15,6 +16,8 @@ import { ROITimeline } from "@/components/ROITimeline";
 import { LifespanComparison } from "@/components/LifespanComparison";
 import { SavingsSummary } from "@/components/SavingsSummary";
 import { RawdahAnalysis } from "@/components/RawdahAnalysis";
+import { ROIAnalysis } from "@/components/ROIAnalysis";
+import { ExcelUpload } from "@/components/ExcelUpload";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   totalYearlySavings25,
@@ -53,13 +56,16 @@ const Index = () => {
           </p>
           <div className="flex flex-wrap gap-4 mt-6">
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
-              📊 2023-2024 Consumption Data
+              📊 2023-2025 Consumption Data
             </div>
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
               🏢 20 Showroom Locations
             </div>
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
               ❄️ 164 AC Package Units
+            </div>
+            <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
+              💰 18,000 SAR/unit
             </div>
           </div>
         </div>
@@ -68,14 +74,29 @@ const Index = () => {
       {/* Tab Navigation */}
       <section className="max-w-7xl mx-auto px-6 -mt-6">
         <Tabs defaultValue="rawdah" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-            <TabsTrigger value="rawdah">Rawdah Analysis</TabsTrigger>
+          <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-6">
+            <TabsTrigger value="rawdah" className="flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              Rawdah Analysis
+            </TabsTrigger>
+            <TabsTrigger value="roi" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              ROI Calculator
+            </TabsTrigger>
             <TabsTrigger value="overview">All Showrooms</TabsTrigger>
           </TabsList>
           
           {/* Rawdah Summary Analysis Tab */}
           <TabsContent value="rawdah" className="space-y-6">
+            {/* Excel Upload */}
+            <ExcelUpload />
+            
             <RawdahAnalysis />
+          </TabsContent>
+
+          {/* ROI Analysis Tab */}
+          <TabsContent value="roi" className="space-y-6">
+            <ROIAnalysis />
           </TabsContent>
 
           {/* All Showrooms Overview Tab */}
@@ -215,7 +236,7 @@ const Index = () => {
               Energy Savings Analysis Report for Jarir Bookstore
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Data based on 2023-2024 SCECO meter readings • Electricity rate: 0.30 SAR/KWh
+              Data based on 2023-2025 SCECO meter readings • Electricity rate: 0.30 SAR/KWh • System cost: 18,000 SAR/unit
             </p>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
