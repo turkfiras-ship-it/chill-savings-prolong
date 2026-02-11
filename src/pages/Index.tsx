@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { 
   Zap, 
   TrendingDown, 
@@ -7,7 +8,8 @@ import {
   BadgePercent,
   Clock,
   Wrench,
-  Target
+  Target,
+  Presentation,
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ShowroomTable } from "@/components/ShowroomTable";
@@ -67,6 +69,13 @@ const Index = () => {
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
               💰 18,000 SAR/unit
             </div>
+            <Link 
+              to="/presentation" 
+              className="px-4 py-2 rounded-full bg-savings text-white text-sm font-medium flex items-center gap-2 hover:bg-savings/90 transition-colors"
+            >
+              <Presentation className="h-4 w-4" />
+              View Presentation
+            </Link>
           </div>
         </div>
       </header>
