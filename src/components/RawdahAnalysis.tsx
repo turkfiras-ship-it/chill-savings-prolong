@@ -87,7 +87,7 @@ export function RawdahAnalysis() {
       {/* Header Summary */}
       <div className="gradient-savings rounded-xl p-6 text-primary-foreground">
         <h2 className="text-2xl font-bold mb-2">Rawdah Showroom - Summary Analysis</h2>
-        <p className="opacity-90 mb-4">Energy Consumption Comparison 2025 (With G8 System)</p>
+        <p className="opacity-90 mb-4">Energy Consumption Comparison – Rawdah vs. Ruben Showroom (2025, Without G8)</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{summaryStats.avgSavingsPercent}%</p>
@@ -314,9 +314,9 @@ export function RawdahAnalysis() {
         </div>
         
         {/* Note about March/April */}
-        <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+        <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-amber-600">Note:</strong> During 2025, two months (March and April) experienced operational issues that temporarily inflated consumption. When excluding these months, the data indicates a <strong className="text-savings">9% overall decrease</strong>, reflecting improved efficiency and better consumption management.
+            <strong className="text-savings">Result:</strong> Total cost savings in 2025: <strong className="text-savings">13,003 SAR</strong>. Even with cost increases in early months (Jan, Mar, Apr, May), net annual performance is positive. Savings are concentrated in mid-to-late year, when tariffs and HVAC load hurt the most — strong evidence of cost-aware energy management.
           </p>
         </div>
       </div>
