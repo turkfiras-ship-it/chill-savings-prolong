@@ -26,7 +26,7 @@ All colors MUST be HSL.
     --muted: 210 15% 92%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 38 92% 50%;
+    --accent: 200 60% 45%;
     --accent-foreground: 220 30% 15%;
 
     --destructive: 0 72% 51%;
@@ -41,11 +41,11 @@ All colors MUST be HSL.
     /* Custom energy/savings colors */
     --savings: 152 60% 40%;
     --savings-light: 152 50% 92%;
-    --energy: 38 92% 50%;
-    --energy-light: 38 100% 95%;
+    --energy: 200 60% 45%;
+    --energy-light: 200 50% 95%;
     --chart-blue: 210 80% 55%;
     --chart-teal: 175 70% 45%;
-    --chart-amber: 38 92% 50%;
+    --chart-amber: 200 60% 45%;
     --chart-red: 0 72% 51%;
 
     --sidebar-background: 0 0% 98%;
@@ -77,7 +77,7 @@ All colors MUST be HSL.
     --muted: 220 20% 18%;
     --muted-foreground: 215 15% 60%;
 
-    --accent: 38 92% 55%;
+    --accent: 200 60% 50%;
     --accent-foreground: 220 30% 10%;
 
     --destructive: 0 62.8% 45%;
@@ -89,11 +89,11 @@ All colors MUST be HSL.
 
     --savings: 152 60% 50%;
     --savings-light: 152 30% 20%;
-    --energy: 38 92% 55%;
-    --energy-light: 38 40% 20%;
+    --energy: 200 60% 50%;
+    --energy-light: 200 30% 20%;
     --chart-blue: 210 80% 60%;
     --chart-teal: 175 70% 50%;
-    --chart-amber: 38 92% 55%;
+    --chart-amber: 200 60% 50%;
     --chart-red: 0 72% 55%;
 
     --sidebar-background: 240 5.9% 10%;
@@ -113,7 +113,7 @@ All colors MUST be HSL.
   }
   
   .gradient-energy {
-    background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(25 95% 55%) 100%);
+    background: linear-gradient(135deg, hsl(200 60% 45%) 0%, hsl(180 50% 40%) 100%);
   }
   
   .gradient-hero {

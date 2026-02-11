@@ -422,7 +422,7 @@ export function ROIAnalysis() {
               </TableRow>
 
               {/* AC Replacement Row */}
-              <TableRow className="hover:bg-muted/30 transition-colors bg-amber-500/5">
+              <TableRow className="hover:bg-muted/30 transition-colors bg-muted/30">
                 <TableCell>
                   <div>
                     <p className="font-medium">AC Unit Replacement (Avoided)</p>
@@ -439,7 +439,7 @@ export function ROIAnalysis() {
                   0 SAR
                   <p className="text-xs">(at year 10)</p>
                 </TableCell>
-                <TableCell className="text-right tabular-nums text-amber-600 font-bold">
+                <TableCell className="text-right tabular-nums text-muted-foreground font-bold">
                   {replacement.avgTotal.toLocaleString()} SAR
                   <p className="text-xs font-normal">one-time at year 10</p>
                 </TableCell>

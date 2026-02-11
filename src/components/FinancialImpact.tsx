@@ -81,9 +81,9 @@ export function FinancialImpact() {
         </div>
 
         {/* Anomaly note */}
-        <div className="mt-4 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+        <div className="mt-4 p-3 bg-muted/50 border border-border rounded-lg">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+            <AlertTriangle className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-sm text-muted-foreground">{energyCostComparison.anomalyNote}</p>
           </div>
         </div>
