@@ -44,20 +44,18 @@ export const environmentalImpact = {
   },
 };
 
-// FalkonAir Technology Summary
-export const falkonairTechnology = {
-  companyName: 'FalkonAir',
-  website: 'falkonair.com',
-  tagline: 'Leaders in Energy Efficiency Innovations',
+// Technology Summary (white-labeled)
+export const technologySummary = {
+  tagline: 'Advanced Energy Efficiency Technology',
   coreTech: 'Variable Mass Flow (VMF) Technology',
   product: 'Smart Compressor Control (SCC)',
   energyReductionRange: '25-45%',
   roiTypical: '3 years or less',
   features: [
     'AI-driven control algorithms that optimize compressor performance in real time',
-    'VMF technology with a proven track record across commercial projects for over five years',
+    'Proven track record across commercial projects for over five years',
     'Retrofit solution — no need to replace existing HVAC equipment',
-    'SCC replicates DC inverter-driven performance on any compressor',
+    'Replicates DC inverter-driven performance on any compressor',
     'Controls compressor, condenser fan motor, and evaporator fan motor',
   ],
   benefits: [
