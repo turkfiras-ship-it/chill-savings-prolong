@@ -98,8 +98,8 @@ export function RawdahAnalysis() {
             <p className="text-sm opacity-80">Total Annual Savings (SAR)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">{summaryStats.monthsWon}/{summaryStats.totalMonths}</p>
-            <p className="text-sm opacity-80">Months Won</p>
+            <p className="text-3xl font-bold">{summaryStats.monthsWonByRawdah}/{summaryStats.totalMonths}</p>
+            <p className="text-sm opacity-80">Months Won (Rawdah)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">Rawdah</p>
@@ -124,7 +124,7 @@ export function RawdahAnalysis() {
             <ArrowUp className="h-4 w-4 text-destructive" />
           </div>
           <p className="text-2xl font-bold">{energyCostSummary.totalBill2024.toLocaleString()} SAR</p>
-          <p className="text-xs text-destructive mt-1">+{energyCostSummary.yearOverYearIncrease}% (+{energyCostSummary.increaseAmount.toLocaleString()} SAR)</p>
+          <p className="text-xs text-destructive mt-1">+{energyCostSummary.yearOverYearIncrease2024}% (+{energyCostSummary.increaseAmount2024.toLocaleString()} SAR)</p>
         </div>
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-savings">
           <div className="flex items-center justify-between mb-2">
