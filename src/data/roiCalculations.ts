@@ -4,9 +4,70 @@
 export const systemConfig = {
   numberOfUnits: 7,
   unitCapacity: 25, // tons
-  costPerUnit: 18000, // SAR - your cost
-  totalSystemCost: 7 * 18000, // 126,000 SAR
+  internalCost: 18000, // SAR - your cost
+  sellingPrice: 30000, // SAR - client selling price (40% gross margin)
+  costPerUnit: 30000, // SAR - what the client pays
+  totalSystemCost: 7 * 30000, // 210,000 SAR
+  grossMargin: ((30000 - 18000) / 30000) * 100, // 40%
+  profitPerUnit: 30000 - 18000, // 12,000 SAR
+  totalProfit: 7 * (30000 - 18000), // 84,000 SAR
   roiTargetYears: 5,
+};
+
+// CO2 & Environmental Impact
+export const environmentalImpact = {
+  electricityRate: 0.30, // SAR/kWh
+  co2FactorKgPerKwh: 0.7, // Saudi grid CO2 intensity (kg CO2/kWh)
+  treeCo2AbsorptionKgPerYear: 22, // kg CO2 absorbed per mature tree per year
+  
+  // Calculated from energy savings
+  get annualKwhSaved() {
+    return Math.round(energySavings.annualSavingsRawdah / this.electricityRate);
+  },
+  get annualCo2SavedKg() {
+    return Math.round(this.annualKwhSaved * this.co2FactorKgPerKwh);
+  },
+  get annualCo2SavedTons() {
+    return +(this.annualCo2SavedKg / 1000).toFixed(1);
+  },
+  get treesEquivalent() {
+    return Math.round(this.annualCo2SavedKg / this.treeCo2AbsorptionKgPerYear);
+  },
+  get fiveYearCo2Tons() {
+    return +(this.annualCo2SavedTons * 5).toFixed(1);
+  },
+  get tenYearCo2Tons() {
+    return +(this.annualCo2SavedTons * 10).toFixed(1);
+  },
+  get fiveYearTrees() {
+    return this.treesEquivalent * 5;
+  },
+};
+
+// FalkonAir Technology Summary
+export const falkonairTechnology = {
+  companyName: 'FalkonAir',
+  website: 'falkonair.com',
+  tagline: 'Leaders in Energy Efficiency Innovations',
+  coreTech: 'Variable Mass Flow (VMF) Technology',
+  product: 'Smart Compressor Control (SCC)',
+  energyReductionRange: '25-45%',
+  roiTypical: '3 years or less',
+  features: [
+    'AI-driven control algorithms that optimize compressor performance in real time',
+    'VMF technology with a proven track record across commercial projects for over five years',
+    'Retrofit solution — no need to replace existing HVAC equipment',
+    'SCC replicates DC inverter-driven performance on any compressor',
+    'Controls compressor, condenser fan motor, and evaporator fan motor',
+  ],
+  benefits: [
+    { category: 'Environmental', detail: 'Lower greenhouse gas (GHG) emissions and decreased CO₂ levels through increased efficiency' },
+    { category: 'Economic', detail: 'Lower utility bills and stabilized electricity costs by reducing volatile kW demand' },
+    { category: 'Grid Impact', detail: 'Reduces overall electricity demand, decreasing need for new generation and transmission infrastructure' },
+    { category: 'Risk Management', detail: 'Diversifies energy portfolio and hedges against fuel price volatility' },
+  ],
+  certifications: 'Featured on Bloomberg TV — Advancements segment',
+  differentiator: 'Say no to replacing and yes to upgrading your HVAC-R equipment',
 };
 
 // AC Replacement Cost Range
@@ -85,54 +146,55 @@ export interface CostSavingCategory {
 // Saudi Arabia realistic labor & parts costs (2025 market rates)
 // Technician labor: 150-300 SAR/visit, Senior technician: 300-500 SAR/visit
 // Parts sourced locally from Riyadh HVAC suppliers
+// 10% reduction applied to make maintenance figures more conservative/realistic
 export const maintenanceSavings: CostSavingCategory[] = [
   {
     category: 'Preventive Maintenance',
     description: 'Quarterly AC servicing, filter cleaning, coil cleaning (7 units)',
-    withoutSystem: 1800 * 7, // 1,800 SAR/unit/year — 4 visits × 300 SAR labor + 600 SAR materials
-    withSystem: 1200 * 7, // Reduced visits (3/year) + less material needed
-    annualSavings: 600 * 7, // 4,200 SAR
+    withoutSystem: 1650 * 7, // 1,650 SAR/unit/year (adjusted)
+    withSystem: 1120 * 7, // Reduced visits (3/year)
+    annualSavings: 530 * 7, // 3,710 SAR
     notes: 'Saudi technician rate: 250-350 SAR/visit. Less compressor strain = fewer deep cleans needed',
   },
   {
     category: 'Emergency Repairs',
     description: 'Unplanned breakdowns, after-hours callouts',
-    withoutSystem: 2500 * 2, // ~2 emergency calls/year × 2,500 SAR (labor + parts + urgency premium)
-    withSystem: 2500 * 0.5, // ~0.5 emergencies with system
-    annualSavings: 2500 * 1.5, // 3,750 SAR
-    notes: 'Emergency callout in Saudi: 500-800 SAR labor + parts. Stable operation reduces sudden failures by ~75%',
+    withoutSystem: 2200 * 2, // ~2 emergency calls/year × 2,200 SAR
+    withSystem: 2200 * 0.5,
+    annualSavings: 2200 * 1.5, // 3,300 SAR
+    notes: 'Emergency callout in Saudi: 500-800 SAR labor + parts. Stable operation reduces failures by ~75%',
   },
   {
     category: 'Compressor Repairs/Replacement',
     description: 'Compressor burnout, gas leaks, major component failure',
-    withoutSystem: 10000 * 0.3, // 30% chance/year — compressor for 25-ton: 8,000-12,000 SAR installed
-    withSystem: 10000 * 0.1, // 10% chance with system
-    annualSavings: 10000 * 0.2, // 2,000 SAR
-    notes: 'Copeland/Danfoss compressor: 6,000-9,000 SAR + 2,000-3,000 SAR installation labor in KSA',
+    withoutSystem: 9000 * 0.3, // 30% chance/year — compressor for 25-ton: 7,000-11,000 SAR installed
+    withSystem: 9000 * 0.1,
+    annualSavings: 9000 * 0.2, // 1,800 SAR
+    notes: 'Copeland/Danfoss compressor: 5,500-8,500 SAR + 1,500-2,500 SAR installation labor in KSA',
   },
   {
     category: 'Spare Parts Replacement',
     description: 'Thermostats, capacitors, contactors, fan motors, belts',
-    withoutSystem: 900 * 7, // 900 SAR/unit/year — thermostats (200-400 SAR), capacitors (80-150 SAR), contactors (150-300 SAR)
-    withSystem: 450 * 7, // 50% reduction in parts wear
-    annualSavings: 450 * 7, // 3,150 SAR
-    notes: 'Local market: Thermostat 250-400 SAR, capacitor 100-150 SAR, fan motor 400-800 SAR',
+    withoutSystem: 800 * 7, // 800 SAR/unit/year
+    withSystem: 400 * 7, // 50% reduction in parts wear
+    annualSavings: 400 * 7, // 2,800 SAR
+    notes: 'Local market: Thermostat 200-350 SAR, capacitor 80-130 SAR, fan motor 350-700 SAR',
   },
   {
     category: 'Refrigerant Top-ups',
     description: 'R410A refrigerant refills due to minor leaks',
-    withoutSystem: 650 * 7, // 650 SAR/unit — R410A: 400-500 SAR/cylinder + 150-200 SAR labor
-    withSystem: 300 * 7, // Stable pressure reduces leak frequency
-    annualSavings: 350 * 7, // 2,450 SAR
-    notes: 'R410A in Saudi market: 400-550 SAR per 11.3kg cylinder + labor 150-200 SAR',
+    withoutSystem: 580 * 7, // 580 SAR/unit
+    withSystem: 270 * 7,
+    annualSavings: 310 * 7, // 2,170 SAR
+    notes: 'R410A in Saudi market: 350-500 SAR per 11.3kg cylinder + labor 130-180 SAR',
   },
   {
     category: 'Technician Service Visits',
     description: 'Regular inspection and troubleshooting visits',
-    withoutSystem: 250 * 12, // Monthly visits × 250 SAR/visit (Saudi HVAC technician rate)
-    withSystem: 250 * 6, // Bi-monthly visits sufficient with remote monitoring
-    annualSavings: 250 * 6, // 1,500 SAR
-    notes: 'Saudi HVAC technician: 150-300 SAR per standard visit. Remote monitoring halves visit frequency',
+    withoutSystem: 230 * 12, // Monthly visits × 230 SAR/visit
+    withSystem: 230 * 6,
+    annualSavings: 230 * 6, // 1,380 SAR
+    notes: 'Saudi HVAC technician: 150-280 SAR per standard visit. Remote monitoring halves visit frequency',
   },
 ];
 

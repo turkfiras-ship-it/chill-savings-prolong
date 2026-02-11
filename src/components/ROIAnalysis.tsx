@@ -23,6 +23,8 @@ import {
   calculateReplacementSavings,
   lifespanExtension,
   acReplacementCosts,
+  environmentalImpact,
+  falkonairTechnology,
 } from "@/data/roiCalculations";
 import {
   Table,
@@ -44,6 +46,11 @@ import {
   CheckCircle,
   ArrowRight,
   Timer,
+  Leaf,
+  TreePine,
+  Globe,
+  Cpu,
+  ExternalLink,
 } from "lucide-react";
 
 export function ROIAnalysis() {
@@ -499,6 +506,116 @@ export function ROIAnalysis() {
               After payback, you gain <strong>{Math.round(savings.annualOperationalSavings).toLocaleString()} SAR</strong> in pure profit every year, 
               plus <strong>{replacement.avgTotal.toLocaleString()} SAR</strong> saved at the 10-year mark by avoiding AC replacement.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* CO2 & Environmental Impact */}
+      <div className="rounded-xl bg-card p-6 card-elevated">
+        <div className="flex items-center gap-2 mb-1">
+          <Leaf className="h-5 w-5 text-savings" />
+          <h3 className="text-xl font-semibold">Environmental Impact — CO₂ Reduction</h3>
+        </div>
+        <p className="text-sm text-muted-foreground mb-6">Carbon emission savings from reduced energy consumption</p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="p-4 rounded-lg bg-savings/10 border border-savings/20 text-center">
+            <Leaf className="h-6 w-6 text-savings mx-auto mb-2" />
+            <p className="text-2xl font-bold text-savings">{environmentalImpact.annualCo2SavedTons}</p>
+            <p className="text-xs text-muted-foreground">Tons CO₂ saved/year</p>
+          </div>
+          <div className="p-4 rounded-lg bg-savings/10 border border-savings/20 text-center">
+            <TreePine className="h-6 w-6 text-savings mx-auto mb-2" />
+            <p className="text-2xl font-bold text-savings">{environmentalImpact.treesEquivalent.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">Trees equivalent/year</p>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/50 border text-center">
+            <Globe className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-2xl font-bold">{environmentalImpact.fiveYearCo2Tons}</p>
+            <p className="text-xs text-muted-foreground">5-Year CO₂ reduction (tons)</p>
+          </div>
+          <div className="p-4 rounded-lg bg-muted/50 border text-center">
+            <Globe className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-2xl font-bold">{environmentalImpact.tenYearCo2Tons}</p>
+            <p className="text-xs text-muted-foreground">10-Year CO₂ reduction (tons)</p>
+          </div>
+        </div>
+
+        <div className="p-4 bg-muted/30 rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            Based on <strong>{environmentalImpact.annualKwhSaved.toLocaleString()} kWh</strong> annual energy saved 
+            × Saudi grid emission factor of <strong>{environmentalImpact.co2FactorKgPerKwh} kg CO₂/kWh</strong>. 
+            Each mature tree absorbs approximately {environmentalImpact.treeCo2AbsorptionKgPerYear} kg CO₂/year. 
+            Over 10 years, this system prevents <strong>{environmentalImpact.tenYearCo2Tons} tons</strong> of CO₂ 
+            from entering the atmosphere — equivalent to planting <strong>{(environmentalImpact.treesEquivalent * 10).toLocaleString()} trees</strong>.
+          </p>
+        </div>
+      </div>
+
+      {/* FalkonAir Technology Summary */}
+      <div className="rounded-xl bg-card card-elevated overflow-hidden">
+        <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Cpu className="h-6 w-6" />
+              <div>
+                <h3 className="text-xl font-bold">Powered by {falkonairTechnology.companyName}</h3>
+                <p className="text-sm opacity-80">{falkonairTechnology.tagline}</p>
+              </div>
+            </div>
+            <a 
+              href={`https://${falkonairTechnology.website}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-sm opacity-70 hover:opacity-100 transition-opacity"
+            >
+              <ExternalLink className="h-4 w-4" />
+              {falkonairTechnology.website}
+            </a>
+          </div>
+        </div>
+        
+        <div className="p-6 space-y-6">
+          <div>
+            <h4 className="font-semibold mb-1">Core Technology: {falkonairTechnology.coreTech}</h4>
+            <p className="text-sm text-muted-foreground mb-4">
+              The {falkonairTechnology.product} enables any compressor to be controlled replicating a DC inverter-driven system, 
+              achieving <strong>{falkonairTechnology.energyReductionRange}</strong> energy reduction with typical ROI in {falkonairTechnology.roiTypical}.
+            </p>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h5 className="text-sm font-semibold mb-2">Key Features</h5>
+                <ul className="space-y-2">
+                  {falkonairTechnology.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-savings shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              <div>
+                <h5 className="text-sm font-semibold mb-2">Benefits</h5>
+                <div className="space-y-2">
+                  {falkonairTechnology.benefits.map((benefit, idx) => (
+                    <div key={idx} className="p-3 rounded-lg bg-muted/30">
+                      <p className="text-sm font-medium">{benefit.category}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{benefit.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-muted/30 rounded-lg flex items-center gap-3">
+            <Shield className="h-5 w-5 text-muted-foreground shrink-0" />
+            <div>
+              <p className="text-sm font-medium">{falkonairTechnology.differentiator}</p>
+              <p className="text-xs text-muted-foreground">{falkonairTechnology.certifications}</p>
+            </div>
           </div>
         </div>
       </div>
