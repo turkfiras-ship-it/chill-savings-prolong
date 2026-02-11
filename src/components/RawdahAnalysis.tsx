@@ -27,6 +27,8 @@ import {
   energyCostSummary,
   systemMonitoringNotes,
 } from "@/data/rawdahAnalysis";
+import { FinancialImpact } from "@/components/FinancialImpact";
+import { WeatherComparison } from "@/components/WeatherComparison";
 import { 
   AlertTriangle, 
   CheckCircle, 
@@ -135,6 +137,12 @@ export function RawdahAnalysis() {
           <p className="text-xs text-savings mt-1">{energyCostSummary.yearlySavingsPercent}% reduction</p>
         </div>
       </div>
+
+      {/* Overall Financial Impact */}
+      <FinancialImpact />
+
+      {/* Weather Comparison */}
+      <WeatherComparison />
 
       {/* Key Insights */}
       <div className="rounded-xl bg-card p-6 card-elevated">
