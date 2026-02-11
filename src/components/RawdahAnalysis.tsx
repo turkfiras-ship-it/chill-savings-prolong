@@ -147,7 +147,7 @@ export function RawdahAnalysis() {
       {/* Key Insights */}
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
-          <Lightbulb className="h-5 w-5 text-amber-500" />
+          <Lightbulb className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-xl font-semibold">Key Insights</h3>
         </div>
         <ul className="space-y-3">
@@ -438,7 +438,7 @@ export function RawdahAnalysis() {
       {/* Unit Performance Observations */}
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
-          <AlertTriangle className="h-5 w-5 text-amber-500" />
+          <AlertTriangle className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-xl font-semibold">Unit Performance Observations</h3>
         </div>
         <div className="space-y-4">
@@ -483,7 +483,7 @@ export function RawdahAnalysis() {
       {/* Monthly Issues */}
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
-          <AlertCircle className="h-5 w-5 text-orange-500" />
+          <AlertCircle className="h-5 w-5 text-muted-foreground" />
           <h3 className="text-xl font-semibold">Monthly Issues</h3>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
@@ -545,10 +545,10 @@ export function RawdahAnalysis() {
           </div>
         </div>
 
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
+        <div className="bg-muted/50 border border-border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="h-4 w-4 text-amber-500" />
-            <p className="font-medium text-amber-600">Additional Consumption Impact</p>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <p className="font-medium text-foreground">Additional Consumption Impact</p>
           </div>
           <p className="text-sm text-muted-foreground">
             Opening earlier led to additional consumption of <strong>{operatingHoursImpact.additionalConsumption.toLocaleString()} kWh</strong> = <strong>SAR {operatingHoursImpact.additionalCost.toLocaleString()}</strong>
