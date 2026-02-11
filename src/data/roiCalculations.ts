@@ -82,54 +82,57 @@ export interface CostSavingCategory {
   notes: string;
 }
 
+// Saudi Arabia realistic labor & parts costs (2025 market rates)
+// Technician labor: 150-300 SAR/visit, Senior technician: 300-500 SAR/visit
+// Parts sourced locally from Riyadh HVAC suppliers
 export const maintenanceSavings: CostSavingCategory[] = [
   {
     category: 'Preventive Maintenance',
-    description: 'Regular AC servicing, filter cleaning, coil cleaning',
-    withoutSystem: 2500 * 7, // 2,500 SAR per unit annually
-    withSystem: 1800 * 7, // Reduced due to less strain
-    annualSavings: 700 * 7,
-    notes: 'Reduced compressor strain means less frequent deep cleaning required',
+    description: 'Quarterly AC servicing, filter cleaning, coil cleaning (7 units)',
+    withoutSystem: 1800 * 7, // 1,800 SAR/unit/year — 4 visits × 300 SAR labor + 600 SAR materials
+    withSystem: 1200 * 7, // Reduced visits (3/year) + less material needed
+    annualSavings: 600 * 7, // 4,200 SAR
+    notes: 'Saudi technician rate: 250-350 SAR/visit. Less compressor strain = fewer deep cleans needed',
   },
   {
     category: 'Emergency Repairs',
     description: 'Unplanned breakdowns, after-hours callouts',
-    withoutSystem: 4000 * 2, // ~2 emergency repairs per year average
-    withSystem: 4000 * 0.5, // ~0.5 emergency repairs with system
-    annualSavings: 4000 * 1.5,
-    notes: 'Stable operation reduces sudden failures by ~75%',
+    withoutSystem: 2500 * 2, // ~2 emergency calls/year × 2,500 SAR (labor + parts + urgency premium)
+    withSystem: 2500 * 0.5, // ~0.5 emergencies with system
+    annualSavings: 2500 * 1.5, // 3,750 SAR
+    notes: 'Emergency callout in Saudi: 500-800 SAR labor + parts. Stable operation reduces sudden failures by ~75%',
   },
   {
     category: 'Compressor Repairs/Replacement',
     description: 'Compressor burnout, gas leaks, major component failure',
-    withoutSystem: 15000 * 0.3, // 30% chance per year of needing major repair
-    withSystem: 15000 * 0.1, // 10% chance with system
-    annualSavings: 15000 * 0.2,
-    notes: 'Soft start and optimized operation extends compressor life significantly',
+    withoutSystem: 10000 * 0.3, // 30% chance/year — compressor for 25-ton: 8,000-12,000 SAR installed
+    withSystem: 10000 * 0.1, // 10% chance with system
+    annualSavings: 10000 * 0.2, // 2,000 SAR
+    notes: 'Copeland/Danfoss compressor: 6,000-9,000 SAR + 2,000-3,000 SAR installation labor in KSA',
   },
   {
     category: 'Spare Parts Replacement',
     description: 'Thermostats, capacitors, contactors, fan motors, belts',
-    withoutSystem: 1200 * 7, // 1,200 SAR per unit for parts annually
-    withSystem: 600 * 7, // 50% reduction
-    annualSavings: 600 * 7,
-    notes: 'Reduced wear and tear on components extends their lifespan',
+    withoutSystem: 900 * 7, // 900 SAR/unit/year — thermostats (200-400 SAR), capacitors (80-150 SAR), contactors (150-300 SAR)
+    withSystem: 450 * 7, // 50% reduction in parts wear
+    annualSavings: 450 * 7, // 3,150 SAR
+    notes: 'Local market: Thermostat 250-400 SAR, capacitor 100-150 SAR, fan motor 400-800 SAR',
   },
   {
     category: 'Refrigerant Top-ups',
     description: 'R410A refrigerant refills due to minor leaks',
-    withoutSystem: 800 * 7, // 800 SAR per unit
-    withSystem: 400 * 7, // Stable pressure reduces leak risk
-    annualSavings: 400 * 7,
-    notes: 'Consistent pressure and reduced cycling minimizes refrigerant loss',
+    withoutSystem: 650 * 7, // 650 SAR/unit — R410A: 400-500 SAR/cylinder + 150-200 SAR labor
+    withSystem: 300 * 7, // Stable pressure reduces leak frequency
+    annualSavings: 350 * 7, // 2,450 SAR
+    notes: 'R410A in Saudi market: 400-550 SAR per 11.3kg cylinder + labor 150-200 SAR',
   },
   {
     category: 'Technician Service Visits',
     description: 'Regular inspection and troubleshooting visits',
-    withoutSystem: 500 * 12, // Monthly visits @ 500 SAR
-    withSystem: 500 * 6, // Bi-monthly visits sufficient
-    annualSavings: 500 * 6,
-    notes: 'Remote monitoring reduces need for physical inspections',
+    withoutSystem: 250 * 12, // Monthly visits × 250 SAR/visit (Saudi HVAC technician rate)
+    withSystem: 250 * 6, // Bi-monthly visits sufficient with remote monitoring
+    annualSavings: 250 * 6, // 1,500 SAR
+    notes: 'Saudi HVAC technician: 150-300 SAR per standard visit. Remote monitoring halves visit frequency',
   },
 ];
 
