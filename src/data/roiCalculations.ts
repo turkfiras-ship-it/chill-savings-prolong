@@ -66,8 +66,8 @@ export const calculateReplacementSavings = () => {
 
 // Energy Savings (from analysis)
 export const energySavings = {
-  annualSavingsRawdah: 4476.99, // SAR/year — updated from latest Excel (Rawdah vs Ruben comparison)
-  annualSavingsPercent: 2.63, // Updated: lower due to operational issues in Mar-Aug
+  annualSavingsRawdah: 17671.82, // SAR/year — from Excel summary: Rawdah vs Ruben (Without G8)
+  annualSavingsPercent: 11.11, // From Excel summary: average savings percentage
   projectedAnnualSavings25: 50812, // at 25% efficiency (from original 20-showroom projection)
   projectedAnnualSavings30: 60974, // at 30% efficiency
 };

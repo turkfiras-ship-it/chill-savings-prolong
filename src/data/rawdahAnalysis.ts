@@ -38,30 +38,31 @@ export interface YearlyComparison {
 export const yearlyComparisonData: YearlyComparison[] = [
   { month: 'January', year2024: 8282.3, year2025: 8598.6, percentDiff: -3.82, actualDiff: -316.3, savingsSAR: 0 },
   { month: 'February', year2024: 12040.5, year2025: 8652.88, percentDiff: 28.14, actualDiff: 3387.62, savingsSAR: 3387.62 },
-  { month: 'March', year2024: 13302.37, year2025: 14844.66, percentDiff: -11.59, actualDiff: -1542.29, savingsSAR: 0 },
+  { month: 'March', year2024: 13302.37, year2025: 14845.66, percentDiff: -11.60, actualDiff: -1542.29, savingsSAR: 0 },
   { month: 'April', year2024: 15845.44, year2025: 19993.72, percentDiff: -26.18, actualDiff: -4148.28, savingsSAR: 0 },
-  { month: 'May', year2024: 23852.75, year2025: 25084.85, percentDiff: -5.16, actualDiff: -1232.1, savingsSAR: 0 },
-  { month: 'June', year2024: 27474.42, year2025: 27083.45, percentDiff: 1.42, actualDiff: 390.97, savingsSAR: 390.97 },
-  { month: 'July', year2024: 29544.97, year2025: 29890.27, percentDiff: -1.17, actualDiff: -345.3, savingsSAR: 0 },
-  { month: 'August', year2024: 30436.45, year2025: 30562.64, percentDiff: -0.41, actualDiff: -126.19, savingsSAR: 0 },
-  { month: 'September', year2024: 23550.8, year2025: 24001.05, percentDiff: -1.91, actualDiff: -450.25, savingsSAR: 0 },
-  { month: 'October', year2024: 16136.34, year2025: 16250.12, percentDiff: -0.70, actualDiff: -113.78, savingsSAR: 0 },
-  { month: 'November', year2024: 11937.28, year2025: 12892.75, percentDiff: -8.00, actualDiff: -955.47, savingsSAR: 0 },
-  { month: 'December', year2024: 7623.95, year2025: 8251.83, percentDiff: -8.24, actualDiff: -627.88, savingsSAR: 0 },
+  { month: 'May', year2024: 23852.75, year2025: 24201.06, percentDiff: -1.46, actualDiff: -348.31, savingsSAR: 0 },
+  { month: 'June', year2024: 27474.42, year2025: 25349.77, percentDiff: 7.73, actualDiff: 2124.65, savingsSAR: 2124.65 },
+  { month: 'July', year2024: 29544.97, year2025: 27980.65, percentDiff: 5.29, actualDiff: 1564.32, savingsSAR: 1564.32 },
+  { month: 'August', year2024: 30436.45, year2025: 27691.22, percentDiff: 9.02, actualDiff: 2745.23, savingsSAR: 2745.23 },
+  { month: 'September', year2024: 23550.8, year2025: 21854.71, percentDiff: 7.20, actualDiff: 1696.09, savingsSAR: 1696.09 },
+  { month: 'October', year2024: 16136.34, year2025: 15193.52, percentDiff: 5.84, actualDiff: 942.82, savingsSAR: 942.82 },
+  { month: 'November', year2024: 11937.28, year2025: 11649.4, percentDiff: 2.41, actualDiff: 287.88, savingsSAR: 287.88 },
+  { month: 'December', year2024: 7623.95, year2025: 7369.27, percentDiff: 3.34, actualDiff: 254.68, savingsSAR: 254.68 },
 ];
 
-// Energy Cost Summary — Updated with 2025 full year
+// Energy Cost Summary — Updated with 2025 full year (using Actual 2025 adjusted values)
 export const energyCostSummary = {
   totalBill2023: 203246,
   totalBill2024: 220028,
-  totalBill2025: 226107,
+  totalBill2025: 226107, // Raw meter total
+  totalBillActual2025: 213379, // Actual 2025 with previous tariff adjustments
   yearOverYearIncrease2024: 8.26, // 2023 → 2024
-  yearOverYearIncrease2025: 2.76, // 2024 → 2025
+  yearOverYearIncrease2025: 2.76, // 2024 → 2025 (raw meter)
   increaseAmount2024: 16782,
   increaseAmount2025: 6079,
-  // Only Feb and Jun showed YoY savings in 2025
-  yearlySavings2024vs2025: 3778.59,
-  yearlySavingsPercent: 1.72,
+  // 8 out of 12 months showed YoY savings using Actual 2025 values
+  yearlySavings2024vs2025: 13003.29,
+  yearlySavingsPercent: 5.91, // 13003.29 / 220028 * 100
 };
 
 // Ruben Showroom Yearly Bills (for reference)
@@ -109,24 +110,24 @@ export const unitComparisons: UnitComparison[] = [
 ];
 
 export const summaryStats = {
-  avgSavingsPercent: -2.63, // Updated: Rawdah consumed more overall vs Ruben in 2025
-  totalAnnualSavings: 4476.99, // Updated: Only months where Rawdah outperformed
-  mostEfficientShowroom: 'Ruben', // Updated: Ruben won 6 of 12 months
-  monthsWonByRawdah: 6,
-  monthsWonByRuben: 6,
+  avgSavingsPercent: 11.11, // From Excel summary: Rawdah vs Ruben (Without G8)
+  totalAnnualSavings: 17671.82, // From Excel summary: total annual savings SAR
+  mostEfficientShowroom: 'Rawdah', // Rawdah won 9 of 12 months
+  monthsWonByRawdah: 9,
+  monthsWonByRuben: 3, // Only March, April, and September
   totalMonths: 12,
-  // However, demand reduction data still shows 55-62% reduction in kWh at unit level
+  // Demand reduction data shows 55-62% reduction in kWh at unit level
   demandReductionPercent: 44.3, // Average across G1, G3, F3, F4
 };
 
 export const keyInsights = [
-  'Updated 2025 data shows Rawdah and Ruben each won 6 out of 12 months in the energy efficiency comparison',
-  'Rawdah showed strongest performance in February (15.0% savings) and December (20.3% savings)',
-  'March and April saw significant spikes in Rawdah consumption (-19.5% and -34.1%) due to thermostat misuse, door issues, and system updates',
-  'Summer months (May-August) showed Rawdah consuming more than Ruben, likely due to extended operating hours and the F1 duct line issue',
-  'Despite the comparison results, unit-level demand snapshots still show 55-62% reduction in kWh consumption after SCC installation',
-  'The 2025 total bill (226,107 SAR) increased 2.76% over 2024 (220,028 SAR), compared to the 8.26% increase from 2023 to 2024 — indicating the rate of cost increase has slowed significantly',
-  'Continued monitoring, resolving the F1 duct issue, and enforcing thermostat policies could significantly improve future performance',
+  'Rawdah consistently outperformed Ruben in energy efficiency, recording lower consumption in 9 out of 12 months in 2025',
+  'The largest savings were achieved in June (18.7%, 4,827.66 SAR) and December (20.3%, 1,805.72 SAR)',
+  'Ruben outperformed Rawdah only in March, April, and September, with marginal differences in September (-0.1%)',
+  'During high-load summer months (May–August), Rawdah consistently demonstrated stronger energy performance, highlighting better operational efficiency under peak demand conditions',
+  'Total cost savings in 2025 (YoY): 13,003.29 SAR — savings are concentrated in mid-to-late year when tariffs and HVAC load hurt the most',
+  'Major cost-saving months (YoY): February (28.1%, 3,387 SAR), August (9.0%, 2,745 SAR), June (7.7%, 2,125 SAR), July (5.3%, 1,564 SAR), September (7.2%, 1,696 SAR)',
+  'Rawdah remains the more energy-efficient showroom, delivering meaningful cost savings and more stable performance throughout the year—particularly during peak cooling periods',
 ];
 
 export interface UnitObservation {
