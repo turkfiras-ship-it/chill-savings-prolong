@@ -33,7 +33,7 @@ export function WeatherComparison() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="rounded-xl bg-gradient-to-r from-orange-500 to-red-500 p-6 text-white">
+      <div className="rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
         <div className="flex items-center gap-2 mb-2">
           <Thermometer className="h-6 w-6" />
           <h3 className="text-xl font-bold">Weather Impact: 2024 vs 2025 — Riyadh Temperatures</h3>
@@ -88,9 +88,9 @@ export function WeatherComparison() {
                 }}
               />
               <Legend />
-              <Bar dataKey="2024 Temp" fill="hsl(220, 70%, 50%)" radius={[4, 4, 0, 0]} opacity={0.7} />
-              <Bar dataKey="2025 Temp" fill="hsl(0, 72%, 51%)" radius={[4, 4, 0, 0]} opacity={0.7} />
-              <Line type="monotone" dataKey="diff" name="Temp Diff (°C)" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={{ r: 3 }} />
+               <Bar dataKey="2024 Temp" fill="hsl(210, 15%, 55%)" radius={[4, 4, 0, 0]} opacity={0.7} />
+              <Bar dataKey="2025 Temp" fill="hsl(210, 20%, 35%)" radius={[4, 4, 0, 0]} opacity={0.7} />
+              <Line type="monotone" dataKey="diff" name="Temp Diff (°C)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
         </div>

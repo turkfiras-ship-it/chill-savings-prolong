@@ -20,7 +20,7 @@ export function FinancialImpact() {
   return (
     <div className="space-y-6">
       {/* Overall Financial Impact Header */}
-      <div className="rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white">
+      <div className="rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
         <div className="flex items-center gap-2 mb-2">
           <DollarSign className="h-6 w-6" />
           <h3 className="text-xl font-bold">Overall Financial Impact</h3>
@@ -139,7 +139,7 @@ export function FinancialImpact() {
       </div>
 
       {/* Management-Ready Conclusion */}
-      <div className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
+      <div className="rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
         <h4 className="text-lg font-bold mb-3">Management-Ready Conclusion</h4>
         <p className="font-semibold mb-3">{managementConclusion.headline}</p>
         <ul className="space-y-2">
