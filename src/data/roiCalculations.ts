@@ -47,8 +47,8 @@ export const environmentalImpact = {
 // Technology Summary (white-labeled)
 export const technologySummary = {
   tagline: 'Advanced Energy Efficiency Technology',
-  coreTech: 'Variable Mass Flow (VMF) Technology',
-  product: 'Smart Compressor Control (SCC)',
+  coreTech: 'Smart Compressor Control (SCC) Technology',
+  product: 'SCC System',
   energyReductionRange: '25-45%',
   roiTypical: '3 years or less',
   features: [
