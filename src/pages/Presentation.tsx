@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ChevronLeft,
   ChevronRight,
   Maximize,
   Minimize,
   Grid3X3,
+  X,
 } from "lucide-react";
 import {
   systemConfig,
@@ -644,6 +646,7 @@ const slides = [
 // ─── Main Presentation Component ────────────────────
 
 export default function Presentation() {
+  const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
@@ -792,6 +795,13 @@ export default function Presentation() {
             title="Fullscreen (F)"
           >
             {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
+          </button>
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors"
+            title="Exit presentation"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
       </div>
