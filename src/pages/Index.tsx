@@ -20,6 +20,7 @@ import { SavingsSummary } from "@/components/SavingsSummary";
 import { RawdahAnalysis } from "@/components/RawdahAnalysis";
 import { ROIAnalysis } from "@/components/ROIAnalysis";
 import { ExcelUpload } from "@/components/ExcelUpload";
+import { UnitMonthlyAnalysis } from "@/components/UnitMonthlyAnalysis";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   totalYearlySavings25,
@@ -83,10 +84,14 @@ const Index = () => {
       {/* Tab Navigation */}
       <section className="max-w-7xl mx-auto px-6 -mt-6">
         <Tabs defaultValue="rawdah" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-6">
+          <TabsList className="grid w-full max-w-3xl grid-cols-4 mb-6">
             <TabsTrigger value="rawdah" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               Rawdah Analysis
+            </TabsTrigger>
+            <TabsTrigger value="units" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              Unit Data
             </TabsTrigger>
             <TabsTrigger value="roi" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
@@ -101,6 +106,11 @@ const Index = () => {
             <ExcelUpload />
             
             <RawdahAnalysis />
+          </TabsContent>
+
+          {/* Unit Monthly Data Tab */}
+          <TabsContent value="units" className="space-y-6">
+            <UnitMonthlyAnalysis />
           </TabsContent>
 
           {/* ROI Analysis Tab */}
