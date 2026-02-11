@@ -24,7 +24,7 @@ import {
   lifespanExtension,
   acReplacementCosts,
   environmentalImpact,
-  falkonairTechnology,
+  technologySummary,
 } from "@/data/roiCalculations";
 import {
   Table,
@@ -552,42 +552,31 @@ export function ROIAnalysis() {
         </div>
       </div>
 
-      {/* FalkonAir Technology Summary */}
+      {/* Technology Summary */}
       <div className="rounded-xl bg-card card-elevated overflow-hidden">
         <div className="bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Cpu className="h-6 w-6" />
-              <div>
-                <h3 className="text-xl font-bold">Powered by {falkonairTechnology.companyName}</h3>
-                <p className="text-sm opacity-80">{falkonairTechnology.tagline}</p>
-              </div>
+          <div className="flex items-center gap-2">
+            <Cpu className="h-6 w-6" />
+            <div>
+              <h3 className="text-xl font-bold">Our Technology</h3>
+              <p className="text-sm opacity-80">{technologySummary.tagline}</p>
             </div>
-            <a 
-              href={`https://${falkonairTechnology.website}`} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm opacity-70 hover:opacity-100 transition-opacity"
-            >
-              <ExternalLink className="h-4 w-4" />
-              {falkonairTechnology.website}
-            </a>
           </div>
         </div>
         
         <div className="p-6 space-y-6">
           <div>
-            <h4 className="font-semibold mb-1">Core Technology: {falkonairTechnology.coreTech}</h4>
+            <h4 className="font-semibold mb-1">Core Technology: {technologySummary.coreTech}</h4>
             <p className="text-sm text-muted-foreground mb-4">
-              The {falkonairTechnology.product} enables any compressor to be controlled replicating a DC inverter-driven system, 
-              achieving <strong>{falkonairTechnology.energyReductionRange}</strong> energy reduction with typical ROI in {falkonairTechnology.roiTypical}.
+              The {technologySummary.product} enables any compressor to be controlled replicating a DC inverter-driven system, 
+              achieving <strong>{technologySummary.energyReductionRange}</strong> energy reduction with typical ROI in {technologySummary.roiTypical}.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <h5 className="text-sm font-semibold mb-2">Key Features</h5>
                 <ul className="space-y-2">
-                  {falkonairTechnology.features.map((feature, idx) => (
+                  {technologySummary.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-2 text-sm">
                       <CheckCircle className="h-4 w-4 text-savings shrink-0 mt-0.5" />
                       <span className="text-muted-foreground">{feature}</span>
@@ -599,7 +588,7 @@ export function ROIAnalysis() {
               <div>
                 <h5 className="text-sm font-semibold mb-2">Benefits</h5>
                 <div className="space-y-2">
-                  {falkonairTechnology.benefits.map((benefit, idx) => (
+                  {technologySummary.benefits.map((benefit, idx) => (
                     <div key={idx} className="p-3 rounded-lg bg-muted/30">
                       <p className="text-sm font-medium">{benefit.category}</p>
                       <p className="text-xs text-muted-foreground mt-1">{benefit.detail}</p>
@@ -613,8 +602,8 @@ export function ROIAnalysis() {
           <div className="p-4 bg-muted/30 rounded-lg flex items-center gap-3">
             <Shield className="h-5 w-5 text-muted-foreground shrink-0" />
             <div>
-              <p className="text-sm font-medium">{falkonairTechnology.differentiator}</p>
-              <p className="text-xs text-muted-foreground">{falkonairTechnology.certifications}</p>
+              <p className="text-sm font-medium">{technologySummary.differentiator}</p>
+              <p className="text-xs text-muted-foreground">{technologySummary.certifications}</p>
             </div>
           </div>
         </div>
