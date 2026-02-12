@@ -55,8 +55,8 @@ const Index = () => {
             </div>
           </div>
           <p className="text-primary-foreground/80 max-w-2xl text-lg mt-4">
-            Comprehensive ROI analysis for power saving devices installed across 20 showroom locations
-            with 164 package AC units totaling over 25+ tons capacity each.
+            Comprehensive ROI analysis for power saving devices across 20 showroom locations
+            with 164 package AC units totaling 25+ tons capacity each. Currently installed at Rawdah Showroom — remaining locations to follow.
           </p>
           <div className="flex flex-wrap gap-4 mt-6">
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
