@@ -5,12 +5,12 @@ export const systemConfig = {
   numberOfUnits: 7,
   unitCapacity: 25, // tons
   internalCost: 18000, // SAR - your cost
-  sellingPrice: 30000, // SAR - client selling price (40% gross margin)
-  costPerUnit: 30000, // SAR - what the client pays
-  totalSystemCost: 7 * 30000, // 210,000 SAR
-  grossMargin: ((30000 - 18000) / 30000) * 100, // 40%
-  profitPerUnit: 30000 - 18000, // 12,000 SAR
-  totalProfit: 7 * (30000 - 18000), // 84,000 SAR
+  sellingPrice: 25000, // SAR - client selling price
+  costPerUnit: 25000, // SAR - what the client pays
+  totalSystemCost: 7 * 25000, // 175,000 SAR
+  grossMargin: ((25000 - 18000) / 25000) * 100, // 28%
+  profitPerUnit: 25000 - 18000, // 7,000 SAR
+  totalProfit: 7 * (25000 - 18000), // 49,000 SAR
   roiTargetYears: 5,
 };
 

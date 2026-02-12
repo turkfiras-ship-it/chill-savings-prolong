@@ -208,7 +208,7 @@ export const aggregatedMonthlyConsumption = months.map((_, idx) =>
 );
 
 // ROI Calculation data
-export const systemCost = totalUnits * 30000; // 164 units × 30,000 SAR = 4,920,000 SAR
+export const systemCost = totalUnits * 25000; // 164 units × 25,000 SAR = 4,100,000 SAR
 export const electricityRate = 0.30; // SAR per KWh
 export const acReplacementCostPerUnit = 55000; // SAR per AC unit replacement (average)
 export const normalLifespan = 10; // Years
