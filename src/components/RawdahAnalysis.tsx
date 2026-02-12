@@ -164,9 +164,9 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-1">
           <Activity className="h-5 w-5 text-savings" />
-          <h3 className="text-xl font-semibold">Demand Reduction - SCC Installation Impact</h3>
+          <h3 className="text-xl font-semibold">Demand Reduction - SCC Installation Impact (G2 Unit)</h3>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">Daily consumption comparison before and after system installation</p>
+        <p className="text-sm text-muted-foreground mb-6">G2 unit daily consumption comparison before and after system installation</p>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Chart */}
