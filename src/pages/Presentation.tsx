@@ -253,7 +253,7 @@ function Slide6_DemandReduction() {
   return (
     <SlideLayout>
       <div className="absolute inset-0 px-[140px] py-[100px]">
-        <SectionHeader title="Demand Reduction (G2 Unit)" subtitle="Before & After SCC Installation" />
+        <SectionHeader title="Demand Reduction" subtitle="Before & After SCC Installation" />
         <div className="flex gap-[40px] mt-[60px]">
           {demandSnapshots.map((s, i) => (
             <div key={i} className={`flex-1 rounded-2xl p-[50px] border ${
