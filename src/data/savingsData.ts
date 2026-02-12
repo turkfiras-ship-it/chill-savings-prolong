@@ -208,18 +208,18 @@ export const aggregatedMonthlyConsumption = months.map((_, idx) =>
 );
 
 // ROI Calculation data
-export const systemCost = 850000; // Estimated system installation cost in SAR
+export const systemCost = totalUnits * 30000; // 164 units × 30,000 SAR = 4,920,000 SAR
 export const electricityRate = 0.30; // SAR per KWh
-export const acReplacementCostPerUnit = 45000; // SAR per AC unit replacement
+export const acReplacementCostPerUnit = 55000; // SAR per AC unit replacement (average)
 export const normalLifespan = 10; // Years
-export const extendedLifespan = 17; // Average of 15-20 years (conservative)
+export const extendedLifespan = 15; // Years with power saving system
 
 // Calculate savings
 export const yearlySavingsConservative = totalYearlySavings25;
 export const yearlySavingsOptimistic = totalYearlySavings30;
 
 // AC Replacement Savings Calculation
-export const acReplacementSavings = totalUnits * acReplacementCostPerUnit * ((extendedLifespan - normalLifespan) / extendedLifespan);
+export const acReplacementSavings = totalUnits * acReplacementCostPerUnit * ((extendedLifespan - normalLifespan) / extendedLifespan); // 1 fewer replacement cycle over 30 years
 
 // Simple payback period in months
 export const paybackPeriodMonths25 = Math.ceil((systemCost / yearlySavingsConservative) * 12);

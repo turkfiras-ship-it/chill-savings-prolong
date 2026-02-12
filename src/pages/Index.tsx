@@ -29,6 +29,7 @@ import {
   systemCost,
   yearlySavingsConservative,
   totalUnits,
+  acReplacementSavings,
 } from "@/data/savingsData";
 
 const Index = () => {
@@ -225,13 +226,13 @@ const Index = () => {
                 </div>
                 <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
                   <p className="text-sm opacity-80 mb-1">Equipment Savings</p>
-                  <p className="text-3xl font-bold">~9.2M SAR</p>
+                  <p className="text-3xl font-bold">{(acReplacementSavings / 1000000).toFixed(1)}M SAR</p>
                   <p className="text-xs opacity-70 mt-1">Avoided replacements</p>
                 </div>
                 <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
                   <p className="text-sm opacity-80 mb-1">Total 10-Year Benefit</p>
                   <p className="text-3xl font-bold">
-                    {((totalYearlySavings25 * 10 + 9200000) / 1000000).toFixed(1)}M SAR
+                    {((totalYearlySavings25 * 10 + acReplacementSavings) / 1000000).toFixed(1)}M SAR
                   </p>
                 </div>
                 <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
