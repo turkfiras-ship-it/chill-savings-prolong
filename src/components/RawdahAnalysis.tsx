@@ -164,9 +164,9 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-1">
           <Activity className="h-5 w-5 text-savings" />
-          <h3 className="text-xl font-semibold">Demand Reduction - SCC Installation Impact</h3>
+          <h3 className="text-xl font-semibold">Demand Reduction - SCC Installation Impact (G2 Unit)</h3>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">Daily consumption comparison before and after system installation</p>
+        <p className="text-sm text-muted-foreground mb-6">G2 unit daily consumption comparison before and after system installation</p>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Chart */}
@@ -358,8 +358,8 @@ export function RawdahAnalysis() {
       {/* Detailed Comparison Table */}
       <div className="rounded-xl bg-card card-elevated overflow-hidden">
         <div className="p-6 border-b">
-          <h3 className="text-xl font-semibold">Monthly Breakdown - Rawdah vs Ruben</h3>
-          <p className="text-sm text-muted-foreground mt-1">Detailed comparison with savings per month</p>
+          <h3 className="text-xl font-semibold">Monthly Breakdown - Rawdah vs Ruben (Without G8)</h3>
+          <p className="text-sm text-muted-foreground mt-1">Energy Consumption Comparison – 2025, Without G8</p>
         </div>
         <div className="overflow-x-auto">
           <Table>
