@@ -25,9 +25,11 @@ import {
   demandSnapshots,
   unitComparisons,
   keyInsights,
+  monthlyComparisonData,
+  yearlyComparisonData,
 } from "@/data/rawdahAnalysis";
 import { monthlyWeatherData, weatherSummary } from "@/data/weatherData";
-import { majorSavingMonths, managementConclusion } from "@/data/financialImpact";
+import { majorSavingMonths, managementConclusion, energyCostComparison } from "@/data/financialImpact";
 
 // ─── Slide Components ───────────────────────────────────
 
@@ -587,7 +589,215 @@ function Slide12_Summary() {
   );
 }
 
-function Slide13_ThankYou() {
+function Slide13_TheoreticalSavings() {
+  const trendWithout = 8.25; // 2024 increase trend
+  const achievedDecrease = 9; // 2025 decrease excl. anomalies
+  const theoreticalSavings = trendWithout + achievedDecrease; // 17.25%
+  const bill2024 = energyCostSummary.totalBill2024; // 220,028
+  const theoreticalCost = Math.round(bill2024 * (1 + trendWithout / 100)); // what 2025 would have cost
+  const actualCost = 213379;
+  const theoreticalSavingSAR = theoreticalCost - actualCost;
+
+  return (
+    <SlideLayout>
+      <div className="absolute inset-0 px-[140px] py-[80px]">
+        <SectionHeader title="Theoretical Savings Analysis" subtitle="The True Impact: Trend Reversal + Actual Decrease" />
+        <div className="grid grid-cols-3 gap-[30px] mt-[40px]">
+          <div className="bg-red-50 border border-red-100 rounded-2xl p-[40px]">
+            <p className="text-[18px] text-slate-500 uppercase tracking-wider">2024 Trend</p>
+            <p className="text-[64px] font-bold text-red-600">+{trendWithout}%</p>
+            <p className="text-[20px] text-slate-600 mt-[6px]">Cost increase (2023→2024)</p>
+            <p className="text-[16px] text-slate-400 mt-[4px]">203,246 → 220,028 SAR</p>
+          </div>
+          <div className="bg-teal-50 border border-teal-100 rounded-2xl p-[40px]">
+            <p className="text-[18px] text-slate-500 uppercase tracking-wider">2025 Achieved</p>
+            <p className="text-[64px] font-bold text-teal-600">-9%</p>
+            <p className="text-[20px] text-slate-600 mt-[6px]">Decrease (excl. Mar/Apr anomalies)</p>
+            <p className="text-[16px] text-slate-400 mt-[4px]">Operational issues excluded</p>
+          </div>
+          <div className="bg-slate-800 rounded-2xl p-[40px] text-white">
+            <p className="text-[18px] text-slate-400 uppercase tracking-wider">Theoretical Total</p>
+            <p className="text-[64px] font-bold text-teal-400">{theoreticalSavings}%</p>
+            <p className="text-[20px] text-slate-300 mt-[6px]">True efficiency improvement</p>
+            <p className="text-[16px] text-slate-500 mt-[4px]">8.25% + 9% = 17.25%</p>
+          </div>
+        </div>
+        <div className="mt-[40px] bg-slate-50 border border-slate-200 rounded-2xl p-[40px]">
+          <h3 className="text-[28px] font-bold text-slate-800 mb-[20px]">How to Read This</h3>
+          <div className="grid grid-cols-2 gap-[40px]">
+            <div className="space-y-[16px]">
+              <div className="flex items-start gap-[14px]">
+                <div className="w-[28px] h-[28px] rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-[2px]">
+                  <span className="text-[14px] font-bold text-red-600">1</span>
+                </div>
+                <p className="text-[19px] text-slate-600">Without the SCC system, 2025 costs would have followed the same +8.25% upward trend</p>
+              </div>
+              <div className="flex items-start gap-[14px]">
+                <div className="w-[28px] h-[28px] rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-[2px]">
+                  <span className="text-[14px] font-bold text-red-600">2</span>
+                </div>
+                <p className="text-[19px] text-slate-600">Projected 2025 cost without SCC: <strong>{theoreticalCost.toLocaleString()} SAR</strong></p>
+              </div>
+            </div>
+            <div className="space-y-[16px]">
+              <div className="flex items-start gap-[14px]">
+                <div className="w-[28px] h-[28px] rounded-full bg-teal-100 flex items-center justify-center shrink-0 mt-[2px]">
+                  <span className="text-[14px] font-bold text-teal-600">3</span>
+                </div>
+                <p className="text-[19px] text-slate-600">Instead, actual 2025 cost was <strong>{actualCost.toLocaleString()} SAR</strong> — a decrease</p>
+              </div>
+              <div className="flex items-start gap-[14px]">
+                <div className="w-[28px] h-[28px] rounded-full bg-teal-100 flex items-center justify-center shrink-0 mt-[2px]">
+                  <span className="text-[14px] font-bold text-teal-600">4</span>
+                </div>
+                <p className="text-[19px] text-slate-600">True savings vs. projected: <strong className="text-teal-600">{theoreticalSavingSAR.toLocaleString()} SAR</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mt-[30px] p-[20px] bg-teal-50 border border-teal-200 rounded-xl">
+          <p className="text-[18px] text-slate-600"><strong className="text-teal-700">Key Insight:</strong> The SCC system didn't just reduce costs — it reversed an upward cost trajectory of +8.25%, delivering a net 17.25% improvement in energy cost efficiency.</p>
+        </div>
+      </div>
+    </SlideLayout>
+  );
+}
+
+function Slide14_YoYComparisonTable() {
+  return (
+    <SlideLayout>
+      <div className="absolute inset-0 px-[100px] py-[70px]">
+        <SectionHeader title="Year-over-Year Comparison" subtitle="Rawdah Monthly Cost: 2024 vs 2025 (SAR)" />
+        <div className="mt-[30px]">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b-2 border-slate-200">
+                <th className="text-left text-[18px] text-slate-500 font-semibold pb-[14px]">Month</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">2024 (SAR)</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">2025 (SAR)</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">Change %</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">Savings (SAR)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {yearlyComparisonData.map((row) => (
+                <tr key={row.month} className="border-b border-slate-100">
+                  <td className="py-[12px] text-[18px] font-medium text-slate-700">{row.month}</td>
+                  <td className="py-[12px] text-right text-[18px] text-slate-600 tabular-nums">{row.year2024.toLocaleString()}</td>
+                  <td className="py-[12px] text-right text-[18px] text-slate-600 tabular-nums">{row.year2025.toLocaleString()}</td>
+                  <td className={`py-[12px] text-right text-[18px] font-semibold tabular-nums ${row.percentDiff > 0 ? 'text-teal-600' : 'text-red-500'}`}>
+                    {row.percentDiff > 0 ? '+' : ''}{row.percentDiff.toFixed(1)}%
+                  </td>
+                  <td className={`py-[12px] text-right text-[18px] font-semibold tabular-nums ${row.savingsSAR > 0 ? 'text-teal-600' : 'text-slate-400'}`}>
+                    {row.savingsSAR > 0 ? row.savingsSAR.toLocaleString() : '—'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-slate-300">
+                <td className="py-[14px] text-[20px] font-bold text-slate-800">TOTAL</td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-slate-800 tabular-nums">
+                  {yearlyComparisonData.reduce((s, r) => s + r.year2024, 0).toLocaleString()}
+                </td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-slate-800 tabular-nums">
+                  {yearlyComparisonData.reduce((s, r) => s + r.year2025, 0).toLocaleString()}
+                </td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-teal-600">5.91%</td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-teal-600 tabular-nums">
+                  {energyCostSummary.yearlySavings2024vs2025.toLocaleString()}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div className="mt-[20px] p-[16px] bg-teal-50 border border-teal-200 rounded-xl">
+          <p className="text-[17px] text-slate-600">
+            <strong className="text-teal-700">Result:</strong> 8 out of 12 months showed YoY savings. Total: <strong className="text-teal-700">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()} SAR</strong> saved despite hotter weather.
+          </p>
+        </div>
+      </div>
+    </SlideLayout>
+  );
+}
+
+function Slide15_RawdahVsRubenTable() {
+  return (
+    <SlideLayout>
+      <div className="absolute inset-0 px-[100px] py-[70px]">
+        <SectionHeader title="Rawdah vs Ruben Comparison" subtitle="2025 Monthly Consumption — Without G8 (SAR)" />
+        <div className="mt-[30px]">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b-2 border-slate-200">
+                <th className="text-left text-[18px] text-slate-500 font-semibold pb-[14px]">Month</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">Ruben (SAR)</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">Rawdah (SAR)</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">Diff %</th>
+                <th className="text-right text-[18px] text-slate-500 font-semibold pb-[14px]">Savings (SAR)</th>
+                <th className="text-center text-[18px] text-slate-500 font-semibold pb-[14px]">Winner</th>
+              </tr>
+            </thead>
+            <tbody>
+              {monthlyComparisonData.map((row) => (
+                <tr key={row.month} className="border-b border-slate-100">
+                  <td className="py-[12px] text-[18px] font-medium text-slate-700">{row.month}</td>
+                  <td className="py-[12px] text-right text-[18px] text-slate-600 tabular-nums">{row.ruben.toLocaleString()}</td>
+                  <td className="py-[12px] text-right text-[18px] text-slate-600 tabular-nums">{row.rawdah.toLocaleString()}</td>
+                  <td className={`py-[12px] text-right text-[18px] font-semibold tabular-nums ${row.difference > 0 ? 'text-teal-600' : 'text-red-500'}`}>
+                    {row.difference > 0 ? '+' : ''}{row.difference}%
+                  </td>
+                  <td className={`py-[12px] text-right text-[18px] font-semibold tabular-nums ${row.savingsSAR > 0 ? 'text-teal-600' : 'text-slate-400'}`}>
+                    {row.savingsSAR > 0 ? row.savingsSAR.toLocaleString() : '—'}
+                  </td>
+                  <td className="py-[12px] text-center">
+                    <span className={`px-[12px] py-[4px] rounded-full text-[14px] font-semibold ${
+                      row.winner === 'RAWDAH' ? 'bg-teal-100 text-teal-700' : 'bg-slate-100 text-slate-500'
+                    }`}>{row.winner}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 border-slate-300">
+                <td className="py-[14px] text-[20px] font-bold text-slate-800">TOTAL</td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-slate-800 tabular-nums">
+                  {monthlyComparisonData.reduce((s, r) => s + r.ruben, 0).toLocaleString()}
+                </td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-slate-800 tabular-nums">
+                  {monthlyComparisonData.reduce((s, r) => s + r.rawdah, 0).toLocaleString()}
+                </td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-teal-600">{summaryStats.avgSavingsPercent}%</td>
+                <td className="py-[14px] text-right text-[20px] font-bold text-teal-600 tabular-nums">
+                  {summaryStats.totalAnnualSavings.toLocaleString()}
+                </td>
+                <td className="py-[14px] text-center">
+                  <span className="px-[12px] py-[4px] rounded-full text-[14px] font-semibold bg-teal-100 text-teal-700">RAWDAH</span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div className="mt-[20px] grid grid-cols-3 gap-[20px]">
+          <div className="bg-teal-50 border border-teal-100 rounded-xl p-[20px] text-center">
+            <p className="text-[36px] font-bold text-teal-600">{summaryStats.monthsWonByRawdah}</p>
+            <p className="text-[16px] text-slate-500">Months Won by Rawdah</p>
+          </div>
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-[20px] text-center">
+            <p className="text-[36px] font-bold text-slate-600">{summaryStats.monthsWonByRuben}</p>
+            <p className="text-[16px] text-slate-500">Months Won by Ruben</p>
+          </div>
+          <div className="bg-teal-50 border border-teal-100 rounded-xl p-[20px] text-center">
+            <p className="text-[36px] font-bold text-teal-600">{summaryStats.avgSavingsPercent}%</p>
+            <p className="text-[16px] text-slate-500">Average Savings Rate</p>
+          </div>
+        </div>
+      </div>
+    </SlideLayout>
+  );
+}
+
+function Slide16_ThankYou() {
   return (
     <SlideLayout bg="bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950">
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
@@ -632,15 +842,18 @@ const slides = [
   Slide2_ExecSummary,
   Slide3_Technology,
   Slide4_FinancialOverview,
+  Slide13_TheoreticalSavings,
   Slide5_WeatherCorrelation,
   Slide6_DemandReduction,
   Slide7_UnitPerformance,
+  Slide14_YoYComparisonTable,
+  Slide15_RawdahVsRubenTable,
   Slide8_ROI,
   Slide9_Maintenance,
   Slide10_Environmental,
   Slide11_LifespanExtension,
   Slide12_Summary,
-  Slide13_ThankYou,
+  Slide16_ThankYou,
 ];
 
 // ─── Main Presentation Component ────────────────────
