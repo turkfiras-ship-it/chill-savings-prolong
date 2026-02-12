@@ -69,7 +69,7 @@ const Index = () => {
               ❄️ 164 AC Package Units
             </div>
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
-              💰 30,000 SAR/unit
+              💰 25,000 SAR/unit
             </div>
             <Link 
               to="/presentation" 
@@ -256,7 +256,7 @@ const Index = () => {
               Energy Savings Analysis Report for Jarir Bookstore
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Data based on 2023-2025 SCECO meter readings • Electricity rate: 0.30 SAR/KWh • System cost: 30,000 SAR/unit
+              Data based on 2023-2025 SCECO meter readings • Electricity rate: 0.30 SAR/KWh • System cost: 25,000 SAR/unit
             </p>
           </div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
