@@ -88,8 +88,8 @@ export function WeatherComparison() {
                 }}
               />
               <Legend />
-               <Bar dataKey="2024 Temp" fill="hsl(210, 15%, 55%)" radius={[4, 4, 0, 0]} opacity={0.7} />
-              <Bar dataKey="2025 Temp" fill="hsl(210, 20%, 35%)" radius={[4, 4, 0, 0]} opacity={0.7} />
+               <Bar dataKey="2024 Temp" fill="hsl(200, 50%, 65%)" radius={[4, 4, 0, 0]} opacity={0.85} />
+              <Bar dataKey="2025 Temp" fill="hsl(0, 55%, 55%)" radius={[4, 4, 0, 0]} opacity={0.85} />
               <Line type="monotone" dataKey="diff" name="Temp Diff (°C)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
             </ComposedChart>
           </ResponsiveContainer>
