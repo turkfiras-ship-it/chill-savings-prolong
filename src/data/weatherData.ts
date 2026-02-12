@@ -32,4 +32,11 @@ export const weatherSummary = {
   peakMonths: ['May', 'June', 'July', 'August', 'September'], // months above 40°C in 2025
   insight: 'Despite 2025 being 1.3°C hotter on average than 2024, Rawdah achieved 13,003 SAR in energy cost savings — proving the system delivers real efficiency gains even under increased thermal load.',
   coolingDegreeIncrease: '~8-12%', // approximate increase in cooling degree days
+  // Estimated additional cooling cost due to hotter 2025 temperatures
+  // Based on 2024 total bill of 220,028 SAR × 8-12%
+  additionalCoolingCostLow: 17602, // 8% of 220,028
+  additionalCoolingCostHigh: 26403, // 12% of 220,028
+  actualSavings: 13003, // SAR saved despite the heat
+  adjustedSavingsLow: 30605, // 13,003 + 17,602
+  adjustedSavingsHigh: 39406, // 13,003 + 26,403
 };
