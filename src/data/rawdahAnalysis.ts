@@ -11,14 +11,14 @@ export interface MonthlyComparison {
 
 // 2025 Comparison: Rawdah vs Ruben (Without G8) — Updated from Excel comparison table
 export const monthlyComparisonData: MonthlyComparison[] = [
-  { month: 'January', ruben: 8899.44, rawdah: 8598.6, difference: 3.4, savingsSAR: 300.84, winner: 'RAWDAH' },
-  { month: 'February', ruben: 10174.19, rawdah: 8652.88, difference: 15.0, savingsSAR: 1521.31, winner: 'RAWDAH' },
-  { month: 'March', ruben: 12428, rawdah: 14845.66, difference: -19.5, savingsSAR: 0, winner: 'RUBEN' },
-  { month: 'April', ruben: 14913.66, rawdah: 19993.72, difference: -34.1, savingsSAR: 0, winner: 'RUBEN' },
-  { month: 'May', ruben: 23569.02, rawdah: 24201.06, difference: -2.7, savingsSAR: 0, winner: 'RUBEN' },
-  { month: 'June', ruben: 25850.44, rawdah: 25349.77, difference: 1.9, savingsSAR: 500.67, winner: 'RAWDAH' },
-  { month: 'July', ruben: 24744.78, rawdah: 27980.65, difference: -13.1, savingsSAR: 0, winner: 'RUBEN' },
-  { month: 'August', ruben: 27170.82, rawdah: 28610.07, difference: -5.3, savingsSAR: 0, winner: 'RUBEN' },
+  { month: 'January', ruben: 8899.44, rawdah: 8330.6, difference: 6.4, savingsSAR: 568.84, winner: 'RAWDAH' },
+  { month: 'February', ruben: 10174.19, rawdah: 8178.88, difference: 19.6, savingsSAR: 1995.31, winner: 'RAWDAH' },
+  { month: 'March', ruben: 12428, rawdah: 13393.66, difference: -7.8, savingsSAR: 0, winner: 'RUBEN' },
+  { month: 'April', ruben: 14913.66, rawdah: 17024.72, difference: -14.2, savingsSAR: 0, winner: 'RUBEN' },
+  { month: 'May', ruben: 23569.02, rawdah: 20465.06, difference: 13.2, savingsSAR: 3103.96, winner: 'RAWDAH' },
+  { month: 'June', ruben: 25850.43, rawdah: 21022.77, difference: 18.7, savingsSAR: 4827.66, winner: 'RAWDAH' },
+  { month: 'July', ruben: 24744.78, rawdah: 22920.65, difference: 7.4, savingsSAR: 1824.13, winner: 'RAWDAH' },
+  { month: 'August', ruben: 27216.82, rawdah: 24019.07, difference: 11.7, savingsSAR: 3197.75, winner: 'RAWDAH' },
   { month: 'September', ruben: 19054.4, rawdah: 19072.58, difference: -0.1, savingsSAR: 0, winner: 'RUBEN' },
   { month: 'October', ruben: 13489.5, rawdah: 13207.52, difference: 2.1, savingsSAR: 281.98, winner: 'RAWDAH' },
   { month: 'November', ruben: 10919.02, rawdah: 10852.55, difference: 0.6, savingsSAR: 66.47, winner: 'RAWDAH' },
@@ -38,7 +38,7 @@ export interface YearlyComparison {
 export const yearlyComparisonData: YearlyComparison[] = [
   { month: 'January', year2024: 8282.3, year2025: 8598.6, percentDiff: -3.82, actualDiff: -316.3, savingsSAR: 0 },
   { month: 'February', year2024: 12040.5, year2025: 8652.88, percentDiff: 28.14, actualDiff: 3387.62, savingsSAR: 3387.62 },
-  { month: 'March', year2024: 13302.37, year2025: 14845.66, percentDiff: -11.60, actualDiff: -1542.29, savingsSAR: 0 },
+  { month: 'March', year2024: 13302.37, year2025: 14845.66, percentDiff: -11.60, actualDiff: -1543.29, savingsSAR: 0 },
   { month: 'April', year2024: 15845.44, year2025: 19993.72, percentDiff: -26.18, actualDiff: -4148.28, savingsSAR: 0 },
   { month: 'May', year2024: 23852.75, year2025: 24201.06, percentDiff: -1.46, actualDiff: -348.31, savingsSAR: 0 },
   { month: 'June', year2024: 27474.42, year2025: 25349.77, percentDiff: 7.73, actualDiff: 2124.65, savingsSAR: 2124.65 },
@@ -62,7 +62,7 @@ export const energyCostSummary = {
   increaseAmount2025: 6079,
   // 8 out of 12 months showed YoY savings using Actual 2025 values
   yearlySavings2024vs2025: 13003.29,
-  yearlySavingsPercent: 5.91, // 13003.29 / 220028 * 100
+  yearlySavingsPercent: 9.06, // From Excel: "SAVINGS 9.06%" (without G8 comparison)
 };
 
 // Ruben Showroom Yearly Bills (for reference)
@@ -116,18 +116,18 @@ export const summaryStats = {
   monthsWonByRawdah: 9,
   monthsWonByRuben: 3, // Only March, April, and September
   totalMonths: 12,
-  // Demand reduction data shows 55-62% reduction in kWh at unit level
-  demandReductionPercent: 44.3, // Average across G1, G3, F3, F4
+  demandReductionPercent: 44.3,
 };
 
 export const keyInsights = [
   'Rawdah consistently outperformed Ruben in energy efficiency, recording lower consumption in 9 out of 12 months in 2025',
   'The largest savings were achieved in June (18.7%, 4,827.66 SAR) and December (20.3%, 1,805.72 SAR)',
-  'Ruben outperformed Rawdah only in March, April, and September, with marginal differences in September (-0.1%)',
+  'Only March and April saw higher Rawdah consumption due to maintenance issues, system updates and operational differences',
   'During high-load summer months (May–August), Rawdah consistently demonstrated stronger energy performance, highlighting better operational efficiency under peak demand conditions',
   'Total cost savings in 2025 (YoY): 13,003.29 SAR — savings are concentrated in mid-to-late year when tariffs and HVAC load hurt the most',
   'Major cost-saving months (YoY): February (28.1%, 3,387 SAR), August (9.0%, 2,745 SAR), June (7.7%, 2,125 SAR), July (5.3%, 1,564 SAR), September (7.2%, 1,696 SAR)',
   'Rawdah remains the more energy-efficient showroom, delivering meaningful cost savings and more stable performance throughout the year—particularly during peak cooling periods',
+  'Continued monitoring and adopting Rawdah\'s operational strategies could further enhance Ruben\'s performance and overall cost efficiency',
 ];
 
 export interface UnitObservation {
