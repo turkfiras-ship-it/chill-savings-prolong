@@ -122,6 +122,22 @@ export function ROIAnalysis() {
       </div>
 
       {/* Weather-Adjusted True ROI */}
+      {/* Weather-Adjusted True ROI */}
+      {(() => {
+        // Use the same method as Rawdah analysis: adjusted energy savings + maintenance + downtime
+        const adjustedEnergyMid = (weatherSummary.adjustedSavingsLow + weatherSummary.adjustedSavingsHigh) / 2;
+        const adjustedEnergyLow = weatherSummary.adjustedSavingsLow;
+        const adjustedEnergyHigh = weatherSummary.adjustedSavingsHigh;
+        // Total operational = adjusted energy + maintenance + downtime (same as calculateTotalSavings method)
+        const adjustedAnnualLow = adjustedEnergyLow + savings.maintenanceSavings + savings.downtimeSavings;
+        const adjustedAnnualHigh = adjustedEnergyHigh + savings.maintenanceSavings + savings.downtimeSavings;
+        const adjustedAnnualMid = (adjustedAnnualLow + adjustedAnnualHigh) / 2;
+        const adjustedPayback = systemConfig.totalSystemCost / adjustedAnnualMid;
+        const adjusted5Year = adjustedAnnualMid * 5;
+        const adjusted10Year = adjustedAnnualMid * 10;
+        const adjusted5YearROI = ((adjusted5Year - systemConfig.totalSystemCost) / systemConfig.totalSystemCost) * 100;
+
+        return (
       <div className="rounded-xl bg-card p-6 card-elevated border-2 border-savings/30">
         <div className="flex items-center gap-2 mb-2">
           <TrendingUp className="h-6 w-6 text-savings" />
@@ -129,31 +145,31 @@ export function ROIAnalysis() {
         </div>
         <p className="text-sm text-muted-foreground mb-4">
           2025 was {weatherSummary.avgTempDiff}°C hotter than 2024, adding {weatherSummary.coolingDegreeIncrease} cooling load. 
-          The true adjusted annual savings account for avoided cost increases.
+          The true adjusted annual savings include energy, maintenance, and downtime avoidance.
         </p>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div className="p-4 bg-muted/30 rounded-lg text-center">
-            <p className="text-xs text-muted-foreground mb-1">Recorded Savings</p>
-            <p className="text-2xl font-bold">{weatherSummary.actualSavings.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mb-1">Adjusted Energy Savings</p>
+            <p className="text-2xl font-bold">{adjustedEnergyLow.toLocaleString()}–{adjustedEnergyHigh.toLocaleString()}</p>
             <p className="text-xs text-muted-foreground">SAR/year</p>
           </div>
-          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-center">
-            <p className="text-xs text-muted-foreground mb-1">Avoided Cost Increase</p>
-            <p className="text-2xl font-bold text-destructive">{weatherSummary.additionalCoolingCostLow.toLocaleString()}–{weatherSummary.additionalCoolingCostHigh.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">SAR</p>
+          <div className="p-4 bg-muted/30 rounded-lg text-center">
+            <p className="text-xs text-muted-foreground mb-1">+ Maintenance & Downtime</p>
+            <p className="text-2xl font-bold">{(savings.maintenanceSavings + savings.downtimeSavings).toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">SAR/year</p>
           </div>
           <div className="p-4 bg-gradient-to-br from-savings/15 to-savings/5 border-2 border-savings/40 rounded-lg text-center">
-            <p className="text-xs text-muted-foreground mb-1">True Adjusted Value</p>
-            <p className="text-2xl font-bold text-savings">{weatherSummary.adjustedSavingsLow.toLocaleString()}–{weatherSummary.adjustedSavingsHigh.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mb-1">Total Adjusted Annual</p>
+            <p className="text-2xl font-bold text-savings">{Math.round(adjustedAnnualLow).toLocaleString()}–{Math.round(adjustedAnnualHigh).toLocaleString()}</p>
             <p className="text-xs text-muted-foreground">SAR/year</p>
           </div>
           <div className="p-4 bg-gradient-to-br from-savings/15 to-savings/5 border-2 border-savings/40 rounded-lg text-center">
             <p className="text-xs text-muted-foreground mb-1">Adjusted Payback Period</p>
             <p className="text-2xl font-bold text-savings">
-              {(systemConfig.totalSystemCost / ((weatherSummary.adjustedSavingsLow + weatherSummary.adjustedSavingsHigh) / 2)).toFixed(1)}
+              {adjustedPayback.toFixed(1)}
             </p>
-            <p className="text-xs text-muted-foreground">Years (using mid-range)</p>
+            <p className="text-xs text-muted-foreground">Years</p>
           </div>
         </div>
 
@@ -161,23 +177,25 @@ export function ROIAnalysis() {
           <div className="p-4 bg-savings/10 border border-savings/20 rounded-lg text-center">
             <p className="text-xs text-muted-foreground mb-1">Adjusted 5-Year Savings</p>
             <p className="text-xl font-bold text-savings">
-              {Math.round(((weatherSummary.adjustedSavingsLow + weatherSummary.adjustedSavingsHigh) / 2) * 5).toLocaleString()} SAR
+              {Math.round(adjusted5Year).toLocaleString()} SAR
             </p>
           </div>
           <div className="p-4 bg-savings/10 border border-savings/20 rounded-lg text-center">
             <p className="text-xs text-muted-foreground mb-1">Adjusted 10-Year Savings</p>
             <p className="text-xl font-bold text-savings">
-              {Math.round(((weatherSummary.adjustedSavingsLow + weatherSummary.adjustedSavingsHigh) / 2) * 10).toLocaleString()} SAR
+              {Math.round(adjusted10Year).toLocaleString()} SAR
             </p>
           </div>
           <div className="p-4 bg-savings/10 border border-savings/20 rounded-lg text-center">
             <p className="text-xs text-muted-foreground mb-1">Adjusted 5-Year ROI</p>
             <p className="text-xl font-bold text-savings">
-              {(((((weatherSummary.adjustedSavingsLow + weatherSummary.adjustedSavingsHigh) / 2) * 5) - systemConfig.totalSystemCost) / systemConfig.totalSystemCost * 100).toFixed(0)}%
+              {adjusted5YearROI.toFixed(0)}%
             </p>
           </div>
         </div>
       </div>
+        );
+      })()}
 
       <div className="rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 p-6 text-white">
         <div className="flex items-center gap-2 mb-4">
