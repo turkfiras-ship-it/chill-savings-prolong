@@ -43,6 +43,7 @@ import {
   BarChart3,
   ArrowDown,
   ArrowUp,
+  GitCompareArrows,
 } from "lucide-react";
 import {
   Table,
@@ -54,21 +55,18 @@ import {
 } from "@/components/ui/table";
 
 export function RawdahAnalysis() {
-  // Chart data for Rawdah vs Ruben comparison
   const vsRubenChartData = monthlyComparisonData.map(d => ({
     month: d.month.substring(0, 3),
     Ruben: d.ruben,
     Rawdah: d.rawdah,
   }));
 
-  // Chart data for 2024 vs 2025 comparison
   const yearComparisonChartData = yearlyComparisonData.map(d => ({
     month: d.month.substring(0, 3),
     '2024': d.year2024,
     '2025': d.year2025,
   }));
 
-  // Demand reduction chart data
   const demandChartData = demandSnapshots.map(d => ({
     year: d.year.toString(),
     consumption: d.totalDailyConsumption,
@@ -76,7 +74,6 @@ export function RawdahAnalysis() {
     label: d.label,
   }));
 
-  // Unit comparison chart data
   const unitChartData = unitComparisons.map(u => ({
     unit: u.unit,
     '2024': u.kw2024,
@@ -86,26 +83,26 @@ export function RawdahAnalysis() {
 
   return (
     <div className="space-y-8">
-      {/* Header Summary */}
+      {/* Header Summary - Rawdah Focused */}
       <div className="gradient-savings rounded-xl p-6 text-primary-foreground">
         <h2 className="text-2xl font-bold mb-2">Rawdah Showroom - Summary Analysis</h2>
-        <p className="opacity-90 mb-4">Energy Consumption Comparison – Rawdah vs. Ruben Showroom (2025, Without G8)</p>
+        <p className="opacity-90 mb-4">Comprehensive energy performance review — 2023 to 2025</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">{summaryStats.avgSavingsPercent}%</p>
-            <p className="text-sm opacity-80">Average Savings</p>
+            <p className="text-3xl font-bold">{energyCostSummary.yearlySavingsPercent}%</p>
+            <p className="text-sm opacity-80">Cost Reduction (2024→2025)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">{summaryStats.totalAnnualSavings.toLocaleString()}</p>
-            <p className="text-sm opacity-80">Total Annual Savings (SAR)</p>
+            <p className="text-3xl font-bold">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()}</p>
+            <p className="text-sm opacity-80">Annual Savings (SAR)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">{summaryStats.monthsWonByRawdah}/{summaryStats.totalMonths}</p>
-            <p className="text-sm opacity-80">Months Won (Rawdah)</p>
+            <p className="text-3xl font-bold">62%</p>
+            <p className="text-sm opacity-80">G2 Demand Reduction</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">Rawdah</p>
-            <p className="text-sm opacity-80">Most Efficient</p>
+            <p className="text-3xl font-bold">7</p>
+            <p className="text-sm opacity-80">AC Units Monitored</p>
           </div>
         </div>
       </div>
@@ -144,20 +141,35 @@ export function RawdahAnalysis() {
       {/* Weather Comparison */}
       <WeatherComparison />
 
-      {/* Key Insights */}
+      {/* 2024 vs 2025 Year Comparison Chart */}
       <div className="rounded-xl bg-card p-6 card-elevated">
-        <div className="flex items-center gap-2 mb-4">
-          <Lightbulb className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-xl font-semibold">Key Insights</h3>
+        <h3 className="text-xl font-semibold mb-1">Energy Cost Comparison - Rawdah 2024 vs 2025</h3>
+        <p className="text-sm text-muted-foreground mb-6">Monthly energy cost trends year-over-year</p>
+        <div className="h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={yearComparisonChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                }}
+                formatter={(value: number) => [`${value.toLocaleString()} SAR`, ""]}
+              />
+              <Legend />
+              <Bar dataKey="2024" fill="hsl(220, 70%, 50%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="2025" fill="hsl(38, 92%, 50%)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
-        <ul className="space-y-3">
-          {keyInsights.map((insight, idx) => (
-            <li key={idx} className="flex items-start gap-3">
-              <CheckCircle className="h-5 w-5 text-savings shrink-0 mt-0.5" />
-              <span className="text-sm">{insight}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
+          <p className="text-sm text-muted-foreground">
+            <strong className="text-savings">Result:</strong> Total cost savings in 2025: <strong className="text-savings">13,003 SAR</strong>. Even with cost increases in early months (Jan, Mar, Apr, May), net annual performance is positive. Savings are concentrated in mid-to-late year, when tariffs and HVAC load hurt the most — strong evidence of cost-aware energy management.
+          </p>
+        </div>
       </div>
 
       {/* Demand Reduction - Before/After SCC */}
@@ -169,7 +181,6 @@ export function RawdahAnalysis() {
         <p className="text-sm text-muted-foreground mb-6">G2 unit daily consumption comparison before and after system installation</p>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Chart */}
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={demandChartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
@@ -192,7 +203,6 @@ export function RawdahAnalysis() {
             </ResponsiveContainer>
           </div>
 
-          {/* Snapshots */}
           <div className="space-y-3">
             {demandSnapshots.map((snapshot, idx) => (
               <div 
@@ -227,7 +237,6 @@ export function RawdahAnalysis() {
           </div>
         </div>
 
-        {/* Reduction summary */}
         <div className="mt-6 p-4 bg-savings/10 border border-savings/20 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <ArrowDown className="h-5 w-5 text-savings" />
@@ -248,7 +257,6 @@ export function RawdahAnalysis() {
         <p className="text-sm text-muted-foreground mb-6">Individual AC unit consumption comparison</p>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Chart */}
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={unitChartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
@@ -270,7 +278,6 @@ export function RawdahAnalysis() {
             </ResponsiveContainer>
           </div>
 
-          {/* Unit cards */}
           <div className="grid grid-cols-2 gap-3">
             {unitComparisons.map((unit, idx) => (
               <div key={idx} className="p-3 rounded-lg border bg-muted/20">
@@ -296,127 +303,20 @@ export function RawdahAnalysis() {
         </div>
       </div>
 
-      {/* 2024 vs 2025 Year Comparison Chart */}
+      {/* Key Insights */}
       <div className="rounded-xl bg-card p-6 card-elevated">
-        <h3 className="text-xl font-semibold mb-1">Energy Cost Comparison - Rawdah 2024 vs 2025</h3>
-        <p className="text-sm text-muted-foreground mb-6">Monthly energy cost trends year-over-year</p>
-        <div className="h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={yearComparisonChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
-                formatter={(value: number) => [`${value.toLocaleString()} SAR`, ""]}
-              />
-              <Legend />
-              <Bar dataKey="2024" fill="hsl(220, 70%, 50%)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="2025" fill="hsl(38, 92%, 50%)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+        <div className="flex items-center gap-2 mb-4">
+          <Lightbulb className="h-5 w-5 text-muted-foreground" />
+          <h3 className="text-xl font-semibold">Key Insights</h3>
         </div>
-        
-        {/* Note about March/April */}
-        <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            <strong className="text-savings">Result:</strong> Total cost savings in 2025: <strong className="text-savings">13,003 SAR</strong>. Even with cost increases in early months (Jan, Mar, Apr, May), net annual performance is positive. Savings are concentrated in mid-to-late year, when tariffs and HVAC load hurt the most — strong evidence of cost-aware energy management.
-          </p>
-        </div>
-      </div>
-
-      {/* Monthly Comparison Chart - Rawdah vs Ruben */}
-      <div className="rounded-xl bg-card p-6 card-elevated">
-        <h3 className="text-xl font-semibold mb-1">Monthly Consumption Comparison</h3>
-        <p className="text-sm text-muted-foreground mb-6">Rawdah vs. Ruben Showroom (2025, Without G8)</p>
-        <div className="h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={vsRubenChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
-                formatter={(value: number) => [`${value.toLocaleString()} SAR`, ""]}
-              />
-              <Legend />
-              <Bar dataKey="Ruben" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Rawdah" fill="hsl(152, 60%, 40%)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Detailed Comparison Table */}
-      <div className="rounded-xl bg-card card-elevated overflow-hidden">
-        <div className="p-6 border-b">
-          <h3 className="text-xl font-semibold">Monthly Breakdown - Rawdah vs Ruben</h3>
-          <p className="text-sm text-muted-foreground mt-1">Detailed comparison with savings per month</p>
-        </div>
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-muted/50">
-                <TableHead className="font-semibold">Month</TableHead>
-                <TableHead className="text-right font-semibold">Ruben (SAR)</TableHead>
-                <TableHead className="text-right font-semibold">Rawdah (SAR)</TableHead>
-                <TableHead className="text-right font-semibold">% Difference</TableHead>
-                <TableHead className="text-right font-semibold">Savings (SAR)</TableHead>
-                <TableHead className="text-center font-semibold">Winner</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {monthlyComparisonData.map((row, idx) => (
-                <TableRow key={idx} className="hover:bg-muted/30 transition-colors">
-                  <TableCell className="font-medium">{row.month}</TableCell>
-                  <TableCell className="text-right tabular-nums">{row.ruben.toLocaleString()}</TableCell>
-                  <TableCell className="text-right tabular-nums">{row.rawdah.toLocaleString()}</TableCell>
-                  <TableCell className={`text-right tabular-nums font-medium ${row.difference > 0 ? 'text-savings' : 'text-destructive'}`}>
-                    {row.difference > 0 ? '+' : ''}{row.difference}%
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums text-savings font-medium">
-                    {row.savingsSAR > 0 ? row.savingsSAR.toLocaleString() : '-'}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      row.winner === 'RAWDAH' 
-                        ? 'bg-savings/20 text-savings' 
-                        : 'bg-muted text-muted-foreground'
-                    }`}>
-                      {row.winner}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-              <TableRow className="bg-muted/70 font-bold border-t-2">
-                <TableCell>TOTAL</TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {monthlyComparisonData.reduce((s, r) => s + r.ruben, 0).toLocaleString()}
-                </TableCell>
-                <TableCell className="text-right tabular-nums">
-                  {monthlyComparisonData.reduce((s, r) => s + r.rawdah, 0).toLocaleString()}
-                </TableCell>
-                <TableCell className="text-right tabular-nums text-savings">{summaryStats.avgSavingsPercent}%</TableCell>
-                <TableCell className="text-right tabular-nums text-savings">
-                  {summaryStats.totalAnnualSavings.toLocaleString()}
-                </TableCell>
-                <TableCell className="text-center">
-                  <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-savings/20 text-savings">
-                    RAWDAH
-                  </span>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
+        <ul className="space-y-3">
+          {keyInsights.map((insight, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-savings shrink-0 mt-0.5" />
+              <span className="text-sm">{insight}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* System Monitoring Notes */}
@@ -553,6 +453,129 @@ export function RawdahAnalysis() {
           <p className="text-sm text-muted-foreground">
             Opening earlier led to additional consumption of <strong>{operatingHoursImpact.additionalConsumption.toLocaleString()} kWh</strong> = <strong>SAR {operatingHoursImpact.additionalCost.toLocaleString()}</strong>
           </p>
+        </div>
+      </div>
+
+      {/* ===== RUBEN COMPARISON SECTION ===== */}
+      <div className="pt-4">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 rounded-lg bg-blue-500/10">
+            <GitCompareArrows className="h-6 w-6 text-blue-500" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">Benchmark: Rawdah vs. Ruben</h2>
+            <p className="text-sm text-muted-foreground">Side-by-side comparison with Ruben Showroom (2025, Without G8)</p>
+          </div>
+        </div>
+
+        {/* Benchmark Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="rounded-xl bg-card p-4 card-elevated text-center">
+            <p className="text-3xl font-bold text-savings">{summaryStats.avgSavingsPercent}%</p>
+            <p className="text-sm text-muted-foreground">Avg Savings vs Ruben</p>
+          </div>
+          <div className="rounded-xl bg-card p-4 card-elevated text-center">
+            <p className="text-3xl font-bold text-savings">{summaryStats.totalAnnualSavings.toLocaleString()}</p>
+            <p className="text-sm text-muted-foreground">Annual Savings (SAR)</p>
+          </div>
+          <div className="rounded-xl bg-card p-4 card-elevated text-center">
+            <p className="text-3xl font-bold">{summaryStats.monthsWonByRawdah}/{summaryStats.totalMonths}</p>
+            <p className="text-sm text-muted-foreground">Months Won (Rawdah)</p>
+          </div>
+          <div className="rounded-xl bg-card p-4 card-elevated text-center">
+            <p className="text-3xl font-bold text-savings">Rawdah</p>
+            <p className="text-sm text-muted-foreground">Most Efficient</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Monthly Comparison Chart - Rawdah vs Ruben */}
+      <div className="rounded-xl bg-card p-6 card-elevated">
+        <h3 className="text-xl font-semibold mb-1">Monthly Consumption Comparison</h3>
+        <p className="text-sm text-muted-foreground mb-6">Rawdah vs. Ruben Showroom (2025, Without G8)</p>
+        <div className="h-[350px]">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={vsRubenChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: "8px",
+                }}
+                formatter={(value: number) => [`${value.toLocaleString()} SAR`, ""]}
+              />
+              <Legend />
+              <Bar dataKey="Ruben" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Rawdah" fill="hsl(152, 60%, 40%)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Detailed Comparison Table */}
+      <div className="rounded-xl bg-card card-elevated overflow-hidden">
+        <div className="p-6 border-b">
+          <h3 className="text-xl font-semibold">Monthly Breakdown - Rawdah vs Ruben</h3>
+          <p className="text-sm text-muted-foreground mt-1">Detailed comparison with savings per month</p>
+        </div>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead className="font-semibold">Month</TableHead>
+                <TableHead className="text-right font-semibold">Ruben (SAR)</TableHead>
+                <TableHead className="text-right font-semibold">Rawdah (SAR)</TableHead>
+                <TableHead className="text-right font-semibold">% Difference</TableHead>
+                <TableHead className="text-right font-semibold">Savings (SAR)</TableHead>
+                <TableHead className="text-center font-semibold">Winner</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {monthlyComparisonData.map((row, idx) => (
+                <TableRow key={idx} className="hover:bg-muted/30 transition-colors">
+                  <TableCell className="font-medium">{row.month}</TableCell>
+                  <TableCell className="text-right tabular-nums">{row.ruben.toLocaleString()}</TableCell>
+                  <TableCell className="text-right tabular-nums">{row.rawdah.toLocaleString()}</TableCell>
+                  <TableCell className={`text-right tabular-nums font-medium ${row.difference > 0 ? 'text-savings' : 'text-destructive'}`}>
+                    {row.difference > 0 ? '+' : ''}{row.difference}%
+                  </TableCell>
+                  <TableCell className="text-right tabular-nums text-savings font-medium">
+                    {row.savingsSAR > 0 ? row.savingsSAR.toLocaleString() : '-'}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
+                      row.winner === 'RAWDAH' 
+                        ? 'bg-savings/20 text-savings' 
+                        : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {row.winner}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+              <TableRow className="bg-muted/70 font-bold border-t-2">
+                <TableCell>TOTAL</TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {monthlyComparisonData.reduce((s, r) => s + r.ruben, 0).toLocaleString()}
+                </TableCell>
+                <TableCell className="text-right tabular-nums">
+                  {monthlyComparisonData.reduce((s, r) => s + r.rawdah, 0).toLocaleString()}
+                </TableCell>
+                <TableCell className="text-right tabular-nums text-savings">{summaryStats.avgSavingsPercent}%</TableCell>
+                <TableCell className="text-right tabular-nums text-savings">
+                  {summaryStats.totalAnnualSavings.toLocaleString()}
+                </TableCell>
+                <TableCell className="text-center">
+                  <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-savings/20 text-savings">
+                    RAWDAH
+                  </span>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
