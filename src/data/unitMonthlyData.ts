@@ -46,10 +46,10 @@ export const unitInfo: Record<string, { location: string; notes: string }> = {
   G1: { location: 'Ground Floor — Main Entrance', notes: 'Highest load due to frequent door openings. Air curtain recommended.' },
   G2: { location: 'Ground Floor — Central Area', notes: 'Moderate consumption. Fluctuations noted in May/June.' },
   G3: { location: 'Ground Floor — Rear Section', notes: 'Serves same area as F1 on different floor. More efficient than F1.' },
-  F1: { location: 'First Floor — Corner Section', notes: 'Lowest consumption after duct optimization. Extra duct line adds ~20,000 kWh/year vs G3.' },
+  F1: { location: 'First Floor — Warehouse & Ladies Lounge', notes: 'Lowest consumption after duct optimization. Extra duct line adds ~20,000 kWh/year vs G3.' },
   F2: { location: 'First Floor — Central Area', notes: 'Sensor issue resolved. Consumption spiked in August (12,236 kW).' },
   F3: { location: 'First Floor — Rear Section', notes: 'Consistent performer. Peak in July (10,910 kW).' },
-  F4: { location: 'First Floor — Warehouse & Ladies Lounge', notes: 'Highest annual consumption (97,034 kW). Peak in August (14,098 kW).' },
+  F4: { location: 'First Floor — Corner Section', notes: 'Highest annual consumption (97,034 kW). Peak in August (14,098 kW).' },
 };
 
 export const unitNames = ['G1', 'G2', 'G3', 'F1', 'F2', 'F3', 'F4'] as const;
