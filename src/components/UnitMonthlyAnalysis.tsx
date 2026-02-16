@@ -302,20 +302,24 @@ export function UnitMonthlyAnalysis() {
                     <TableCell className="font-medium">
                       {row.month}
                     </TableCell>
-                    {unitNamesWithG8.map((u) => (
-                      <TableCell
-                        key={u}
-                        className={`text-right tabular-nums ${
-                          u === maxUnit
-                            ? "text-destructive font-semibold"
-                            : u === minUnit
-                            ? "text-savings font-medium"
-                            : ""
-                        }`}
-                      >
-                        {row[u].toLocaleString()}
-                      </TableCell>
-                    ))}
+                    {unitNamesWithG8.map((u) => {
+                      const pct = ((row[u] / row.totalWithG8) * 100).toFixed(1);
+                      return (
+                        <TableCell
+                          key={u}
+                          className={`text-right tabular-nums ${
+                            u === maxUnit
+                              ? "text-destructive font-semibold"
+                              : u === minUnit
+                              ? "text-savings font-medium"
+                              : ""
+                          }`}
+                        >
+                          {row[u].toLocaleString()}
+                          <span className="block text-xs text-muted-foreground">{pct}%</span>
+                        </TableCell>
+                      );
+                    })}
                     <TableCell className="text-right tabular-nums font-bold">
                       {row.totalWithG8.toLocaleString()}
                     </TableCell>
@@ -328,6 +332,9 @@ export function UnitMonthlyAnalysis() {
                 {unitNamesWithG8.map((u) => (
                   <TableCell key={u} className="text-right tabular-nums">
                     {unitAnnualTotals[u].toLocaleString()}
+                    <span className="block text-xs text-muted-foreground">
+                      {((unitAnnualTotals[u] / unitAnnualTotals.totalWithG8) * 100).toFixed(1)}%
+                    </span>
                   </TableCell>
                 ))}
                 <TableCell className="text-right tabular-nums text-lg">
