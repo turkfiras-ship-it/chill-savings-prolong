@@ -107,7 +107,7 @@ export const unitComparisons: UnitComparison[] = [
   { unit: 'G1', date2024: 'Oct 12 2024', date2025: 'Oct 12 2025', kw2024: 478, avgKwh2024: 33, kw2025: 214, avgKwh2025: 15, reduction: 55.2 },
   { unit: 'G3', date2024: 'Oct 12 2024', date2025: 'Oct 12 2025', kw2024: 327, avgKwh2024: 22.5, kw2025: 217, avgKwh2025: 15, reduction: 33.6 },
   { unit: 'F3', date2024: 'Oct 16 2024', date2025: 'Oct 16 2025', kw2024: 477, avgKwh2024: 33, kw2025: 234, avgKwh2025: 15, reduction: 50.9 },
-  { unit: 'F4', date2024: 'Oct 20 2024', date2025: 'Oct 20 2025', kw2024: 465, avgKwh2024: 31, kw2025: 290, avgKwh2025: 20, reduction: 37.6 },
+  { unit: 'F1', date2024: 'Oct 20 2024', date2025: 'Oct 20 2025', kw2024: 465, avgKwh2024: 31, kw2025: 290, avgKwh2025: 20, reduction: 37.6 },
 ];
 
 export const summaryStats = {
