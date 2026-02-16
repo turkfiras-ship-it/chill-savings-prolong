@@ -184,7 +184,7 @@ function Slide4_FinancialOverview() {
           {[
             { year: "2023", bill: energyCostSummary.totalBill2023, change: null, label: "Baseline Year" },
             { year: "2024", bill: energyCostSummary.totalBill2024, change: `+${energyCostSummary.yearOverYearIncrease2024}%`, label: "Pre-optimization" },
-            { year: "2025", bill: 213379, change: "-3.02%", label: "With SCC System" },
+            { year: "2025", bill: 213379, change: "-6.09%", label: "With SCC System" },
           ].map((item) => (
             <div key={item.year} className={`rounded-2xl p-[50px] border ${item.year === '2025' ? 'bg-teal-50 border-teal-200' : 'bg-slate-50 border-slate-100'}`}>
               <p className="text-[22px] text-slate-500 uppercase tracking-wider">{item.year}</p>

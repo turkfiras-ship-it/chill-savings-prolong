@@ -62,7 +62,7 @@ export const energyCostSummary = {
   increaseAmount2025: 6079,
   // 8 out of 12 months showed YoY savings using Actual 2025 values
   yearlySavings2024vs2025: 13003.29,
-  yearlySavingsPercent: 3.02, // Actual YoY cost reduction: (220,028 - 213,379) / 220,028 = 3.02%
+  yearlySavingsPercent: 6.09, // Actual YoY cost reduction: 13,003.29 / 213,379 = 6.09%
   rawdahVsRubenSavingsPercent: 9.06, // From Excel: Rawdah vs Ruben savings (without G8)
 };
 
@@ -123,7 +123,7 @@ export const summaryStats = {
 // Rawdah-specific insights (standalone performance)
 export const rawdahInsights = [
   'Rawdah achieved 13,003 SAR in energy cost savings in 2025 (YoY), with the strongest financial performance during peak summer months',
-  'Total cost reduction of ~3% (2024→2025) despite 2025 being 1.3°C hotter than 2024 — demonstrating effective energy cost control',
+  'Total cost reduction of ~6% (2024→2025) despite 2025 being 1.3°C hotter than 2024 — demonstrating effective energy cost control',
   'Major cost-saving months (YoY): February (28.1%, 3,387 SAR), August (9.0%, 2,745 SAR), June (7.7%, 2,125 SAR), July (5.3%, 1,564 SAR), September (7.2%, 1,696 SAR)',
   'Q1 cost increases (Jan +3.8%, Mar +11.6%, Apr +26.2%) were driven by early-season inefficiencies, thermostat misuse, and system updates — these represent clear opportunities for further optimization',
   'During high-load summer months (May–August), Rawdah demonstrated consistent improvement over 2024, proving cost control measures are effective under peak tariff conditions',

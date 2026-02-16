@@ -162,7 +162,7 @@ export function PrintBooklet() {
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="p-3 rounded-lg border"><p className="text-xs text-muted-foreground">2023 Baseline</p><p className="text-lg font-bold">{energyCostComparison.year2023.totalBill.toLocaleString()} SAR</p></div>
             <div className="p-3 rounded-lg border border-red-200"><p className="text-xs text-muted-foreground">2024 (+{energyCostSummary.yearOverYearIncrease2024}%)</p><p className="text-lg font-bold">{energyCostComparison.year2024.totalBill.toLocaleString()} SAR</p></div>
-            <div className="p-3 rounded-lg border border-teal-200"><p className="text-xs text-muted-foreground">2025 With SCC (-3.02%)</p><p className="text-lg font-bold text-teal-700">{energyCostComparison.year2025.totalBill.toLocaleString()} SAR</p></div>
+            <div className="p-3 rounded-lg border border-teal-200"><p className="text-xs text-muted-foreground">2025 With SCC (-6.09%)</p><p className="text-lg font-bold text-teal-700">{energyCostComparison.year2025.totalBill.toLocaleString()} SAR</p></div>
           </div>
 
           <h3 className="font-semibold mb-2">Top Saving Months (2024 vs 2025)</h3>
@@ -210,7 +210,7 @@ export function PrintBooklet() {
                 </tr>
               ))}
             </tbody>
-            <tfoot><tr className="border-t-2 font-bold"><td className="py-1.5">TOTAL</td><td className="py-1.5 text-right">{yearlyComparisonData.reduce((s, r) => s + r.year2024, 0).toLocaleString()}</td><td className="py-1.5 text-right">{yearlyComparisonData.reduce((s, r) => s + r.year2025, 0).toLocaleString()}</td><td className="py-1.5 text-right text-teal-600">5.91%</td><td className="py-1.5 text-right text-teal-600">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()}</td></tr></tfoot>
+            <tfoot><tr className="border-t-2 font-bold"><td className="py-1.5">TOTAL</td><td className="py-1.5 text-right">{yearlyComparisonData.reduce((s, r) => s + r.year2024, 0).toLocaleString()}</td><td className="py-1.5 text-right">{yearlyComparisonData.reduce((s, r) => s + r.year2025, 0).toLocaleString()}</td><td className="py-1.5 text-right text-teal-600">6.09%</td><td className="py-1.5 text-right text-teal-600">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()}</td></tr></tfoot>
           </table>
 
           <p className="text-xs text-muted-foreground mb-4 p-2 bg-teal-50 rounded border border-teal-200">

@@ -49,6 +49,6 @@ export const managementConclusion = {
 export const energyCostComparison = {
   year2023: { totalBill: 203246, label: '2023 Total Bill' },
   year2024: { totalBill: 220028, label: '2024 Total Bill', changePercent: 8.25, changeSAR: 16782, direction: 'increase' as const },
-  year2025: { totalBill: 213379, label: '2025 Total Bill', changePercent: -3.02, changeSAR: -6649, direction: 'decrease' as const },
+  year2025: { totalBill: 213379, label: '2025 Total Bill', changePercent: -6.09, changeSAR: -13003, direction: 'decrease' as const },
   anomalyNote: 'During 2025, two months (March and April) experienced operational issues that temporarily inflated consumption. When excluding these months, the data indicates a 9% overall decrease. Combined with the 8.25% upward cost trend from 2024, this represents a theoretical 17.25% improvement in energy cost efficiency — reflecting improved efficiency and better consumption management.',
 };

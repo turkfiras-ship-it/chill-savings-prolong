@@ -126,7 +126,7 @@ export const calculateReplacementSavings = () => {
 // Energy Savings (from analysis)
 export const energySavings = {
   annualSavingsRawdah: 13003.29, // SAR/year — Actual 2024 vs 2025 YoY savings (from Excel)
-  annualSavingsPercent: 3.02, // Actual YoY cost reduction percentage
+  annualSavingsPercent: 6.09, // Actual YoY cost reduction percentage (13,003.29 / 213,379)
   rawdahVsRubenSavings: 17671.82, // SAR/year — Rawdah vs Ruben comparison (Without G8)
   rawdahVsRubenPercent: 11.11, // Average savings vs Ruben
   projectedAnnualSavings25: 50812, // at 25% efficiency (from original 20-showroom projection)
