@@ -85,7 +85,6 @@ function Slide2_ExecSummary() {
           {[
             { value: `${summaryStats.avgSavingsPercent}%`, label: "Energy Savings Rate", sub: "vs. Ruben Showroom" },
             { value: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, label: "SAR Saved in 2025", sub: "Year-over-year (actual)" },
-            { value: `${roi.paybackPeriodYears.toFixed(1)} Yrs`, label: "Payback Period", sub: "Operational savings" },
             { value: `62%`, label: "Demand Reduction", sub: "Daily kW consumption" },
           ].map((card) => (
             <div key={card.label} className="bg-slate-50 rounded-2xl p-[36px] border border-slate-100">
@@ -97,7 +96,7 @@ function Slide2_ExecSummary() {
         </div>
         <div className="mt-[30px]">
           <p className="text-[18px] text-slate-500 uppercase tracking-widest font-medium mb-[16px]">Weather-Adjusted True Savings — 2025 was {weatherSummary.avgTempDiff}°C hotter</p>
-          <div className="grid grid-cols-4 gap-[30px]">
+          <div className="grid grid-cols-5 gap-[24px]">
             <div className="bg-slate-50 rounded-2xl p-[36px] border border-slate-100">
               <p className="text-[52px] font-bold text-slate-800">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()}</p>
               <p className="text-[20px] font-semibold text-slate-600 mt-[8px]">Actual Savings</p>
@@ -117,7 +116,12 @@ function Slide2_ExecSummary() {
             <div className="bg-teal-50 rounded-2xl p-[36px] border border-teal-200">
               <p className="text-[52px] font-bold text-teal-700">17.25%</p>
               <p className="text-[20px] font-semibold text-teal-600 mt-[8px]">Efficiency Gain</p>
-              <p className="text-[16px] text-slate-400 mt-[4px]">Trend reversal + actual savings</p>
+              <p className="text-[16px] text-slate-400 mt-[4px]">Trend reversal + actual</p>
+            </div>
+            <div className="bg-teal-50 rounded-2xl p-[36px] border border-teal-200">
+              <p className="text-[52px] font-bold text-teal-700">{roi.paybackPeriodYears.toFixed(1)}</p>
+              <p className="text-[20px] font-semibold text-teal-600 mt-[8px]">ROI (Years)</p>
+              <p className="text-[16px] text-slate-400 mt-[4px]">Payback period</p>
             </div>
           </div>
         </div>
