@@ -122,11 +122,11 @@ export function Recommendations() {
             <p className="text-sm opacity-80">Avg kWh/Unit</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">F4</p>
+            <p className="text-3xl font-bold">F1</p>
             <p className="text-sm opacity-80">Highest Consumer</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">F1</p>
+            <p className="text-3xl font-bold">F4</p>
             <p className="text-sm opacity-80">Lowest Consumer</p>
           </div>
         </div>
@@ -266,7 +266,7 @@ export function Recommendations() {
         {/* Unit Comparison Radar */}
         <div className="rounded-xl bg-card p-6 card-elevated">
            <h3 className="text-xl font-semibold mb-1">Unit Efficiency Score</h3>
-          <p className="text-sm text-muted-foreground mb-4">Higher = more efficient (F1 lowest consumer, F4 highest)</p>
+          <p className="text-sm text-muted-foreground mb-4">Higher = more efficient (F4 lowest consumer, F1 highest)</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
@@ -362,7 +362,7 @@ function getRecommendation(unit: string): string {
     case 'F3':
       return 'Consistent performer with stable seasonal pattern. Maintain current operations. Minor optimization: reduce fan speed to medium during winter months (Nov–Feb) to save ~5–8% during low-load periods. Good candidate for zone balancing with F1.';
     case 'G3':
-      return 'Serves the same zone as F4 across floors. Coordinate scheduling — consider alternating operation during low-traffic hours (early morning, last hour before close) to reduce combined load by ~10%. Ensure both units share a consistent thermostat setpoint.';
+      return 'Serves the same zone as F1 across floors. Coordinate scheduling — consider alternating operation during low-traffic hours (early morning, last hour before close) to reduce combined load by ~10%. Ensure both units share a consistent thermostat setpoint.';
     case 'F4':
       return 'Lowest consumer (45,730 kWh/year). Consistent low load with peak in April. Maintain current operations. Minor optimization possible with seasonal fan speed adjustment during winter months.';
     default:
@@ -393,8 +393,8 @@ const recommendations = [
     icon: Target,
   },
   {
-    title: 'G3/F4 Alternating Operation',
-    description: 'G3 and F4 serve overlapping zones across floors. During low-traffic hours (first hour after opening, last hour before close), alternate operation — run only one unit while the other rests. This reduces combined compressor cycling by ~10% without affecting customer comfort.',
+    title: 'G3/F1 Alternating Operation',
+    description: 'G3 and F1 serve overlapping zones across floors. During low-traffic hours (first hour after opening, last hour before close), alternate operation — run only one unit while the other rests. This reduces combined compressor cycling by ~10% without affecting customer comfort.',
     savings: '2,000–3,000 SAR/year',
     priority: 'medium' as const,
     icon: Wrench,

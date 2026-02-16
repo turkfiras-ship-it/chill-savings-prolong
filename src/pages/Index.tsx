@@ -10,6 +10,7 @@ import {
   Wrench,
   Target,
   Presentation,
+  Printer,
 } from "lucide-react";
 import { StatCard } from "@/components/StatCard";
 import { ShowroomTable } from "@/components/ShowroomTable";
@@ -22,6 +23,7 @@ import { ROIAnalysis } from "@/components/ROIAnalysis";
 import { ExcelUpload } from "@/components/ExcelUpload";
 import { UnitMonthlyAnalysis } from "@/components/UnitMonthlyAnalysis";
 import { Recommendations } from "@/components/Recommendations";
+import { PrintBooklet } from "@/components/PrintBooklet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   totalYearlySavings25,
@@ -83,7 +85,7 @@ const Index = () => {
       {/* Tab Navigation */}
       <section className="max-w-7xl mx-auto px-6 -mt-6">
         <Tabs defaultValue="rawdah" className="w-full">
-          <TabsList className="grid w-full max-w-4xl grid-cols-5 mb-6">
+          <TabsList className="grid w-full max-w-5xl grid-cols-6 mb-6">
             <TabsTrigger value="rawdah" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
               Rawdah Analysis
@@ -101,6 +103,10 @@ const Index = () => {
               ROI Calculator
             </TabsTrigger>
             <TabsTrigger value="overview">All Showrooms</TabsTrigger>
+            <TabsTrigger value="print" className="flex items-center gap-2">
+              <Printer className="h-4 w-4" />
+              Print Booklet
+            </TabsTrigger>
           </TabsList>
           
           {/* Rawdah Summary Analysis Tab */}
@@ -124,6 +130,11 @@ const Index = () => {
           {/* ROI Analysis Tab */}
           <TabsContent value="roi" className="space-y-6">
             <ROIAnalysis />
+          </TabsContent>
+
+          {/* Print Booklet Tab */}
+          <TabsContent value="print" className="space-y-6">
+            <PrintBooklet />
           </TabsContent>
 
           {/* All Showrooms Overview Tab */}
