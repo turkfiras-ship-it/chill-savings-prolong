@@ -85,27 +85,28 @@ const Index = () => {
       {/* Tab Navigation */}
       <section className="max-w-7xl mx-auto px-6 -mt-6">
         <Tabs defaultValue="rawdah" className="w-full">
-          <TabsList className="grid w-full max-w-5xl grid-cols-6 mb-6">
-            <TabsTrigger value="rawdah" className="flex items-center gap-2">
+          <TabsList className="flex w-full max-w-5xl mb-6 overflow-x-auto no-scrollbar">
+            <TabsTrigger value="rawdah" className="flex items-center gap-2 shrink-0">
               <Building2 className="h-4 w-4" />
-              Rawdah Analysis
+              <span className="hidden sm:inline">Rawdah</span> Analysis
             </TabsTrigger>
-            <TabsTrigger value="units" className="flex items-center gap-2">
+            <TabsTrigger value="units" className="flex items-center gap-2 shrink-0">
               <Zap className="h-4 w-4" />
               Unit Data
             </TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex items-center gap-2">
+            <TabsTrigger value="recommendations" className="flex items-center gap-2 shrink-0">
               <Leaf className="h-4 w-4" />
-              Recommendations
+              <span className="hidden sm:inline">Recommendations</span>
+              <span className="sm:hidden">Recs</span>
             </TabsTrigger>
-            <TabsTrigger value="roi" className="flex items-center gap-2">
+            <TabsTrigger value="roi" className="flex items-center gap-2 shrink-0">
               <Target className="h-4 w-4" />
-              ROI Calculator
+              ROI
             </TabsTrigger>
-            <TabsTrigger value="overview">All Showrooms</TabsTrigger>
-            <TabsTrigger value="print" className="flex items-center gap-2">
+            <TabsTrigger value="overview" className="shrink-0">All Showrooms</TabsTrigger>
+            <TabsTrigger value="print" className="flex items-center gap-2 shrink-0">
               <Printer className="h-4 w-4" />
-              Print Booklet
+              Print
             </TabsTrigger>
           </TabsList>
           
