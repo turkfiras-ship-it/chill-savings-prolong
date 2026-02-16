@@ -23,12 +23,12 @@ import {
   unitMonthlyData2025,
   unitAnnualTotals,
   unitInfo,
-  unitNames,
-  type UnitName,
+  unitNamesWithG8,
+  type UnitNameWithG8,
 } from "@/data/unitMonthlyData";
 import { Zap, BarChart3, TrendingDown, Info } from "lucide-react";
 
-const UNIT_COLORS: Record<UnitName, string> = {
+const UNIT_COLORS: Record<UnitNameWithG8, string> = {
   G1: "hsl(200, 60%, 45%)",
   G2: "hsl(220, 50%, 55%)",
   G3: "hsl(180, 45%, 45%)",
@@ -36,16 +36,17 @@ const UNIT_COLORS: Record<UnitName, string> = {
   F2: "hsl(260, 45%, 55%)",
   F3: "hsl(152, 50%, 40%)",
   F4: "hsl(30, 50%, 50%)",
+  G8: "hsl(45, 60%, 50%)",
 };
 
 export function UnitMonthlyAnalysis() {
-  const [selectedUnit, setSelectedUnit] = useState<UnitName | "ALL">("ALL");
+  const [selectedUnit, setSelectedUnit] = useState<UnitNameWithG8 | "ALL">("ALL");
 
   // Chart data — stacked or single unit
   const chartData = unitMonthlyData2025.map((d) => ({
     month: d.month.substring(0, 3),
-    ...Object.fromEntries(unitNames.map((u) => [u, d[u]])),
-    total: d.total,
+    ...Object.fromEntries(unitNamesWithG8.map((u) => [u, d[u]])),
+    total: d.totalWithG8,
   }));
 
   // Line chart data for month-over-month comparison
@@ -54,7 +55,7 @@ export function UnitMonthlyAnalysis() {
     return {
       month: d.month.substring(0, 3),
       ...Object.fromEntries(
-        unitNames.map((u) => [
+        unitNamesWithG8.map((u) => [
           `${u}_change`,
           prev ? +(((d[u] - prev[u]) / prev[u]) * 100).toFixed(1) : 0,
         ])
@@ -67,7 +68,7 @@ export function UnitMonthlyAnalysis() {
 
   // Find peak month per unit
   const peakMonths = Object.fromEntries(
-    unitNames.map((u) => {
+    unitNamesWithG8.map((u) => {
       const max = Math.max(...unitMonthlyData2025.map((d) => d[u]));
       const month = unitMonthlyData2025.find((d) => d[u] === max)?.month || "";
       return [u, { max, month: month.substring(0, 3) }];
@@ -88,7 +89,7 @@ export function UnitMonthlyAnalysis() {
         >
           All Units
         </button>
-        {unitNames.map((u) => (
+        {unitNamesWithG8.map((u) => (
           <button
             key={u}
             onClick={() => setSelectedUnit(u)}
@@ -150,7 +151,7 @@ export function UnitMonthlyAnalysis() {
               />
               <Legend />
               {selectedUnit === "ALL" ? (
-                unitNames.map((u) => (
+                unitNamesWithG8.map((u) => (
                   <Bar
                     key={u}
                     dataKey={u}
@@ -224,7 +225,7 @@ export function UnitMonthlyAnalysis() {
                     strokeWidth={2}
                     dot={{ r: 3 }}
                   />
-                  {unitNames.map((u) => (
+                  {unitNamesWithG8.map((u) => (
                     <Line
                       key={u}
                       type="monotone"
@@ -271,7 +272,7 @@ export function UnitMonthlyAnalysis() {
             <TableHeader>
               <TableRow className="bg-muted/50">
                 <TableHead className="font-semibold">Month</TableHead>
-                {unitNames.map((u) => (
+                {unitNamesWithG8.map((u) => (
                   <TableHead
                     key={u}
                     className="text-right font-semibold"
@@ -287,10 +288,10 @@ export function UnitMonthlyAnalysis() {
             <TableBody>
               {unitMonthlyData2025.map((row, idx) => {
                 // Find max unit for this month
-                const maxUnit = unitNames.reduce((a, b) =>
+                const maxUnit = unitNamesWithG8.reduce((a, b) =>
                   row[a] > row[b] ? a : b
                 );
-                const minUnit = unitNames.reduce((a, b) =>
+                const minUnit = unitNamesWithG8.reduce((a, b) =>
                   row[a] < row[b] ? a : b
                 );
                 return (
@@ -301,7 +302,7 @@ export function UnitMonthlyAnalysis() {
                     <TableCell className="font-medium">
                       {row.month}
                     </TableCell>
-                    {unitNames.map((u) => (
+                    {unitNamesWithG8.map((u) => (
                       <TableCell
                         key={u}
                         className={`text-right tabular-nums ${
@@ -316,7 +317,7 @@ export function UnitMonthlyAnalysis() {
                       </TableCell>
                     ))}
                     <TableCell className="text-right tabular-nums font-bold">
-                      {row.total.toLocaleString()}
+                      {row.totalWithG8.toLocaleString()}
                     </TableCell>
                   </TableRow>
                 );
@@ -324,13 +325,13 @@ export function UnitMonthlyAnalysis() {
               {/* Annual totals row */}
               <TableRow className="bg-muted/70 font-bold border-t-2">
                 <TableCell>Annual Total</TableCell>
-                {unitNames.map((u) => (
+                {unitNamesWithG8.map((u) => (
                   <TableCell key={u} className="text-right tabular-nums">
                     {unitAnnualTotals[u].toLocaleString()}
                   </TableCell>
                 ))}
                 <TableCell className="text-right tabular-nums text-lg">
-                  {unitAnnualTotals.total.toLocaleString()}
+                  {unitAnnualTotals.totalWithG8.toLocaleString()}
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -340,7 +341,7 @@ export function UnitMonthlyAnalysis() {
 
       {/* Unit Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {unitNames.map((u) => (
+        {unitNamesWithG8.map((u) => (
           <div
             key={u}
             className="rounded-xl bg-card p-4 card-elevated border-l-4"
