@@ -51,10 +51,10 @@ export const unitInfo: Record<string, { location: string; notes: string }> = {
   G1: { location: 'Ground Floor — Main Entrance', notes: 'High load due to frequent door openings. Air curtain recommended.' },
   G2: { location: 'Ground Floor — Central Area', notes: 'Moderate consumption. Good improvement after SCC installation (62% daily reduction).' },
   G3: { location: 'Ground Floor — Rear Section', notes: 'Serves same area as F1 on different floor. More efficient than F1.' },
-  F1: { location: 'First Floor — Warehouse & Ladies Lounge', notes: 'Lowest consumption unit (45,730 kWh/year). Extra duct line adds ~20,000 kWh/year to total building load.' },
+  F1: { location: 'First Floor — Book Area', notes: 'Lowest consumption unit (45,730 kWh/year). Consistent low load with peak in April (6,975 kW).' },
   F2: { location: 'First Floor — Central Area', notes: 'Sensor issue resolved. Consumption spiked in August (12,236 kW).' },
   F3: { location: 'First Floor — Rear Section', notes: 'Consistent performer. Peak in July (10,910 kW).' },
-  F4: { location: 'First Floor — Book Area', notes: 'Highest consumption unit (97,034 kWh/year). Peak in August (14,098 kW). Inspect insulation and zone balancing.' },
+  F4: { location: 'First Floor — Warehouse & Ladies Lounge', notes: 'Highest consumption unit (97,034 kWh/year). Extra duct line adds ~20,000 kWh/year to total building load. Peak in August (14,098 kW). Evaluate duct layout.' },
   G8: { location: 'Ground Floor — 8th Panel', notes: 'Consists of cassettes, ducted split, and split units. Not part of SCC system. 3–18% of total building consumption depending on season.' },
 };
 
