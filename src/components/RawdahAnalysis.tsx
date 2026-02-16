@@ -16,7 +16,8 @@ import {
   monthlyComparisonData,
   yearlyComparisonData,
   summaryStats,
-  keyInsights,
+  rawdahInsights,
+  comparisonInsights,
   unitPerformanceObservations,
   maintenanceNotes,
   monthlyIssues,
@@ -303,14 +304,14 @@ export function RawdahAnalysis() {
         </div>
       </div>
 
-      {/* Key Insights */}
+      {/* Key Insights - Rawdah Standalone */}
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <Lightbulb className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-xl font-semibold">Key Insights</h3>
+          <h3 className="text-xl font-semibold">Key Insights — Rawdah Performance (2024 vs 2025)</h3>
         </div>
         <ul className="space-y-3">
-          {keyInsights.map((insight, idx) => (
+          {rawdahInsights.map((insight, idx) => (
             <li key={idx} className="flex items-start gap-3">
               <CheckCircle className="h-5 w-5 text-savings shrink-0 mt-0.5" />
               <span className="text-sm">{insight}</span>
@@ -466,6 +467,22 @@ export function RawdahAnalysis() {
             <h2 className="text-2xl font-bold">Benchmark: Rawdah vs. Ruben</h2>
             <p className="text-sm text-muted-foreground">Side-by-side comparison with Ruben Showroom (2025, Without G8)</p>
           </div>
+        </div>
+
+        {/* Comparison Key Insights */}
+        <div className="rounded-xl bg-card p-6 card-elevated mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Lightbulb className="h-5 w-5 text-blue-500" />
+            <h3 className="text-xl font-semibold">Key Insights — Rawdah vs Ruben</h3>
+          </div>
+          <ul className="space-y-3">
+            {comparisonInsights.map((insight, idx) => (
+              <li key={idx} className="flex items-start gap-3">
+                <CheckCircle className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                <span className="text-sm">{insight}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         {/* Benchmark Stats */}
