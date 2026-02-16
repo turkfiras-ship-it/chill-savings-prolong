@@ -469,22 +469,6 @@ export function RawdahAnalysis() {
           </div>
         </div>
 
-        {/* Comparison Key Insights */}
-        <div className="rounded-xl bg-card p-6 card-elevated mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Lightbulb className="h-5 w-5 text-blue-500" />
-            <h3 className="text-xl font-semibold">Key Insights — Rawdah vs Ruben</h3>
-          </div>
-          <ul className="space-y-3">
-            {comparisonInsights.map((insight, idx) => (
-              <li key={idx} className="flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
-                <span className="text-sm">{insight}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         {/* Benchmark Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="rounded-xl bg-card p-4 card-elevated text-center">
@@ -594,6 +578,22 @@ export function RawdahAnalysis() {
             </TableBody>
           </Table>
         </div>
+      </div>
+
+      {/* Key Insights — Rawdah vs Ruben */}
+      <div className="rounded-xl bg-card p-6 card-elevated">
+        <div className="flex items-center gap-2 mb-4">
+          <Lightbulb className="h-5 w-5 text-blue-500" />
+          <h3 className="text-xl font-semibold">Key Insights — Rawdah vs Ruben</h3>
+        </div>
+        <ul className="space-y-3">
+          {comparisonInsights.map((insight, idx) => (
+            <li key={idx} className="flex items-start gap-3">
+              <CheckCircle className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+              <span className="text-sm">{insight}</span>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
