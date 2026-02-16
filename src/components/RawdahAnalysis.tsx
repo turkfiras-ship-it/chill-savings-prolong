@@ -161,7 +161,7 @@ export function RawdahAnalysis() {
               />
               <Legend />
               <Bar dataKey="2024" fill="hsl(220, 70%, 50%)" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="2025" fill="hsl(38, 92%, 50%)" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="2025" fill="hsl(152, 60%, 40%)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
