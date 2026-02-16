@@ -352,7 +352,7 @@ export function Recommendations() {
 function getRecommendation(unit: string): string {
   switch (unit) {
     case 'F4':
-      return 'Highest consumer (97,034 kWh/year). Inspect insulation, check for air leaks in corner section. Consider adding thermal curtain. Peak in August (14,098 kW) suggests oversized load — investigate zone balancing with F3.';
+      return 'Highest consumer (97,034 kWh/year) but has extra duct line adding ~20,000 kWh/year to building load via warehouse and ladies lounge. Evaluate duct layout — sealing or removing redundant duct sections could save 15–20% on this unit alone. Consider replacing the back duct with a dedicated wall split unit for the ladies lounge.';
     case 'G1':
       return 'High load from frequent door openings at main entrance. Install air curtain to reduce heat gain by 60–80%. Consider vestibule entrance or auto-closing mechanism. Set thermostat to 23–24°C minimum in winter to avoid unnecessary cycling.';
     case 'F2':
@@ -364,7 +364,7 @@ function getRecommendation(unit: string): string {
     case 'G3':
       return 'Serves the same zone as F1 across floors. Coordinate scheduling — consider alternating operation during low-traffic hours (early morning, last hour before close) to reduce combined load by ~10%. Ensure both units share a consistent thermostat setpoint.';
     case 'F1':
-      return 'Lowest consumer (45,730 kWh/year) but has extra duct line adding ~20,000 kWh/year to building load via warehouse and ladies lounge. Evaluate duct layout — sealing or removing redundant duct sections could save 15–20% on this unit alone. Consider replacing the back duct with a dedicated wall split unit for the ladies lounge.';
+      return 'Lowest consumer (45,730 kWh/year). Consistent low load with peak in April. Maintain current operations. Minor optimization possible with seasonal fan speed adjustment during winter months.';
     default:
       return '';
   }
@@ -386,16 +386,16 @@ const recommendations = [
     icon: Wind,
   },
   {
-    title: 'F4 Insulation & Zone Rebalancing',
-    description: 'F4 is the highest consumer at 97,034 kWh/year with a peak of 14,098 kW in August — nearly double the unit average. Inspect corner section insulation for thermal bridging and air leaks. Install thermal curtains on exterior-facing walls. Rebalance airflow distribution with F3 (which serves the same floor) by adjusting damper positions and coordinating fan speeds. Consider a load-sharing schedule where F4 reduces capacity when F3 can compensate.',
-    savings: '4,000–7,000 SAR/year',
+    title: 'F4 Duct Line & Insulation Optimization',
+    description: 'F4 is the highest consumer at 97,034 kWh/year with an extra duct line servicing the warehouse and ladies lounge adding an estimated 20,000 kWh/year (~SAR 5,800) to building load. Three-step fix: (1) Cancel the back duct line completely, (2) Install a dedicated wall-mount split unit (9,000–12,000 BTU) for the ladies lounge, (3) Add ventilation openings in the warehouse for passive air circulation. Also inspect corner section insulation for thermal bridging and air leaks. Rebalance airflow with F3.',
+    savings: '7,000–12,000 SAR/year',
     priority: 'high' as const,
     icon: Target,
   },
   {
-    title: 'F1 Duct Line Optimization',
-    description: 'F1\'s extra duct line servicing the warehouse and ladies lounge adds an estimated 20,000 kWh/year (~SAR 5,800) to building load. Three-step fix: (1) Cancel the back duct line completely, (2) Install a dedicated wall-mount split unit (9,000–12,000 BTU) for the ladies lounge, (3) Add ventilation openings in the warehouse for passive air circulation. This isolates F1\'s load to its primary zone and could save 15–20% on this unit alone.',
-    savings: '3,500–5,800 SAR/year',
+    title: 'G3/F1 Alternating Operation',
+    description: 'G3 and F1 serve overlapping zones across floors. During low-traffic hours (first hour after opening, last hour before close), alternate operation — run only one unit while the other rests. This reduces combined compressor cycling by ~10% without affecting customer comfort.',
+    savings: '2,000–3,000 SAR/year',
     priority: 'medium' as const,
     icon: Wrench,
   },
@@ -412,13 +412,6 @@ const recommendations = [
     savings: '2,000–3,500 SAR/year',
     priority: 'medium' as const,
     icon: Clock,
-  },
-  {
-    title: 'G3/F1 Alternating Operation',
-    description: 'G3 and F1 serve overlapping zones across floors. During low-traffic hours (first hour after opening, last hour before close), alternate operation — run only one unit while the other rests. This reduces combined compressor cycling by ~10% without affecting customer comfort. Coordinate thermostat setpoints between the two units to prevent one from overcompensating when the other is cycling off.',
-    savings: '2,000–3,000 SAR/year',
-    priority: 'medium' as const,
-    icon: Zap,
   },
   {
     title: 'F2 Monthly Sensor Monitoring',
