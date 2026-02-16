@@ -62,7 +62,8 @@ export const energyCostSummary = {
   increaseAmount2025: 6079,
   // 8 out of 12 months showed YoY savings using Actual 2025 values
   yearlySavings2024vs2025: 13003.29,
-  yearlySavingsPercent: 9.06, // From Excel: "SAVINGS 9.06%" (without G8 comparison)
+  yearlySavingsPercent: 3.02, // Actual YoY cost reduction: (220,028 - 213,379) / 220,028 = 3.02%
+  rawdahVsRubenSavingsPercent: 9.06, // From Excel: Rawdah vs Ruben savings (without G8)
 };
 
 // Ruben Showroom Yearly Bills (for reference)
@@ -119,16 +120,28 @@ export const summaryStats = {
   demandReductionPercent: 44.3,
 };
 
-export const keyInsights = [
-  'Rawdah consistently outperformed Ruben in energy efficiency, recording lower consumption in 9 out of 12 months in 2025',
-  'The largest savings were achieved in June (18.7%, 4,827.66 SAR) and December (20.3%, 1,805.72 SAR)',
-  'Only March and April saw higher Rawdah consumption due to maintenance issues, system updates and operational differences',
-  'During high-load summer months (May–August), Rawdah consistently demonstrated stronger energy performance, highlighting better operational efficiency under peak demand conditions',
-  'Total cost savings in 2025 (YoY): 13,003.29 SAR — savings are concentrated in mid-to-late year when tariffs and HVAC load hurt the most',
+// Rawdah-specific insights (standalone performance)
+export const rawdahInsights = [
+  'Rawdah achieved 13,003 SAR in energy cost savings in 2025 (YoY), with the strongest financial performance during peak summer months',
+  'Total cost reduction of ~3% (2024→2025) despite 2025 being 1.3°C hotter than 2024 — demonstrating effective energy cost control',
   'Major cost-saving months (YoY): February (28.1%, 3,387 SAR), August (9.0%, 2,745 SAR), June (7.7%, 2,125 SAR), July (5.3%, 1,564 SAR), September (7.2%, 1,696 SAR)',
+  'Q1 cost increases (Jan +3.8%, Mar +11.6%, Apr +26.2%) were driven by early-season inefficiencies, thermostat misuse, and system updates — these represent clear opportunities for further optimization',
+  'During high-load summer months (May–August), Rawdah demonstrated consistent improvement over 2024, proving cost control measures are effective under peak tariff conditions',
+  'Savings are concentrated in mid-to-late year, when tariffs and HVAC load hurt the most — strong evidence of cost-aware energy management',
+];
+
+// Rawdah vs Ruben comparison insights
+export const comparisonInsights = [
+  'Rawdah consistently outperformed Ruben in energy efficiency, recording lower consumption in 9 out of 12 months in 2025',
+  'Average savings vs Ruben: 11.11% — total annual savings: 17,671.82 SAR (without G8)',
+  'The largest savings vs Ruben were achieved in June (18.7%, 4,827.66 SAR) and December (20.3%, 1,805.72 SAR)',
+  'Ruben outperformed Rawdah only in March, April, and September — with marginal difference in September (-0.1%)',
   'Rawdah remains the more energy-efficient showroom, delivering meaningful cost savings and more stable performance throughout the year—particularly during peak cooling periods',
   'Continued monitoring and adopting Rawdah\'s operational strategies could further enhance Ruben\'s performance and overall cost efficiency',
 ];
+
+// Combined for backward compatibility
+export const keyInsights = [...rawdahInsights, ...comparisonInsights];
 
 export interface UnitObservation {
   unit: string;

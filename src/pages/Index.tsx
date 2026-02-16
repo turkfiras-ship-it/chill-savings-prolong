@@ -69,9 +69,6 @@ const Index = () => {
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
               ❄️ 164 AC Package Units
             </div>
-            <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
-              💰 25,000 SAR/unit
-            </div>
             <Link 
               to="/presentation" 
               className="px-4 py-2 rounded-full bg-savings text-white text-sm font-medium flex items-center gap-2 hover:bg-savings/90 transition-colors"
@@ -188,7 +185,7 @@ const Index = () => {
                     <h3 className="font-semibold">Extended Equipment Life</h3>
                   </div>
                   <p className="text-muted-foreground text-sm">
-                    AC lifespan extended from 10 to <span className="text-energy font-semibold">15-20 years</span>, 
+                    AC lifespan extended from 10 to <span className="text-energy font-semibold">15 years</span>, 
                     reducing replacement costs by millions over the equipment lifecycle.
                   </p>
                 </div>

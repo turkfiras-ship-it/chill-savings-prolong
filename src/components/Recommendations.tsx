@@ -127,7 +127,7 @@ export function Recommendations() {
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">F1</p>
-            <p className="text-sm opacity-80">Most Efficient</p>
+            <p className="text-sm opacity-80">Lowest Consumer</p>
           </div>
         </div>
       </div>
@@ -265,8 +265,8 @@ export function Recommendations() {
 
         {/* Unit Comparison Radar */}
         <div className="rounded-xl bg-card p-6 card-elevated">
-          <h3 className="text-xl font-semibold mb-1">Unit Efficiency Score</h3>
-          <p className="text-sm text-muted-foreground mb-4">Higher = more efficient (F1 best, F4 worst)</p>
+           <h3 className="text-xl font-semibold mb-1">Unit Efficiency Score</h3>
+          <p className="text-sm text-muted-foreground mb-4">Higher = more efficient (F1 lowest consumer, F4 highest)</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
@@ -352,19 +352,19 @@ export function Recommendations() {
 function getRecommendation(unit: string): string {
   switch (unit) {
     case 'F4':
-      return 'Highest consumer (97,034 kWh). Inspect insulation, check for air leaks in corner section. Consider adding thermal curtain. Peak in August (14,098 kW) suggests oversized load — investigate zone balancing with F3.';
+      return 'Highest consumer (97,034 kWh/year). Inspect insulation, check for air leaks in corner section. Consider adding thermal curtain. Peak in August (14,098 kW) suggests oversized load — investigate zone balancing with F3.';
     case 'G1':
-      return 'High load from frequent door openings. Install air curtain if not present. Consider vestibule entrance or auto-closing doors. Thermostat should be set to 23–24°C minimum in winter.';
+      return 'High load from frequent door openings at main entrance. Install air curtain to reduce heat gain by 60–80%. Consider vestibule entrance or auto-closing mechanism. Set thermostat to 23–24°C minimum in winter to avoid unnecessary cycling.';
     case 'F2':
-      return 'Sensor issue was resolved, but August spike (12,236 kW) is abnormal. Monitor sensor readings monthly. Consider adding a backup thermostat sensor for this zone.';
+      return 'Sensor issue was resolved, but August spike (12,236 kW) is abnormal — 53% above its own summer average. Monitor sensor readings monthly and consider adding a backup thermostat sensor. Investigate whether the spike was caused by adjacent zone overload or a recurring sensor drift.';
     case 'G2':
-      return 'Good improvement after SCC installation (62% daily reduction). Maintain current filter schedule. May/June fluctuations may be from thermostat adjustments — lock thermostat at 22–23°C.';
+      return 'Strong improvement after SCC installation (62% daily demand reduction). Maintain current filter schedule. May/June fluctuations likely from thermostat adjustments — lock thermostat at 22–23°C to maintain consistency.';
     case 'F3':
-      return 'Consistent performer. Maintain current operations. Minor optimization: adjust fan speed to medium during winter months to save ~5–8% during low-load periods.';
+      return 'Consistent performer with stable seasonal pattern. Maintain current operations. Minor optimization: reduce fan speed to medium during winter months (Nov–Feb) to save ~5–8% during low-load periods. Good candidate for zone balancing with F4.';
     case 'G3':
-      return 'Serves same zone as F1 across floors. Coordinate scheduling — consider alternating operation during low-traffic hours to reduce combined load by ~10%.';
+      return 'Serves the same zone as F1 across floors. Coordinate scheduling — consider alternating operation during low-traffic hours (early morning, last hour before close) to reduce combined load by ~10%. Ensure both units share a consistent thermostat setpoint.';
     case 'F1':
-      return 'Lowest consumer but has extra duct line adding ~20,000 kWh/year. Evaluate duct layout — sealing or removing redundant duct sections could save 15–20% on this unit alone.';
+      return 'Lowest consumer (45,730 kWh/year) but has extra duct line adding ~20,000 kWh/year to building load via warehouse and ladies lounge. Evaluate duct layout — sealing or removing redundant duct sections could save 15–20% on this unit alone. Consider replacing the back duct with a dedicated wall split unit for the ladies lounge.';
     default:
       return '';
   }
@@ -373,58 +373,58 @@ function getRecommendation(unit: string): string {
 const recommendations = [
   {
     title: 'Lock Thermostats at 22–24°C',
-    description: 'Install tamper-proof thermostat covers or smart thermostats with locked ranges. Prevents staff from setting below 20°C.',
+    description: 'Install tamper-proof thermostat covers or smart thermostats with locked ranges. March 2025 data confirmed staff set units to 18°C, causing a 15–20% consumption spike. Implement password-protected setpoints and real-time alerts when temperatures deviate below 22°C. Train all staff quarterly on proper thermostat usage.',
     savings: '8,000–12,000 SAR/year',
     priority: 'high' as const,
     icon: Thermometer,
   },
   {
     title: 'Air Curtain for G1 Entrance',
-    description: 'Main entrance unit G1 loses significant cooling due to door traffic. Air curtain can reduce loss by 60–80%.',
+    description: 'G1 (main entrance) loses 60–80% of its cooling through frequent door openings. Install a commercial air curtain (2m width, 8–12 m/s velocity) at the entrance. Additionally, repair/replace the auto-closing door mechanism — the front door was repeatedly reported jammed in March and April. Combined, these measures eliminate the largest controllable heat gain source.',
     savings: '5,000–8,000 SAR/year',
     priority: 'high' as const,
     icon: Wind,
   },
   {
-    title: 'F4 Zone Rebalancing',
-    description: 'F4 is the highest consumer (97K kWh). Rebalance airflow with F3 and check for insulation issues in corner section.',
+    title: 'F4 Insulation & Zone Rebalancing',
+    description: 'F4 is the highest consumer at 97,034 kWh/year with a peak of 14,098 kW in August — nearly double the unit average. Inspect corner section insulation for thermal bridging and air leaks. Install thermal curtains on exterior-facing walls. Rebalance airflow distribution with F3 (which serves the same floor) by adjusting damper positions and coordinating fan speeds. Consider a load-sharing schedule where F4 reduces capacity when F3 can compensate.',
     savings: '4,000–7,000 SAR/year',
     priority: 'high' as const,
     icon: Target,
   },
   {
-    title: 'F1 Duct Optimization',
-    description: 'Extra duct line adds ~20,000 kWh/year. Seal or redirect redundant duct sections to reduce F1 load by 15–20%.',
-    savings: '2,500–4,000 SAR/year',
+    title: 'F1 Duct Line Optimization',
+    description: 'F1\'s extra duct line servicing the warehouse and ladies lounge adds an estimated 20,000 kWh/year (~SAR 5,800) to building load. Three-step fix: (1) Cancel the back duct line completely, (2) Install a dedicated wall-mount split unit (9,000–12,000 BTU) for the ladies lounge, (3) Add ventilation openings in the warehouse for passive air circulation. This isolates F1\'s load to its primary zone and could save 15–20% on this unit alone.',
+    savings: '3,500–5,800 SAR/year',
     priority: 'medium' as const,
     icon: Wrench,
   },
   {
-    title: 'Seasonal Schedule Adjustment',
-    description: 'Reduce fan speed to medium in winter months (Nov–Feb). Summer accounts for 55%+ of load — focus resources there.',
+    title: 'Quarterly Preventive Maintenance',
+    description: 'Full AC cleaning was performed only 3 times in 2025 — below the recommended quarterly cycle. Dirty filters alone increase consumption by 5–15%. Establish a strict 30-day filter replacement schedule and quarterly deep-clean for all 7 units. Include coil cleaning, refrigerant pressure checks, and electrical connection inspection. Without proper maintenance, energy consumption can exceed that of old fixed-speed systems regardless of SCC technology.',
+    savings: '3,000–5,000 SAR/year',
+    priority: 'high' as const,
+    icon: CheckCircle,
+  },
+  {
+    title: 'Seasonal Fan Speed Adjustment',
+    description: 'Summer (May–Sep) accounts for 55%+ of annual load. During winter months (Nov–Feb), reduce evaporator fan speed to medium across all units — consumption drops ~5–8% with minimal comfort impact. In summer, focus resources on peak-hour load management: pre-cool the showroom 30 minutes before opening, then maintain at 22°C. Implement weekend/holiday schedules to avoid unnecessary full-load operation.',
     savings: '2,000–3,500 SAR/year',
     priority: 'medium' as const,
     icon: Clock,
   },
   {
     title: 'G3/F1 Alternating Operation',
-    description: 'These units serve overlapping zones. Alternate operation during low-traffic hours (early morning, last hour) to cut combined load ~10%.',
+    description: 'G3 and F1 serve overlapping zones across floors. During low-traffic hours (first hour after opening, last hour before close), alternate operation — run only one unit while the other rests. This reduces combined compressor cycling by ~10% without affecting customer comfort. Coordinate thermostat setpoints between the two units to prevent one from overcompensating when the other is cycling off.',
     savings: '2,000–3,000 SAR/year',
     priority: 'medium' as const,
     icon: Zap,
   },
   {
-    title: 'Monthly F2 Sensor Checks',
-    description: 'F2 had a sensor issue that caused an August spike. Monthly sensor calibration prevents recurrence and wasted energy.',
+    title: 'F2 Monthly Sensor Monitoring',
+    description: 'F2\'s August spike (12,236 kW — 53% above summer average) was caused by a faulty internal sensor that didn\'t respond to thermostat commands. Although fixed, this pattern can recur. Implement monthly sensor calibration checks across all units. Install backup temperature sensors in F2\'s zone for redundancy. Set up automated alerts when consumption deviates >15% from the 30-day rolling average.',
     savings: '1,500–2,500 SAR/year',
     priority: 'low' as const,
     icon: BarChart3,
-  },
-  {
-    title: 'Filter Maintenance Schedule',
-    description: 'Maintain 30-day filter replacement cycle across all units. Dirty filters increase consumption by 5–15%.',
-    savings: '3,000–5,000 SAR/year',
-    priority: 'high' as const,
-    icon: CheckCircle,
   },
 ];
