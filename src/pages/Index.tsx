@@ -85,26 +85,25 @@ const Index = () => {
       {/* Tab Navigation */}
       <section className="max-w-7xl mx-auto px-6 -mt-6">
         <Tabs defaultValue="rawdah" className="w-full">
-          <TabsList className="flex w-full max-w-5xl mb-6 overflow-x-auto no-scrollbar">
-            <TabsTrigger value="rawdah" className="flex items-center gap-2 shrink-0">
+          <TabsList className="flex flex-wrap h-auto gap-1 w-full max-w-5xl mb-6">
+            <TabsTrigger value="rawdah" className="flex items-center gap-2">
               <Building2 className="h-4 w-4" />
-              <span className="hidden sm:inline">Rawdah</span> Analysis
+              Rawdah Analysis
             </TabsTrigger>
-            <TabsTrigger value="units" className="flex items-center gap-2 shrink-0">
+            <TabsTrigger value="units" className="flex items-center gap-2">
               <Zap className="h-4 w-4" />
               Unit Data
             </TabsTrigger>
-            <TabsTrigger value="recommendations" className="flex items-center gap-2 shrink-0">
+            <TabsTrigger value="recommendations" className="flex items-center gap-2">
               <Leaf className="h-4 w-4" />
-              <span className="hidden sm:inline">Recommendations</span>
-              <span className="sm:hidden">Recs</span>
+              Recommendations
             </TabsTrigger>
-            <TabsTrigger value="roi" className="flex items-center gap-2 shrink-0">
+            <TabsTrigger value="roi" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
               ROI
             </TabsTrigger>
-            <TabsTrigger value="overview" className="shrink-0">All Showrooms</TabsTrigger>
-            <TabsTrigger value="print" className="flex items-center gap-2 shrink-0">
+            <TabsTrigger value="overview">All Showrooms</TabsTrigger>
+            <TabsTrigger value="print" className="flex items-center gap-2">
               <Printer className="h-4 w-4" />
               Print
             </TabsTrigger>
