@@ -84,7 +84,7 @@ function Slide2_ExecSummary() {
         <div className="grid grid-cols-4 gap-[30px] mt-[60px]">
           {[
             { value: `${summaryStats.avgSavingsPercent}%`, label: "Energy Savings Rate", sub: "vs. Ruben Showroom" },
-            { value: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, label: "SAR Saved in 2025", sub: "Year-over-year" },
+            { value: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, label: "SAR Saved in 2025", sub: "Year-over-year (actual)" },
             { value: `${roi.paybackPeriodYears.toFixed(1)} Yrs`, label: "Payback Period", sub: "Operational savings" },
             { value: `62%`, label: "Demand Reduction", sub: "Daily kW consumption" },
           ].map((card) => (
@@ -95,10 +95,25 @@ function Slide2_ExecSummary() {
             </div>
           ))}
         </div>
-        <div className="mt-[60px] bg-teal-50 rounded-2xl p-[40px] border border-teal-100">
-          <p className="text-[24px] text-slate-700 leading-relaxed">
-            <span className="font-bold text-teal-700">Bottom Line:</span> {weatherSummary.insight}
-          </p>
+        <div className="mt-[40px] bg-teal-50 rounded-2xl p-[40px] border border-teal-100">
+          <p className="text-[20px] text-slate-500 uppercase tracking-wider mb-[16px]">Weather-Adjusted True Savings</p>
+          <div className="flex items-center gap-[40px]">
+            <div>
+              <p className="text-[18px] text-slate-500">Actual Savings</p>
+              <p className="text-[32px] font-bold text-slate-700">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()} SAR</p>
+            </div>
+            <p className="text-[36px] text-slate-400">+</p>
+            <div>
+              <p className="text-[18px] text-slate-500">Avoided Cooling Cost (8–12%)</p>
+              <p className="text-[32px] font-bold text-slate-700">{weatherSummary.additionalCoolingCostLow.toLocaleString()} – {weatherSummary.additionalCoolingCostHigh.toLocaleString()} SAR</p>
+            </div>
+            <p className="text-[36px] text-slate-400">=</p>
+            <div>
+              <p className="text-[18px] text-teal-600 font-semibold">True Savings</p>
+              <p className="text-[40px] font-bold text-teal-600">{weatherSummary.adjustedSavingsLow.toLocaleString()} – {weatherSummary.adjustedSavingsHigh.toLocaleString()} SAR</p>
+            </div>
+          </div>
+          <p className="text-[17px] text-slate-500 mt-[16px]">2025 was {weatherSummary.avgTempDiff}°C hotter on average — the system saved energy <em>and</em> offset the increased cooling demand.</p>
         </div>
       </div>
     </SlideLayout>
