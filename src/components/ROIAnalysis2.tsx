@@ -427,9 +427,9 @@ export function ROIAnalysis2() {
           <p className="text-xs text-muted-foreground">Before weather correction</p>
         </div>
         <div className="rounded-xl bg-card card-elevated p-5 text-center border-t-4 border-t-energy">
-          <p className="text-3xl font-bold text-energy">{totalTrueSavingsSAR.toLocaleString()} SAR</p>
+          <p className="text-3xl font-bold text-energy">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</p>
           <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">True Financial Value</p>
-          <p className="text-xs text-muted-foreground">@ actual rate {BLENDED_RATE.toFixed(4)} SAR/kWh</p>
+          <p className="text-xs text-muted-foreground">Bill comparison: 246,431 − 213,379</p>
           <p className="text-xs text-energy font-medium">vs {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill saving</p>
         </div>
       </div>
@@ -669,7 +669,7 @@ export function ROIAnalysis2() {
               </td>
               <td className="text-right py-3 px-3 text-savings">{totalTrueSavingsKw >= 0 ? '+' : ''}{totalTrueSavingsKw.toLocaleString()}</td>
               <td className="text-right py-3 px-3 text-savings">{totalTrueSavingsPct.toFixed(1)}%</td>
-              <td className="text-right py-3 px-3 text-savings">{totalTrueSavingsSAR.toLocaleString()} SAR</td>
+              <td className="text-right py-3 px-3 text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</td>
             </tr>
           </tfoot>
         </table>
@@ -692,7 +692,7 @@ export function ROIAnalysis2() {
             <ul className="space-y-1 text-muted-foreground">
               <li>• Adjusted 2025 baseline: <strong>{totalAdjusted2025.toLocaleString()} kWh</strong></li>
               <li>• True adjusted saving: <span className="text-savings font-bold">{totalTrueSavingsKw.toLocaleString()} kWh ({totalTrueSavingsPct.toFixed(1)}%)</span></li>
-              <li>• Financial value: <span className="text-savings font-bold">{totalTrueSavingsSAR.toLocaleString()} SAR/year</span></li>
+              <li>• Financial value: <span className="text-savings font-bold">{TRUE_SAVINGS_SAR.toLocaleString()} SAR/year</span></li>
             </ul>
           </div>
         </div>
