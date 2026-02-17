@@ -24,6 +24,7 @@ import { ExcelUpload } from "@/components/ExcelUpload";
 import { UnitMonthlyAnalysis } from "@/components/UnitMonthlyAnalysis";
 import { Recommendations } from "@/components/Recommendations";
 import { PrintBooklet } from "@/components/PrintBooklet";
+import { ROIAnalysis2 } from "@/components/ROIAnalysis2";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   totalYearlySavings25,
@@ -102,6 +103,10 @@ const Index = () => {
               <Target className="h-4 w-4" />
               ROI
             </TabsTrigger>
+            <TabsTrigger value="roi2" className="flex items-center gap-2">
+              <Target className="h-4 w-4" />
+              ROI 2
+            </TabsTrigger>
             <TabsTrigger value="overview">All Showrooms</TabsTrigger>
             <TabsTrigger value="print" className="flex items-center gap-2">
               <Printer className="h-4 w-4" />
@@ -130,6 +135,11 @@ const Index = () => {
           {/* ROI Analysis Tab */}
           <TabsContent value="roi" className="space-y-6">
             <ROIAnalysis />
+          </TabsContent>
+
+          {/* ROI 2 — True Adjusted KW Savings */}
+          <TabsContent value="roi2" className="space-y-6">
+            <ROIAnalysis2 />
           </TabsContent>
 
           {/* Print Booklet Tab */}
