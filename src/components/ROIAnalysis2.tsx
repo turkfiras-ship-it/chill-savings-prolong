@@ -13,13 +13,23 @@ import {
 } from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// CORRECT DATA FROM EXCEL IMAGE — Monthly kW without G8
+// CORRECT DATA FROM EXCEL — Monthly kW for 7 SCC-controlled panels (without G8)
 // ─────────────────────────────────────────────────────────────────────────────
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const DEFAULT_KW_2024 = [25490, 34926, 36668, 40952, 60362, 67968, 72070, 75996, 59952, 42573, 33081, 22267];
-const DEFAULT_KW_2025 = [26407, 25107, 41139, 52976, 61372, 61810, 67537, 68039, 55035, 39840, 32246, 21728]; // Without G8
+const DEFAULT_KW_2025 = [26407, 25107, 41139, 52976, 61372, 61810, 67537, 68039, 55035, 39840, 32246, 21728];
+
+// BUILDING COVERAGE
+// 8 panels total × 25 tons each = 200 tons total building cooling capacity
+// SCC device installed on 7 panels × 25 tons = 175 tons = 87.5% of building
+// G8 (Panel 8) = 25 tons, NO SCC device → consuming same or more than 2024
+// All savings below are attributable to the 7 covered panels ONLY
+const TOTAL_PANELS = 8;
+const SCC_PANELS = 7;
+const TONS_PER_PANEL = 25;
+const SCC_COVERAGE_PCT = (SCC_PANELS / TOTAL_PANELS) * 100; // 87.5%
 
 const COOLING_LOAD_FACTOR = 0.12; // 2025 was ~1.3°C hotter → 12% extra cooling load
 
@@ -177,13 +187,45 @@ export function ROIAnalysis2() {
           <div className="flex-1">
             <h2 className="text-2xl font-bold mb-1">True Adjusted kW Savings — ROI 2</h2>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-3xl">
-              KW-based analysis using exact meter readings (7 SCC units, G8 excluded).
-              A <strong>12% weather correction</strong> is applied to 2025 figures (2025 was ~1.3°C hotter).
-              <strong> 2024 had active cooling complaints</strong> — meaning 2024 kW was inflated by a struggling system.
-              2025 achieved the same comfort with <em>less energy</em> — that is real efficiency.
+              KW-based analysis for the <strong>7 SCC-controlled panels</strong> (G8 excluded — no device installed).
+              A <strong>12% weather bonus</strong> is applied since 2025 was ~1.3°C hotter.
+              <strong> 2024 had active cooling complaints</strong> — meaning kW was inflated by a struggling system.
+              2025 achieved full comfort with <em>less energy</em>.
             </p>
           </div>
         </div>
+      </div>
+
+      {/* ── COVERAGE BANNER ── */}
+      <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5">
+        <h3 className="font-bold text-sm mb-4 uppercase tracking-wide">Building Coverage — SCC System Scope</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="p-3 rounded-lg bg-card border border-border">
+            <p className="text-3xl font-black">{TOTAL_PANELS}</p>
+            <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Total Panels</p>
+            <p className="text-xs text-muted-foreground">{TOTAL_PANELS * TONS_PER_PANEL} tons total</p>
+          </div>
+          <div className="p-3 rounded-lg bg-savings/10 border border-savings/30">
+            <p className="text-3xl font-black text-savings">{SCC_PANELS}</p>
+            <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">SCC Panels (G1–G3, F1–F4)</p>
+            <p className="text-xs text-savings font-medium">{SCC_PANELS * TONS_PER_PANEL} tons — Saving ✓</p>
+          </div>
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30">
+            <p className="text-3xl font-black text-destructive">1</p>
+            <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">G8 — No Device</p>
+            <p className="text-xs text-destructive font-medium">{TONS_PER_PANEL} tons — Same/More ✗</p>
+          </div>
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+            <p className="text-3xl font-black text-primary">{SCC_COVERAGE_PCT.toFixed(0)}%</p>
+            <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Building Coverage</p>
+            <p className="text-xs text-primary font-medium">All savings from this {SCC_COVERAGE_PCT.toFixed(0)}%</p>
+          </div>
+        </div>
+        <p className="mt-4 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3">
+          <strong className="text-foreground">Important:</strong> G8 (Panel 8, 25 tons) has no SCC device and is consuming the same or more energy than 2024.
+          All savings figures below represent the <strong>7 SCC-controlled panels only</strong> — which account for {SCC_COVERAGE_PCT.toFixed(0)}% of the building's {TOTAL_PANELS * TONS_PER_PANEL}-ton total cooling capacity.
+          Adding the device to G8 would unlock an additional estimated <strong>~12–15% of building consumption</strong> for optimisation.
+        </p>
       </div>
 
       {/* ── 2024 COMPLAINTS CONTEXT BANNER ── */}
