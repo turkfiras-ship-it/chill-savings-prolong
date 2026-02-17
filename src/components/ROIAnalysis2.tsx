@@ -52,11 +52,14 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
   return MONTHS.map((month, i) => {
     const raw2024 = kw2024[i];
     const raw2025 = kw2025[i];
-    const adjusted2025 = Math.round(raw2025 / (1 + COOLING_LOAD_FACTOR));
+    const adjusted2025 = Math.round(raw2025 * (1 + COOLING_LOAD_FACTOR));
     const rawSavingsKw = raw2024 - raw2025;
-    const trueSavingsKw = raw2024 - adjusted2025;
-    const trueSavingsPct = (trueSavingsKw / raw2024) * 100;
-    const trueSavingsSAR = Math.round(trueSavingsKw * 0.30);
+    // adjusted2025 = what the building NEEDED given 12% extra heat
+    // trueSavingsKw = how much less was consumed vs that higher demand
+    const trueSavingsKw = adjusted2025 - raw2025; // = raw2025 * 0.12 (weather-corrected gain)
+    const totalSavingsKw = rawSavingsKw + trueSavingsKw; // raw YoY + weather bonus
+    const trueSavingsPct = (totalSavingsKw / raw2024) * 100;
+    const trueSavingsSAR = Math.round(totalSavingsKw * 0.30);
     return {
       month,
       raw2024,
@@ -64,7 +67,8 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
       adjusted2025,
       rawSavingsKw: Math.round(rawSavingsKw),
       rawSavingsPct: parseFloat(((rawSavingsKw / raw2024) * 100).toFixed(1)),
-      trueSavingsKw: Math.round(trueSavingsKw),
+      weatherBonusKw: Math.round(trueSavingsKw),
+      trueSavingsKw: Math.round(totalSavingsKw),
       trueSavingsPct: parseFloat(trueSavingsPct.toFixed(1)),
       trueSavingsSAR,
     };
@@ -142,11 +146,12 @@ export function ROIAnalysis2() {
   const totalKw2024 = kw2024.reduce((a, b) => a + b, 0);
   const totalKw2025 = kw2025.reduce((a, b) => a + b, 0);
   const totalAdjusted2025 = monthlyData.reduce((a, m) => a + m.adjusted2025, 0);
-  const totalTrueSavingsKw = totalKw2024 - totalAdjusted2025;
-  const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
-  const totalTrueSavingsSAR = Math.round(totalTrueSavingsKw * 0.30);
   const totalRawSavingsKw = totalKw2024 - totalKw2025;
   const totalRawSavingsPct = (totalRawSavingsKw / totalKw2024) * 100;
+  const totalWeatherBonusKw = Math.round(totalKw2025 * COOLING_LOAD_FACTOR);
+  const totalTrueSavingsKw = totalRawSavingsKw + totalWeatherBonusKw;
+  const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
+  const totalTrueSavingsSAR = Math.round(totalTrueSavingsKw * 0.30);
 
   const update2024 = useCallback((i: number, v: number) => {
     setKw2024((prev) => { const next = [...prev]; next[i] = v; return next; });
@@ -230,15 +235,15 @@ export function ROIAnalysis2() {
           <div className="flex items-start gap-2">
             <span className="text-energy font-bold mt-0.5">②</span>
             <div>
-              <p className="font-medium">÷ 1.12 Weather Correction</p>
-              <p className="text-muted-foreground">Removes 12% extra kW caused by 2025 being 1.3°C hotter — gives fair like-for-like comparison</p>
+              <p className="font-medium">× 1.12 Weather Demand (Adjusted 2025)</p>
+              <p className="text-muted-foreground">What the building NEEDED given 12% extra heat in 2025 — shows the true demand pressure the system overcame</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-chart-blue font-bold mt-0.5">③</span>
             <div>
-              <p className="font-medium">True Savings = 2024 kW − Adjusted 2025 kW</p>
-              <p className="text-muted-foreground">Positive = SCC system genuinely saved energy at equivalent climate conditions</p>
+              <p className="font-medium">True Savings = Raw YoY + Weather Bonus (12% of 2025)</p>
+              <p className="text-muted-foreground">Combines year-over-year reduction with the energy avoided despite higher heat demand — the full efficiency gain</p>
             </div>
           </div>
         </div>
@@ -459,7 +464,7 @@ export function ROIAnalysis2() {
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">
                 2025 kW Raw {isEditing && <span className="text-primary text-xs">(editable)</span>}
               </th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 Adj (÷1.12)</th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 Adj (×1.12 heat demand)</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">Raw Savings</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True Savings kW</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True %</th>
