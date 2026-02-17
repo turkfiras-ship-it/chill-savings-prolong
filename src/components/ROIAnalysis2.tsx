@@ -1,3 +1,4 @@
+import { useState, useCallback } from "react";
 import {
   BarChart,
   Bar,
@@ -12,73 +13,30 @@ import {
 } from "recharts";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RAW DATA FROM EXCEL PAGE 3 & 4 — "CONSUMPTION JARIR RAWDAH EXIT 12"
+// CORRECT DATA FROM EXCEL IMAGE — Monthly kW without G8
 // ─────────────────────────────────────────────────────────────────────────────
 
-// 2024 KW without G8 — from Excel "Diff last year" row (Page 3, line 397)
-const kw2024 = [25490, 34926, 36668, 40952, 60362, 67968, 72070, 75996, 59952, 42573, 33081, 22267];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-// 2025 KW without G8 — from Excel "Diff this year" row (Page 4, line 467) — CORRECTED
-// These are the 7-unit SCC totals with G8 already subtracted
-const kw2025 = [26381, 25607, 40720, 51248, 61220, 62835, 68338, 69286, 55751, 40182, 32324, 21767];
+const DEFAULT_KW_2024 = [26240, 36800, 40458, 47829, 71038, 81536, 87538, 90122, 70163, 48672, 36501, 23998];
+const DEFAULT_KW_2025 = [27157, 26981, 44928, 59853, 72048, 75378, 83005, 82164, 65247, 45939, 35666, 23460]; // Without G8
 
-// ─────────────────────────────────────────────────────────────────────────────
-// IMPORTANT CONTEXT: 2024 COOLING COMPLAINTS
-// In 2024, the showroom had active AC complaints — the system was NOT cooling
-// properly (damaged filters, sensor faults, suboptimal settings).
-// This means 2024's kW was INFLATED (system worked harder but delivered less cool).
-// In 2025: zero complaints, full comfort achieved.
-// → The true efficiency gap is even wider than numbers alone suggest.
-// ─────────────────────────────────────────────────────────────────────────────
+const COOLING_LOAD_FACTOR = 0.12; // 2025 was ~1.3°C hotter → 12% extra cooling load
 
 // ─────────────────────────────────────────────────────────────────────────────
-// WEATHER / COOLING LOAD ADJUSTMENT
-// 2025 was 1.3°C hotter than 2024 — requiring ~12% more cooling energy by nature.
-// We divide 2025 kW by 1.12 to get "what 2025 would have consumed at 2024 temps".
+// BUILDING TOTAL DAILY DEMAND (Oct 21 each year — FULL METER)
 // ─────────────────────────────────────────────────────────────────────────────
-const COOLING_LOAD_FACTOR = 0.12;
-
-const months = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+const demandSnapshots = [
+  { label: 'Oct 2023 — Pre-SCC', totalKw: 495, note: 'No energy-saving system', colorClass: 'text-destructive', cellFill: 'hsl(var(--destructive))' },
+  { label: 'Oct 2024 — Post-SCC (Old Filters + Complaints)', totalKw: 218, note: 'SCC installed but issues present', colorClass: 'text-energy', cellFill: 'hsl(var(--energy))' },
+  { label: 'Oct 2025 — Optimised (New Filters, Zero Complaints)', totalKw: 189, note: 'Full performance, zero AC complaints', colorClass: 'text-savings', cellFill: 'hsl(var(--savings))' },
 ];
 
-const monthlyData = months.map((month, i) => {
-  const raw2024 = kw2024[i];
-  const raw2025 = kw2025[i];
-  const adjusted2025 = Math.round(raw2025 / (1 + COOLING_LOAD_FACTOR));
-  const rawSavingsKw = raw2024 - raw2025;
-  const trueSavingsKw = raw2024 - adjusted2025;
-  const trueSavingsPct = (trueSavingsKw / raw2024) * 100;
-  // Financial at blended 0.30 SAR/kWh
-  const trueSavingsSAR = Math.round(trueSavingsKw * 0.30);
-
-  return {
-    month,
-    raw2024,
-    raw2025,
-    adjusted2025,
-    rawSavingsKw: Math.round(rawSavingsKw),
-    rawSavingsPct: parseFloat(((rawSavingsKw / raw2024) * 100).toFixed(1)),
-    trueSavingsKw: Math.round(trueSavingsKw),
-    trueSavingsPct: parseFloat(trueSavingsPct.toFixed(1)),
-    trueSavingsSAR,
-  };
-});
-
-// Annual totals
-const totalKw2024 = kw2024.reduce((a, b) => a + b, 0);
-const totalKw2025 = kw2025.reduce((a, b) => a + b, 0);
-const totalAdjusted2025 = monthlyData.reduce((a, m) => a + m.adjusted2025, 0);
-const totalTrueSavingsKw = totalKw2024 - totalAdjusted2025;
-const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
-const totalTrueSavingsSAR = Math.round(totalTrueSavingsKw * 0.30);
-const totalRawSavingsKw = totalKw2024 - totalKw2025;
-const totalRawSavingsPct = (totalRawSavingsKw / totalKw2024) * 100;
+const reduction2023to2025 = (((495 - 189) / 495) * 100).toFixed(1);
+const reduction2024to2025 = (((218 - 189) / 218) * 100).toFixed(1);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// UNIT-LEVEL DEMAND SNAPSHOTS (same date comparison, Oct each year)
-// Source: Excel demand comparison sheets
+// UNIT-LEVEL DEMAND SNAPSHOTS (Oct spot measurements)
 // ─────────────────────────────────────────────────────────────────────────────
 const unitDemandData = [
   { unit: 'G1', kw2024: 478, kw2025: 214, reduction: 55.2 },
@@ -87,27 +45,31 @@ const unitDemandData = [
   { unit: 'F1', kw2024: 465, kw2025: 290, reduction: 37.6 },
 ];
 
-// Total unit demand Oct 2024 (4 units measured): 478+327+477+465 = 1,747 kW
-// Total unit demand Oct 2025 (4 units measured): 214+217+234+290 = 955 kW
-// Reduction on measured units: 45.2%
-// These 4 units represent the SCC-controlled panels — not G8 (26 tons, separate)
-
 // ─────────────────────────────────────────────────────────────────────────────
-// BUILDING TOTAL DAILY DEMAND (Oct 21 each year — FULL METER)
-// Source: Excel demandSnapshots / rawdahAnalysis
-// 2023 (before SCC): 495 kW — TOTAL building
-// 2024 (after SCC, old filters, cooling complaints): 218 kW — TOTAL building
-// 2025 (new filters, no complaints): 189 kW — TOTAL building
+// DERIVED CALCULATIONS
 // ─────────────────────────────────────────────────────────────────────────────
-const demandSnapshots = [
-  { label: 'Oct 2023 — Pre-SCC', totalKw: 495, note: 'No energy-saving system', colorClass: 'text-destructive', cellFill: 'hsl(var(--destructive))' },
-  { label: 'Oct 2024 — Post-SCC (Old Filters + Complaints)', totalKw: 218, note: 'SCC installed but issues present', colorClass: 'text-energy', cellFill: 'hsl(var(--energy))' },
-  { label: 'Oct 2025 — Optimised (New Filters, Zero Complaints)', totalKw: 189, note: 'Full performance, zero AC complaints', colorClass: 'text-savings', cellFill: 'hsl(var(--savings))' },
-];
-
-// Reductions
-const reduction2023to2025 = (((495 - 189) / 495) * 100).toFixed(1); // 61.8%
-const reduction2024to2025 = (((218 - 189) / 218) * 100).toFixed(1); // 13.3%
+function computeMonthly(kw2024: number[], kw2025: number[]) {
+  return MONTHS.map((month, i) => {
+    const raw2024 = kw2024[i];
+    const raw2025 = kw2025[i];
+    const adjusted2025 = Math.round(raw2025 / (1 + COOLING_LOAD_FACTOR));
+    const rawSavingsKw = raw2024 - raw2025;
+    const trueSavingsKw = raw2024 - adjusted2025;
+    const trueSavingsPct = (trueSavingsKw / raw2024) * 100;
+    const trueSavingsSAR = Math.round(trueSavingsKw * 0.30);
+    return {
+      month,
+      raw2024,
+      raw2025,
+      adjusted2025,
+      rawSavingsKw: Math.round(rawSavingsKw),
+      rawSavingsPct: parseFloat(((rawSavingsKw / raw2024) * 100).toFixed(1)),
+      trueSavingsKw: Math.round(trueSavingsKw),
+      trueSavingsPct: parseFloat(trueSavingsPct.toFixed(1)),
+      trueSavingsSAR,
+    };
+  });
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TOOLTIPS
@@ -119,7 +81,7 @@ const renderKwTooltip = ({ active, payload, label }: any) => {
       <p className="font-semibold mb-2">{label}</p>
       {payload.map((p: any) => (
         <p key={p.name} style={{ color: p.color }}>
-          {p.name}: <span className="font-medium">{p.value.toLocaleString()} kWh</span>
+          {p.name}: <span className="font-medium">{Number(p.value).toLocaleString()} kWh</span>
         </p>
       ))}
     </div>
@@ -142,9 +104,62 @@ const renderSavingsTooltip = ({ active, payload, label }: any) => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// EDITABLE CELL
+// ─────────────────────────────────────────────────────────────────────────────
+function EditableCell({
+  value,
+  onChange,
+  isEditing,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  isEditing: boolean;
+}) {
+  if (!isEditing) return <span>{value.toLocaleString()}</span>;
+  return (
+    <input
+      type="number"
+      className="w-24 text-right bg-primary/10 border border-primary/40 rounded px-1 py-0.5 text-sm font-medium focus:outline-none focus:ring-1 focus:ring-primary"
+      value={value}
+      onChange={(e) => {
+        const v = parseInt(e.target.value, 10);
+        if (!isNaN(v) && v >= 0) onChange(v);
+      }}
+    />
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // COMPONENT
 // ─────────────────────────────────────────────────────────────────────────────
 export function ROIAnalysis2() {
+  const [kw2024, setKw2024] = useState<number[]>([...DEFAULT_KW_2024]);
+  const [kw2025, setKw2025] = useState<number[]>([...DEFAULT_KW_2025]);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const monthlyData = computeMonthly(kw2024, kw2025);
+
+  const totalKw2024 = kw2024.reduce((a, b) => a + b, 0);
+  const totalKw2025 = kw2025.reduce((a, b) => a + b, 0);
+  const totalAdjusted2025 = monthlyData.reduce((a, m) => a + m.adjusted2025, 0);
+  const totalTrueSavingsKw = totalKw2024 - totalAdjusted2025;
+  const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
+  const totalTrueSavingsSAR = Math.round(totalTrueSavingsKw * 0.30);
+  const totalRawSavingsKw = totalKw2024 - totalKw2025;
+  const totalRawSavingsPct = (totalRawSavingsKw / totalKw2024) * 100;
+
+  const update2024 = useCallback((i: number, v: number) => {
+    setKw2024((prev) => { const next = [...prev]; next[i] = v; return next; });
+  }, []);
+  const update2025 = useCallback((i: number, v: number) => {
+    setKw2025((prev) => { const next = [...prev]; next[i] = v; return next; });
+  }, []);
+
+  const resetData = () => {
+    setKw2024([...DEFAULT_KW_2024]);
+    setKw2025([...DEFAULT_KW_2025]);
+  };
+
   return (
     <div className="space-y-8">
 
@@ -154,13 +169,13 @@ export function ROIAnalysis2() {
           <div className="p-2 rounded-lg bg-savings/10 mt-1">
             <span className="text-2xl">⚡</span>
           </div>
-          <div>
+          <div className="flex-1">
             <h2 className="text-2xl font-bold mb-1">True Adjusted kW Savings — ROI 2</h2>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-3xl">
-              KW-based analysis using exact meter readings from Excel (7 SCC units, G8 excluded).
+              KW-based analysis using exact meter readings (7 SCC units, G8 excluded).
               A <strong>12% weather correction</strong> is applied to 2025 figures (2025 was ~1.3°C hotter).
-              Additionally, <strong>2024 had active cooling complaints</strong> — meaning 2024 kW was inflated
-              by a struggling system. 2025 achieved the same comfort with <em>less energy</em> — that is real efficiency.
+              <strong> 2024 had active cooling complaints</strong> — meaning 2024 kW was inflated by a struggling system.
+              2025 achieved the same comfort with <em>less energy</em> — that is real efficiency.
             </p>
           </div>
         </div>
@@ -195,7 +210,7 @@ export function ROIAnalysis2() {
               </div>
             </div>
             <p className="mt-3 text-sm font-medium text-energy">
-              Conclusion: The comparison is actually conservative — 2024 was artificially high. The true efficiency gain of the optimised system is even greater.
+              Conclusion: The comparison is conservative — 2024 was artificially high. The true efficiency gain of the optimised system is even greater.
             </p>
           </div>
         </div>
@@ -209,7 +224,7 @@ export function ROIAnalysis2() {
             <span className="text-savings font-bold mt-0.5">①</span>
             <div>
               <p className="font-medium">Raw 2025 kW (7 units, no G8)</p>
-              <p className="text-muted-foreground">From Excel "Diff this year" row — G8's 26-ton complex excluded as it is not SCC-controlled</p>
+              <p className="text-muted-foreground">Exact meter readings — G8's 26-ton complex excluded as it is not SCC-controlled</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
@@ -253,7 +268,7 @@ export function ROIAnalysis2() {
         </div>
       </div>
 
-      {/* ── BUILDING DEMAND SNAPSHOT — THE HEADLINE NUMBER ── */}
+      {/* ── BUILDING DEMAND SNAPSHOT ── */}
       <div className="rounded-xl bg-card p-6 card-elevated border-2 border-savings/30">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xl">🏢</span>
@@ -264,7 +279,6 @@ export function ROIAnalysis2() {
           This is the <strong>full meter</strong> — all 8 panels, including G8.
         </p>
 
-        {/* KPI Cards */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {demandSnapshots.map((snap) => (
             <div key={snap.label} className="text-center p-4 rounded-xl border border-border bg-muted/20">
@@ -275,23 +289,12 @@ export function ROIAnalysis2() {
           ))}
         </div>
 
-        {/* Bar Chart */}
         <div className="h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={demandSnapshots} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="label"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={10}
-                tick={{ width: 120 }}
-              />
-              <YAxis
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-                unit=" kW"
-                domain={[0, 550]}
-              />
+              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={10} tick={{ width: 120 }} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} unit=" kW" domain={[0, 550]} />
               <Tooltip formatter={(v: number) => [`${v} kW`, 'Total Daily Demand']} />
               <Bar dataKey="totalKw" name="Total Daily Demand (kW)" radius={[6, 6, 0, 0]}>
                 {demandSnapshots.map((entry, index) => (
@@ -302,25 +305,16 @@ export function ROIAnalysis2() {
           </ResponsiveContainer>
         </div>
 
-        {/* Highlight boxes */}
         <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-savings/10 border border-savings/30">
-            <p className="text-sm font-bold text-savings">
-              📉 vs Pre-SCC (2023): 495 → 189 kW
-            </p>
+            <p className="text-sm font-bold text-savings">📉 vs Pre-SCC (2023): 495 → 189 kW</p>
             <p className="text-2xl font-black text-savings">{reduction2023to2025}% reduction</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Since SCC installation + filter replacement + system optimisation
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Since SCC installation + filter replacement + system optimisation</p>
           </div>
           <div className="p-4 rounded-lg bg-chart-blue/10 border border-chart-blue/30">
-            <p className="text-sm font-bold" style={{ color: 'hsl(var(--chart-blue))' }}>
-              📉 Year-on-Year (2024 → 2025): 218 → 189 kW
-            </p>
+            <p className="text-sm font-bold" style={{ color: 'hsl(var(--chart-blue))' }}>📉 Year-on-Year (2024 → 2025): 218 → 189 kW</p>
             <p className="text-2xl font-black" style={{ color: 'hsl(var(--chart-blue))' }}>{reduction2024to2025}% further reduction</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Even after SCC was already in place — new filters & optimisation delivered more
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">Even after SCC was already in place — new filters & optimisation delivered more</p>
           </div>
         </div>
 
@@ -356,8 +350,6 @@ export function ROIAnalysis2() {
             </div>
           ))}
         </div>
-
-        {/* Totals for the 4 measured units */}
         <div className="rounded-lg bg-savings/5 border border-savings/20 p-4">
           <div className="grid grid-cols-3 gap-4 text-center text-sm">
             <div>
@@ -385,7 +377,6 @@ export function ROIAnalysis2() {
         <h3 className="text-lg font-semibold mb-1">Monthly kW Consumption: 2024 vs 2025 vs Adjusted 2025</h3>
         <p className="text-sm text-muted-foreground mb-4">
           "Adjusted 2025" removes the 12% climate penalty — showing what 2025 would have consumed at 2024 temperatures.
-          2024 was already inflated by system issues/complaints.
         </p>
         <div className="h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -395,9 +386,9 @@ export function ROIAnalysis2() {
               <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
               <Tooltip content={renderKwTooltip} />
               <Legend />
-              <Bar dataKey="raw2024" name="2024 kWh (inflated by AC issues)" fill="hsl(var(--chart-blue))" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="raw2025" name="2025 kWh (Raw)" fill="hsl(var(--energy))" radius={[2, 2, 0, 0]} opacity={0.7} />
-              <Bar dataKey="adjusted2025" name="2025 kWh (−12% weather adj.)" fill="hsl(var(--savings))" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="raw2024" name="2024 kW (inflated by AC issues)" fill="hsl(var(--chart-blue))" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="raw2025" name="2025 kW (Raw, no G8)" fill="hsl(var(--energy))" radius={[2, 2, 0, 0]} opacity={0.7} />
+              <Bar dataKey="adjusted2025" name="2025 kW (−12% weather adj.)" fill="hsl(var(--savings))" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -407,7 +398,7 @@ export function ROIAnalysis2() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <h3 className="text-lg font-semibold mb-1">Monthly True Adjusted kW Savings</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Green = genuine savings (2024 kW − adjusted 2025 kW). Red = months where 2025 consumed more even after weather correction (Mar, Apr — driven by thermostat issues).
+          Green = genuine savings (2024 kW − adjusted 2025 kW). Red = months where 2025 consumed more even after weather correction.
         </p>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -419,10 +410,7 @@ export function ROIAnalysis2() {
               <Tooltip content={renderSavingsTooltip} />
               <Bar dataKey="trueSavingsKw" name="True Adjusted Savings (kWh)" radius={[3, 3, 0, 0]}>
                 {monthlyData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={entry.trueSavingsKw >= 0 ? 'hsl(var(--savings))' : 'hsl(0,72%,51%)'}
-                  />
+                  <Cell key={`cell-${index}`} fill={entry.trueSavingsKw >= 0 ? 'hsl(var(--savings))' : 'hsl(0,72%,51%)'} />
                 ))}
               </Bar>
             </BarChart>
@@ -430,28 +418,64 @@ export function ROIAnalysis2() {
         </div>
       </div>
 
-      {/* ── FULL MONTHLY TABLE ── */}
+      {/* ── EDITABLE MONTHLY TABLE ── */}
       <div className="rounded-xl bg-card p-6 card-elevated overflow-x-auto">
-        <h3 className="text-lg font-semibold mb-4">Full Monthly Breakdown — kW Without G8</h3>
-        <table className="w-full text-sm border-collapse min-w-[760px]">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold">Full Monthly Breakdown — kW Without G8</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {isEditing ? '✏️ Edit mode — click any 2024 or 2025 kW value to change it. All calculations update live.' : 'Click "Edit Data" to update kW values directly.'}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {isEditing && (
+              <button
+                onClick={resetData}
+                className="px-3 py-1.5 text-xs rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors"
+              >
+                Reset to Original
+              </button>
+            )}
+            <button
+              onClick={() => setIsEditing(!isEditing)}
+              className={`px-4 py-1.5 text-xs rounded-lg font-medium transition-colors ${
+                isEditing
+                  ? 'bg-savings text-savings-foreground hover:bg-savings/90'
+                  : 'bg-primary text-primary-foreground hover:bg-primary/90'
+              }`}
+            >
+              {isEditing ? '✓ Done Editing' : '✏️ Edit Data'}
+            </button>
+          </div>
+        </div>
+
+        <table className="w-full text-sm border-collapse min-w-[820px]">
           <thead>
             <tr className="border-b border-border">
               <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Month</th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2024 kWh</th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 kWh (Raw)</th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">
+                2024 kW {isEditing && <span className="text-primary text-xs">(editable)</span>}
+              </th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">
+                2025 kW Raw {isEditing && <span className="text-primary text-xs">(editable)</span>}
+              </th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 Adj (÷1.12)</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">Raw Savings</th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">True Savings kWh</th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">True Savings kW</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True %</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">SAR Value</th>
             </tr>
           </thead>
           <tbody>
             {monthlyData.map((row, i) => (
-              <tr key={i} className="border-b border-border/50 hover:bg-muted/20 transition-colors">
-                <td className="py-2 pr-4 font-medium">{months[i]}</td>
-                <td className="text-right py-2 px-3">{row.raw2024.toLocaleString()}</td>
-                <td className="text-right py-2 px-3 text-muted-foreground">{row.raw2025.toLocaleString()}</td>
+              <tr key={i} className={`border-b border-border/50 transition-colors ${isEditing ? 'hover:bg-primary/5' : 'hover:bg-muted/20'}`}>
+                <td className="py-2 pr-4 font-medium">{MONTHS[i]}</td>
+                <td className="text-right py-2 px-3">
+                  <EditableCell value={kw2024[i]} onChange={(v) => update2024(i, v)} isEditing={isEditing} />
+                </td>
+                <td className="text-right py-2 px-3 text-muted-foreground">
+                  <EditableCell value={kw2025[i]} onChange={(v) => update2025(i, v)} isEditing={isEditing} />
+                </td>
                 <td className="text-right py-2 px-3 font-medium">{row.adjusted2025.toLocaleString()}</td>
                 <td className={`text-right py-2 px-3 ${row.rawSavingsKw >= 0 ? 'text-savings' : 'text-destructive'}`}>
                   {row.rawSavingsKw >= 0 ? '+' : ''}{row.rawSavingsKw.toLocaleString()}
@@ -492,9 +516,9 @@ export function ROIAnalysis2() {
           <div>
             <h4 className="font-semibold mb-2">What the raw numbers say (7 units, no G8)</h4>
             <ul className="space-y-1 text-muted-foreground">
-              <li>• 2024 total kWh: <strong>{totalKw2024.toLocaleString()}</strong> <em>(inflated — system under stress)</em></li>
-              <li>• 2025 total kWh: <strong>{totalKw2025.toLocaleString()}</strong> <em>(full comfort, zero complaints)</em></li>
-              <li>• Raw saving: <strong>{totalRawSavingsKw.toLocaleString()} kWh ({totalRawSavingsPct.toFixed(1)}%)</strong></li>
+              <li>• 2024 total kWh: <strong>{totalKw2024.toLocaleString()}</strong> <em>(inflated — system under stress, cooling complaints)</em></li>
+              <li>• 2025 total kWh: <strong>{totalKw2025.toLocaleString()}</strong> <em>(full comfort, zero complaints, no G8)</em></li>
+              <li>• Raw saving: <strong className={totalRawSavingsKw >= 0 ? 'text-savings' : 'text-destructive'}>{totalRawSavingsKw.toLocaleString()} kWh ({totalRawSavingsPct.toFixed(1)}%)</strong></li>
             </ul>
           </div>
           <div>
