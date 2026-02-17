@@ -22,27 +22,44 @@ const DEFAULT_KW_2024 = [25490, 34926, 36668, 40952, 60362, 67968, 72070, 75996,
 const DEFAULT_KW_2025 = [26407, 25107, 41139, 52976, 61372, 61810, 67537, 68039, 55035, 39840, 32246, 21728];
 
 // BUILDING COVERAGE
-// 8 panels total × 25 tons each = 200 tons total building cooling capacity
-// SCC device installed on 7 panels × 25 tons = 175 tons = 87.5% of building
-// G8 (Panel 8) = 25 tons, NO SCC device → consuming same or more than 2024
-const TOTAL_PANELS = 8;
-const SCC_PANELS = 7;
-const TONS_PER_PANEL = 25;
-const SCC_COVERAGE_PCT = (SCC_PANELS / TOTAL_PANELS) * 100; // 87.5%
+// ─────────────────────────────────────────────────────────────────────────────
+// SCC panels: 7 × 25 tons = 175 tons (all inverter-type package units)
+// G8 panel: 26 tons BUT non-inverter units (3 cassettes MCCT36/48, 1 ducted MHGT60, 1 split RYD25)
+//   Non-inverter units draw ~1.5× more power per ton vs inverter → higher kW consumption per ton
+//   G8 effective consumption weight = 26 × 1.5 = 39 "equivalent tons"
+// Total effective tons = 175 (SCC) + 39 (G8 non-inv equivalent) = 214
+// ─────────────────────────────────────────────────────────────────────────────
+const SCC_TONS = 175;           // 7 panels × 25 tons — inverter-type, SCC controlled
+const G8_TONS_ACTUAL = 26;      // physical tons on G8
+const G8_NON_INVERTER_FACTOR = 1.5; // non-inverter draws ~50% more per ton vs inverter
+const G8_EFFECTIVE_TONS = G8_TONS_ACTUAL * G8_NON_INVERTER_FACTOR; // 39 equivalent tons
+const TOTAL_EFFECTIVE_TONS = SCC_TONS + G8_EFFECTIVE_TONS;          // 214 equivalent tons
+const SCC_EFFECTIVE_SHARE_PCT = (SCC_TONS / TOTAL_EFFECTIVE_TONS) * 100;   // ~81.8%
+const G8_EFFECTIVE_SHARE_PCT = (G8_EFFECTIVE_TONS / TOTAL_EFFECTIVE_TONS) * 100; // ~18.2%
 
 // ─────────────────────────────────────────────────────────────────────────────
 // REAL FINANCIAL DATA — derived from actual bills
 // ─────────────────────────────────────────────────────────────────────────────
-const ACTUAL_BILL_2024 = 220028;          // SAR — full building annual bill
-const G8_KWH_2024_EST = 90883;            // kWh — G8 estimated from unit sub-meter data
+const ACTUAL_BILL_2025 = 213379;   // SAR — actual 2025 annual bill
+const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
+
+// What 2025 SHOULD have cost: actual bill + 15% VAT-equivalent adjustment + 12% weather load increase
+// User's calculation: 213,379 × (1 + 0.15 + 0.12) ≈ 246,431 SAR
+const EXPECTED_BILL_2025_WITHOUT_SCC = 246431.36; // SAR — what 2025 would have cost without SCC + weather penalty
+const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // = 33,052 SAR
+
+// Blended rate from 2024 actual bill and total kWh
+const G8_KWH_2024_EST = 90883;
 const TOTAL_KWH_2024_BUILDING = DEFAULT_KW_2024.reduce((a, b) => a + b, 0) + G8_KWH_2024_EST;
 const BLENDED_RATE = ACTUAL_BILL_2024 / TOTAL_KWH_2024_BUILDING; // ~0.3317 SAR/kWh
-const SEVEN_PANEL_KWH_2024 = DEFAULT_KW_2024.reduce((a, b) => a + b, 0);
-const SEVEN_PANEL_BILL_SHARE = (SEVEN_PANEL_KWH_2024 / TOTAL_KWH_2024_BUILDING) * ACTUAL_BILL_2024;
-const SEVEN_PANEL_BILL_PCT = (SEVEN_PANEL_KWH_2024 / TOTAL_KWH_2024_BUILDING) * 100;
 
-// Known actual YoY bill savings (all panels, actual bills)
-const ACTUAL_BILL_SAVINGS_SAR = 13003;
+// SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
+const SEVEN_PANEL_KWH_2024 = DEFAULT_KW_2024.reduce((a, b) => a + b, 0);
+const SCC_BILL_SHARE_SAR = ACTUAL_BILL_2025 * (SCC_EFFECTIVE_SHARE_PCT / 100); // ~174,547 SAR
+const SCC_BILL_SHARE_PCT = SCC_EFFECTIVE_SHARE_PCT; // ~81.8%
+
+// YoY apparent bill saving
+const APPARENT_BILL_SAVINGS_SAR = ACTUAL_BILL_2024 - ACTUAL_BILL_2025; // 220,028 - 213,379 = 6,649 SAR
 
 const COOLING_LOAD_FACTOR = 0.12; // 2025 was ~1.3°C hotter → 12% extra cooling demand
 
@@ -211,87 +228,120 @@ export function ROIAnalysis2() {
 
       {/* ── COVERAGE BANNER ── */}
       <div className="rounded-xl border-2 border-primary/30 bg-primary/5 p-5">
-        <h3 className="font-bold text-sm mb-4 uppercase tracking-wide">Building Coverage — SCC System Scope</h3>
+        <h3 className="font-bold text-sm mb-4 uppercase tracking-wide">Building Coverage — SCC System Scope (Consumption-Weighted)</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <div className="p-3 rounded-lg bg-card border border-border">
-            <p className="text-3xl font-black">{TOTAL_PANELS}</p>
+            <p className="text-3xl font-black">8</p>
             <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Total Panels</p>
-            <p className="text-xs text-muted-foreground">{TOTAL_PANELS * TONS_PER_PANEL} tons total</p>
+            <p className="text-xs text-muted-foreground">201 physical tons total</p>
           </div>
           <div className="p-3 rounded-lg bg-savings/10 border border-savings/30">
-            <p className="text-3xl font-black text-savings">{SCC_PANELS}</p>
+            <p className="text-3xl font-black text-savings">7</p>
             <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">SCC Panels (G1–G3, F1–F4)</p>
-            <p className="text-xs text-savings font-medium">{SCC_PANELS * TONS_PER_PANEL} tons — Saving ✓</p>
+            <p className="text-xs text-savings font-medium">{SCC_TONS} tons inverter — Saving ✓</p>
           </div>
           <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30">
             <p className="text-3xl font-black text-destructive">1</p>
             <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">G8 — No Device</p>
-            <p className="text-xs text-destructive font-medium">{TONS_PER_PANEL} tons — Same/More ✗</p>
+            <p className="text-xs text-destructive font-medium">{G8_TONS_ACTUAL} tons non-inverter ✗</p>
+            <p className="text-xs text-destructive">(≈{G8_EFFECTIVE_TONS} equiv. tons @ 1.5× draw)</p>
           </div>
           <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
-            <p className="text-3xl font-black text-primary">{SCC_COVERAGE_PCT.toFixed(0)}%</p>
-            <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Building Coverage</p>
-            <p className="text-xs text-primary font-medium">All savings from this {SCC_COVERAGE_PCT.toFixed(0)}%</p>
+            <p className="text-3xl font-black text-primary">{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}%</p>
+            <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Effective Bill Share</p>
+            <p className="text-xs text-primary font-medium">Consumption-weighted coverage</p>
           </div>
         </div>
         <p className="mt-4 text-xs text-muted-foreground bg-muted/40 rounded-lg p-3">
-          <strong className="text-foreground">Important:</strong> G8 (Panel 8, 25 tons) has no SCC device and is consuming the same or more energy than 2024.
-          All savings figures below represent the <strong>7 SCC-controlled panels only</strong> — which account for {SCC_COVERAGE_PCT.toFixed(0)}% of the building's {TOTAL_PANELS * TONS_PER_PANEL}-ton total cooling capacity.
-          Adding the device to G8 would unlock an additional estimated <strong>~12–15% of building consumption</strong> for optimisation.
+          <strong className="text-foreground">Non-inverter correction:</strong> G8's {G8_TONS_ACTUAL}-ton panel uses non-inverter compressors (3 cassettes MCCT36/48, 1 ducted MHGT60, 1 split RYD25).
+          Non-inverter units draw ~50% more power per ton than inverter units — constant on/off cycling, no modulation.
+          Adjusted for consumption weight, G8 represents <strong>{G8_EFFECTIVE_SHARE_PCT.toFixed(1)}%</strong> of the bill
+          while the 7 SCC panels represent <strong>{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}%</strong>.
+          The true financial savings are being measured against the SCC-controlled {SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the bill.
         </p>
       </div>
 
-      {/* ── FINANCIAL REALITY: 88% OF BILL ── */}
+      {/* ── FINANCIAL REALITY ── */}
       <div className="rounded-xl bg-card card-elevated p-6 border-2 border-primary/30">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xl">💰</span>
-          <h3 className="text-lg font-bold">Financial Reality — Saving on {SEVEN_PANEL_BILL_PCT.toFixed(1)}% of the Bill</h3>
+          <h3 className="text-lg font-bold">Financial Reality — True Savings on {SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the Bill</h3>
         </div>
         <p className="text-sm text-muted-foreground mb-5">
-          The 7 SCC panels account for <strong>{SEVEN_PANEL_BILL_PCT.toFixed(1)}% of the total annual electricity bill</strong>
-          (~{Math.round(SEVEN_PANEL_BILL_SHARE).toLocaleString()} SAR out of {ACTUAL_BILL_2024.toLocaleString()} SAR).
-          All financial values use the <strong>actual blended rate of {BLENDED_RATE.toFixed(4)} SAR/kWh</strong> — derived directly from your real 2024 bill and meter readings.
+          G8's non-inverter units make it consume disproportionately more per ton. After consumption-weighting,
+          the 7 SCC panels represent <strong>{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the actual bill</strong>
+          (~{Math.round(SCC_BILL_SHARE_SAR).toLocaleString()} SAR out of {ACTUAL_BILL_2025.toLocaleString()} SAR actual 2025 bill).
+          Financial values use the <strong>blended rate of {BLENDED_RATE.toFixed(4)} SAR/kWh</strong>.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+
+        {/* Bills comparison */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
           <div className="p-4 rounded-xl bg-muted/30 border border-border text-center">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Annual Bill 2024</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Actual Bill 2024</p>
             <p className="text-3xl font-black">{ACTUAL_BILL_2024.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">SAR / year — full building</p>
+            <p className="text-xs text-muted-foreground">SAR — full building</p>
           </div>
-          <div className="p-4 rounded-xl bg-primary/10 border border-primary/30 text-center">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">7-Panel Bill Portion</p>
-            <p className="text-3xl font-black text-primary">{Math.round(SEVEN_PANEL_BILL_SHARE).toLocaleString()}</p>
-            <p className="text-xs text-primary font-medium">{SEVEN_PANEL_BILL_PCT.toFixed(1)}% — the portion we optimise</p>
+          <div className="p-4 rounded-xl bg-muted/30 border border-border text-center">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Actual Bill 2025</p>
+            <p className="text-3xl font-black">{ACTUAL_BILL_2025.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">SAR — full building</p>
           </div>
           <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-center">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">G8 Portion (No Device)</p>
-            <p className="text-3xl font-black text-destructive">{Math.round(ACTUAL_BILL_2024 - SEVEN_PANEL_BILL_SHARE).toLocaleString()}</p>
-            <p className="text-xs text-destructive font-medium">{(100 - SEVEN_PANEL_BILL_PCT).toFixed(1)}% — unoptimised</p>
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Expected 2025 (No SCC + Heat)</p>
+            <p className="text-3xl font-black text-destructive">{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}</p>
+            <p className="text-xs text-destructive font-medium">Without SCC + 12% heat + 15% baseline</p>
+          </div>
+          <div className="p-4 rounded-xl bg-savings/10 border border-savings/30 text-center">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">True Savings vs Expected</p>
+            <p className="text-3xl font-black text-savings">{TRUE_SAVINGS_SAR.toLocaleString()}</p>
+            <p className="text-xs text-savings font-medium">SAR saved vs what it SHOULD have cost</p>
           </div>
         </div>
+
+        {/* SCC portion */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div className="p-4 rounded-xl bg-primary/10 border border-primary/30 text-center">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">SCC 7-Panel Bill Share (2025)</p>
+            <p className="text-3xl font-black text-primary">{Math.round(SCC_BILL_SHARE_SAR).toLocaleString()}</p>
+            <p className="text-xs text-primary font-medium">{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% — the portion we optimise</p>
+          </div>
+          <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-center">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">G8 Bill Share (No Device)</p>
+            <p className="text-3xl font-black text-destructive">{Math.round(ACTUAL_BILL_2025 - SCC_BILL_SHARE_SAR).toLocaleString()}</p>
+            <p className="text-xs text-destructive font-medium">{G8_EFFECTIVE_SHARE_PCT.toFixed(1)}% — non-inverter, unoptimised</p>
+          </div>
+          <div className="p-4 rounded-xl bg-savings/10 border border-savings/30 text-center">
+            <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Apparent YoY Bill Saving</p>
+            <p className="text-3xl font-black text-savings">{APPARENT_BILL_SAVINGS_SAR.toLocaleString()}</p>
+            <p className="text-xs text-savings font-medium">SAR — raw 2024 vs 2025 difference</p>
+            <p className="text-xs text-muted-foreground">Understates true value</p>
+          </div>
+        </div>
+
         <div className="rounded-xl border border-savings/30 bg-savings/5 p-5">
-          <h4 className="font-bold text-sm mb-4">Why the Bill Appears to Save Less Than the True Value</h4>
+          <h4 className="font-bold text-sm mb-4">The Real Picture: Apparent vs True Savings</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="p-3 rounded-lg bg-card border border-border">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Apparent Bill Savings (YoY)</p>
-              <p className="text-2xl font-black">{ACTUAL_BILL_SAVINGS_SAR.toLocaleString()} SAR</p>
-              <p className="text-xs text-muted-foreground mt-1">Reduced by G8 increases &amp; hotter 2025</p>
+              <p className="text-2xl font-black">{APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR</p>
+              <p className="text-xs text-muted-foreground mt-1">Raw diff: G8 increases &amp; hotter 2025 mask the gains</p>
             </div>
             <div className="p-3 rounded-lg bg-savings/10 border border-savings/30">
-              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">True Adjusted Savings (kWh × rate)</p>
-              <p className="text-2xl font-black text-savings">{totalTrueSavingsSAR.toLocaleString()} SAR</p>
-              <p className="text-xs text-savings font-medium mt-1">Real efficiency value — weather &amp; rate corrected</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">True Adjusted Savings</p>
+              <p className="text-2xl font-black text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</p>
+              <p className="text-xs text-savings font-medium mt-1">vs what 2025 SHOULD have cost without SCC</p>
             </div>
             <div className="p-3 rounded-lg bg-energy/10 border border-energy/30">
               <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Hidden Value (Gap)</p>
-              <p className="text-2xl font-black text-energy">{(totalTrueSavingsSAR - ACTUAL_BILL_SAVINGS_SAR).toLocaleString()} SAR</p>
-              <p className="text-xs text-energy font-medium mt-1">Masked by G8 increases &amp; 12% hotter 2025</p>
+              <p className="text-2xl font-black text-energy">{(TRUE_SAVINGS_SAR - APPARENT_BILL_SAVINGS_SAR).toLocaleString()} SAR</p>
+              <p className="text-xs text-energy font-medium mt-1">Masked by G8 non-inverter load &amp; 2025 heat</p>
             </div>
           </div>
           <p className="mt-4 text-xs text-muted-foreground">
-            <strong className="text-foreground">Key message:</strong> The bill-level saving of {ACTUAL_BILL_SAVINGS_SAR.toLocaleString()} SAR <em>understates</em> the real value.
-            G8's unoptimised consumption and 2025 being 1.3°C hotter both masked the efficiency gain.
-            The TRUE value delivered by the SCC system on the 7 panels is <strong className="text-savings">{totalTrueSavingsSAR.toLocaleString()} SAR/year</strong>.
+            <strong className="text-foreground">Key message:</strong> The apparent YoY bill saving of {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR
+            <em> massively understates</em> the real value. 2025 should have cost <strong>{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()} SAR</strong> given
+            hotter weather and baseline growth — the SCC system delivered <strong className="text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR in true savings</strong>,
+            all from the {SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the bill it controls.
           </p>
         </div>
       </div>
@@ -380,7 +430,7 @@ export function ROIAnalysis2() {
           <p className="text-3xl font-bold text-energy">{totalTrueSavingsSAR.toLocaleString()} SAR</p>
           <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">True Financial Value</p>
           <p className="text-xs text-muted-foreground">@ actual rate {BLENDED_RATE.toFixed(4)} SAR/kWh</p>
-          <p className="text-xs text-energy font-medium">vs {ACTUAL_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill saving</p>
+          <p className="text-xs text-energy font-medium">vs {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill saving</p>
         </div>
       </div>
 
