@@ -57,12 +57,13 @@ export const energyCostSummary = {
   totalBill2025: 213379, // Actual 2025 annual bill (verified from SCECO)
   totalBillActual2025: 213379, // Actual 2025 bill
   yearOverYearIncrease2024: 8.25, // 2023 → 2024: (220,028 − 203,246) / 203,246
-  yearOverYearIncrease2025: -6.09, // 2024 → 2025: 13,003 SAR reduction
+  yearOverYearIncrease2025: -3.02, // 2024 → 2025: (220,028 − 213,379) / 220,028 = 3.02%
   increaseAmount2024: 16782,
-  increaseAmount2025: 6079,
-  // 8 out of 12 months showed YoY savings using Actual 2025 values
-  yearlySavings2024vs2025: 13003,
-  yearlySavingsPercent: 6.09, // Actual YoY cost reduction: 13,003 / 220,028 = 6.09%
+  increaseAmount2025: 6649,
+  // 220,028 − 213,379 = 6,649 SAR actual bill reduction
+  yearlySavings2024vs2025: 6649,
+  yearlySavingsPercent: 3.02, // Actual YoY bill reduction: 6,649 / 220,028 = 3.02%
+  savingsGoodMonthsSum: 13003, // Sum of months where 2025 < 2024 (not the net bill diff)
   rawdahVsRubenSavingsPercent: 9.06, // From Excel: Rawdah vs Ruben savings (without G8)
 };
 
@@ -122,8 +123,8 @@ export const summaryStats = {
 
 // Rawdah-specific insights (standalone performance)
 export const rawdahInsights = [
-  'Rawdah achieved 13,003 SAR in energy cost savings in 2025 (YoY), with the strongest financial performance during peak summer months',
-  'Total cost reduction of ~6% (2024→2025) despite 2025 being 1.3°C hotter than 2024 — demonstrating effective energy cost control',
+  'Rawdah achieved 6,649 SAR in direct bill savings in 2025 (YoY: 220,028 → 213,379 SAR), with the strongest financial performance during peak summer months',
+  'Total cost reduction of ~3% direct bill saving (2024→2025: 6,649 SAR) despite 2025 being 1.3°C hotter than 2024 — true adjusted savings of 33,052 SAR once weather normalization is applied',
   'Major cost-saving months (YoY): February (28.1%, 3,387 SAR), August (9.0%, 2,745 SAR), June (7.7%, 2,125 SAR), July (5.3%, 1,564 SAR), September (7.2%, 1,696 SAR)',
   'Q1 cost increases (Jan +3.8%, Mar +11.6%, Apr +26.2%) were driven by early-season inefficiencies, thermostat misuse, and system updates — these represent clear opportunities for further optimization',
   'During high-load summer months (May–August), Rawdah demonstrated consistent improvement over 2024, proving cost control measures are effective under peak tariff conditions',
