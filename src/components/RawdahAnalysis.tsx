@@ -93,7 +93,7 @@ export function RawdahAnalysis() {
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{energyCostSummary.yearlySavingsPercent}%</p>
             <p className="text-sm opacity-80">Raw Bill Reduction (2024→2025)</p>
-            <p className="text-xs opacity-60 mt-1">13,003 SAR apparent saving</p>
+            <p className="text-xs opacity-60 mt-1">6,649 SAR direct bill saving</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">33,052</p>
@@ -138,7 +138,7 @@ export function RawdahAnalysis() {
             <TrendingDown className="h-4 w-4 text-savings" />
           </div>
           <p className="text-2xl font-bold text-savings">{energyCostSummary.totalBill2025.toLocaleString()} SAR</p>
-          <p className="text-xs text-savings mt-1">−{energyCostSummary.yearlySavingsPercent}% ({energyCostSummary.yearlySavings2024vs2025.toLocaleString()} SAR raw YoY saving)</p>
+          <p className="text-xs text-savings mt-1">−{energyCostSummary.yearlySavingsPercent}% (6,649 SAR direct bill reduction vs 2024)</p>
           <p className="text-xs text-muted-foreground mt-1">True adjusted savings: <strong className="text-savings">33,052 SAR</strong> — see ROI 2 tab</p>
         </div>
       </div>
@@ -240,7 +240,7 @@ export function RawdahAnalysis() {
         </div>
         <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-savings">Raw YoY Result:</strong> Apparent bill saving 2024→2025: <strong className="text-savings">13,003 SAR</strong> (6.09% reduction). Even with cost increases in early months (Jan, Mar, Apr, May), net annual performance is positive. Savings are concentrated in mid-to-late year. <strong className="text-savings">True adjusted savings = 33,052 SAR</strong> — once weather normalization (+12% hotter 2025) and baseline growth are accounted for. See ROI 2 tab for full detail.
+            <strong className="text-savings">Raw YoY Result:</strong> Direct bill reduction 2024→2025: <strong className="text-savings">6,649 SAR</strong> (220,028 − 213,379 = 6,649 SAR / 3.02% reduction). Even with cost increases in early months, net annual performance is positive. Savings are concentrated in mid-to-late year. <strong className="text-savings">True adjusted savings = 33,052 SAR</strong> — once weather normalization (+12% hotter 2025) is accounted for. See ROI 2 tab for full detail.
           </p>
         </div>
       </div>
