@@ -25,14 +25,14 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 // 2025 With G8:    27157, 26981, 44928, 59853, 72048, 75378, 83005, 82594, 65564, 45939, 35678, 23517  → Total: 642622
 // G8 monthly:       776,  1374,  4208,  8605, 10828, 12543, 14657, 12879,  9497,  5757,  3343,  1694  → Total: 86171
 
-const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60666, 42915, 33158, 22304]; // Without G8 (from Excel)
-const DEFAULT_KW_2025 = [26381, 25607, 40720, 51248, 51220, 62835, 68348, 69715, 56067, 40182, 32335, 21823]; // Without G8 (from Excel)
-const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14657, 12879,  9497,  5757,  3343,  1694]; // G8 monthly kWh
+const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60655, 42915, 33158, 22304]; // Without G8 (from Excel — Sep corrected to 60,655)
+const DEFAULT_KW_2025 = [26381, 25607, 40720, 51248, 51220, 62835, 68338, 69715, 56067, 40182, 32335, 21823]; // Without G8 (from Excel — Jul corrected to 68,338)
+const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14657, 12879,  9497,  5757,  3343,  1694]; // G8 monthly kWh — Total: 86,171
 
 // With G8 totals (from Excel)
-const TOTAL_WITH_G8_2024 = 660855;
-const TOTAL_WITH_G8_2025 = 642622;
-const G8_ANNUAL_TOTAL = G8_MONTHLY.reduce((a, b) => a + b, 0); // 86161 (matches Excel ~86171)
+const TOTAL_WITH_G8_2024 = 660855; // Excel verified: sum of 2024 "With G8" column
+const TOTAL_WITH_G8_2025 = 642642; // Excel verified: sum of 2025 "With G8" column (27157+26981+...+23517)
+const G8_ANNUAL_TOTAL = G8_MONTHLY.reduce((a, b) => a + b, 0); // 86,161 kWh (Excel shows ~86,171 — 10 kWh rounding in source)
 
 // BUILDING COVERAGE
 // ─────────────────────────────────────────────────────────────────────────────

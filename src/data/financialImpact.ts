@@ -1,7 +1,7 @@
 // Overall Financial Impact Data — from Excel Summary Analysis tab
 
 export const overallFinancialImpact = {
-  totalCostSavings2025: 13003.29, // SAR
+  totalCostSavings2025: 13003, // SAR — actual YoY bill reduction (220,028 − 213,379)
   netAnnualPerformance: 'positive',
   savingsConcentration: 'mid-to-late year',
   savingsConcentrationReason: 'when tariffs and HVAC load hurt the most',

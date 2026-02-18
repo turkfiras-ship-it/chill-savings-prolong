@@ -54,15 +54,15 @@ export const yearlyComparisonData: YearlyComparison[] = [
 export const energyCostSummary = {
   totalBill2023: 203246,
   totalBill2024: 220028,
-  totalBill2025: 226107, // Raw meter total
-  totalBillActual2025: 213379, // Actual 2025 with previous tariff adjustments
-  yearOverYearIncrease2024: 8.26, // 2023 → 2024
-  yearOverYearIncrease2025: 2.76, // 2024 → 2025 (raw meter)
+  totalBill2025: 213379, // Actual 2025 annual bill (verified from SCECO)
+  totalBillActual2025: 213379, // Actual 2025 bill
+  yearOverYearIncrease2024: 8.25, // 2023 → 2024: (220,028 − 203,246) / 203,246
+  yearOverYearIncrease2025: -6.09, // 2024 → 2025: 13,003 SAR reduction
   increaseAmount2024: 16782,
   increaseAmount2025: 6079,
   // 8 out of 12 months showed YoY savings using Actual 2025 values
-  yearlySavings2024vs2025: 13003.29,
-  yearlySavingsPercent: 6.09, // Actual YoY cost reduction: 13,003.29 / 213,379 = 6.09%
+  yearlySavings2024vs2025: 13003,
+  yearlySavingsPercent: 6.09, // Actual YoY cost reduction: 13,003 / 220,028 = 6.09%
   rawdahVsRubenSavingsPercent: 9.06, // From Excel: Rawdah vs Ruben savings (without G8)
 };
 
