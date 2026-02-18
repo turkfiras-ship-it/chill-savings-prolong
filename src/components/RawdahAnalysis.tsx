@@ -92,19 +92,23 @@ export function RawdahAnalysis() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{energyCostSummary.yearlySavingsPercent}%</p>
-            <p className="text-sm opacity-80">Cost Reduction (2024→2025)</p>
+            <p className="text-sm opacity-80">Raw Bill Reduction (2024→2025)</p>
+            <p className="text-xs opacity-60 mt-1">13,003 SAR apparent saving</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()}</p>
-            <p className="text-sm opacity-80">Annual Savings (SAR)</p>
+            <p className="text-3xl font-bold">33,052</p>
+            <p className="text-sm opacity-80">True Adjusted Savings (SAR)</p>
+            <p className="text-xs opacity-60 mt-1">Weather-normalized vs expected 246,431 SAR</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">62%</p>
-            <p className="text-sm opacity-80">G2 Demand Reduction</p>
+            <p className="text-3xl font-bold">61.8%</p>
+            <p className="text-sm opacity-80">Building Demand Reduction</p>
+            <p className="text-xs opacity-60 mt-1">495 kW (2023) → 189 kW (2025)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">7</p>
-            <p className="text-sm opacity-80">AC Units Monitored</p>
+            <p className="text-sm opacity-80">SCC-Controlled AC Units</p>
+            <p className="text-xs opacity-60 mt-1">G1–G3, F1–F4 (175 tons inverter)</p>
           </div>
         </div>
       </div>
@@ -117,7 +121,7 @@ export function RawdahAnalysis() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </div>
           <p className="text-2xl font-bold">{energyCostSummary.totalBill2023.toLocaleString()} SAR</p>
-          <p className="text-xs text-muted-foreground mt-1">Baseline year</p>
+          <p className="text-xs text-muted-foreground mt-1">Baseline — pre-SCC installation</p>
         </div>
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-destructive">
           <div className="flex items-center justify-between mb-2">
@@ -125,15 +129,17 @@ export function RawdahAnalysis() {
             <ArrowUp className="h-4 w-4 text-destructive" />
           </div>
           <p className="text-2xl font-bold">{energyCostSummary.totalBill2024.toLocaleString()} SAR</p>
-          <p className="text-xs text-destructive mt-1">+{energyCostSummary.yearOverYearIncrease2024}% (+{energyCostSummary.increaseAmount2024.toLocaleString()} SAR)</p>
+          <p className="text-xs text-destructive mt-1">+{energyCostSummary.yearOverYearIncrease2024}% (+{energyCostSummary.increaseAmount2024.toLocaleString()} SAR vs 2023)</p>
+          <p className="text-xs text-muted-foreground mt-1">SCC active but AC filters damaged + complaints</p>
         </div>
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-savings">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">2024 vs 2025 Savings</span>
+            <span className="text-sm text-muted-foreground">2025 Total Bill</span>
             <TrendingDown className="h-4 w-4 text-savings" />
           </div>
-          <p className="text-2xl font-bold text-savings">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()} SAR</p>
-          <p className="text-xs text-savings mt-1">{energyCostSummary.yearlySavingsPercent}% reduction</p>
+          <p className="text-2xl font-bold text-savings">{energyCostSummary.totalBill2025.toLocaleString()} SAR</p>
+          <p className="text-xs text-savings mt-1">−{energyCostSummary.yearlySavingsPercent}% ({energyCostSummary.yearlySavings2024vs2025.toLocaleString()} SAR raw YoY saving)</p>
+          <p className="text-xs text-muted-foreground mt-1">True adjusted savings: <strong className="text-savings">33,052 SAR</strong> — see ROI 2 tab</p>
         </div>
       </div>
 
@@ -234,7 +240,7 @@ export function RawdahAnalysis() {
         </div>
         <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
           <p className="text-sm text-muted-foreground">
-            <strong className="text-savings">Result:</strong> Total cost savings in 2025: <strong className="text-savings">13,003 SAR</strong>. Even with cost increases in early months (Jan, Mar, Apr, May), net annual performance is positive. Savings are concentrated in mid-to-late year, when tariffs and HVAC load hurt the most — strong evidence of cost-aware energy management.
+            <strong className="text-savings">Raw YoY Result:</strong> Apparent bill saving 2024→2025: <strong className="text-savings">13,003 SAR</strong> (6.09% reduction). Even with cost increases in early months (Jan, Mar, Apr, May), net annual performance is positive. Savings are concentrated in mid-to-late year. <strong className="text-savings">True adjusted savings = 33,052 SAR</strong> — once weather normalization (+12% hotter 2025) and baseline growth are accounted for. See ROI 2 tab for full detail.
           </p>
         </div>
       </div>
@@ -243,9 +249,9 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-1">
           <Activity className="h-5 w-5 text-savings" />
-          <h3 className="text-xl font-semibold">Demand Reduction - SCC Installation Impact (G2 Unit)</h3>
+          <h3 className="text-xl font-semibold">Building Demand Reduction — SCC Installation Impact</h3>
         </div>
-        <p className="text-sm text-muted-foreground mb-6">G2 unit daily consumption comparison before and after system installation</p>
+        <p className="text-sm text-muted-foreground mb-6">Full building daily kW demand comparison — same date (Oct 21) across all 3 years</p>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="h-[280px]">
