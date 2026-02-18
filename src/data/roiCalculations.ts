@@ -201,9 +201,9 @@ export const maintenanceSavings: CostSavingCategory[] = [
 // Downtime Cost Avoidance
 export const downtimeSavings = {
   averageDowntimeHoursWithout: 24, // hours per year
-  averageDowntimeHoursWith: 4, // hours per year
+  averageDowntimeHoursWith: 9,  // hours per year (conservative estimate)
   hourlyRevenueLoss: 500, // SAR per hour (showroom revenue impact)
-  annualSavings: (24 - 4) * 500, // 10,000 SAR
+  annualSavings: (24 - 9) * 500, // 7,500 SAR
   notes: 'Reduced AC failures means less store closures and customer discomfort',
 };
 
