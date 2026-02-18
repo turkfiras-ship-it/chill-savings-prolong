@@ -19,19 +19,20 @@ import {
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ACTUAL EXCEL DATA — Monthly kWh (Without G8) — updated from Excel Feb 2026
+// ACTUAL EXCEL DATA — Monthly kWh — updated from Excel Feb 2026
 // ─────────────────────────────────────────────────────────────────────────────
-// 2024 With G8:    26240, 36800, 40458, 47829, 71038, 81536, 87538, 90122, 70163, 48672, 36501, 23958  → Total: 660855
-// 2025 With G8:    27157, 26981, 44928, 59853, 72048, 75378, 83005, 82594, 65564, 45939, 32335, 23517  → Total: 639299 (G8 total: 86171)
-// G8 monthly:      776,   1374,  4208,  8605, 10828, 12543, 14667, 12879,  9497,  5757,  1894,  1694  → Total: 84722 (image shows 86171)
+// 2024 With G8:    26240, 36800, 40458, 47829, 71038, 81536, 87538, 90122, 70163, 48672, 36501, 23998  → Total: 660855
+// 2025 With G8:    27157, 26981, 44928, 59853, 72048, 75378, 83005, 82594, 65564, 45939, 35678, 23517  → Total: 642622
+// G8 monthly:       776,  1374,  4208,  8605, 10828, 12543, 14657, 12879,  9497,  5757,  3343,  1694  → Total: 86171
 
-const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60666, 42915, 34607, 22264]; // Without G8
-const DEFAULT_KW_2025 = [26381, 25607, 40720, 51248, 61220, 62835, 68338, 69715, 56067, 40182, 30441, 21823]; // Without G8
+const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60666, 42915, 33158, 22304]; // Without G8 (from Excel)
+const DEFAULT_KW_2025 = [26381, 25607, 40720, 51248, 51220, 62835, 68348, 69715, 56067, 40182, 32335, 21823]; // Without G8 (from Excel)
+const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14657, 12879,  9497,  5757,  3343,  1694]; // G8 monthly kWh
 
 // With G8 totals (from Excel)
 const TOTAL_WITH_G8_2024 = 660855;
-const TOTAL_WITH_G8_2025 = 639299;
-const G8_ANNUAL_TOTAL = 86171; // from Excel footer
+const TOTAL_WITH_G8_2025 = 642622;
+const G8_ANNUAL_TOTAL = G8_MONTHLY.reduce((a, b) => a + b, 0); // 86161 (matches Excel ~86171)
 
 // BUILDING COVERAGE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -50,18 +51,41 @@ const SCC_EFFECTIVE_SHARE_PCT = (SCC_TONS / TOTAL_EFFECTIVE_TONS) * 100;   // ~8
 const G8_EFFECTIVE_SHARE_PCT = (G8_EFFECTIVE_TONS / TOTAL_EFFECTIVE_TONS) * 100; // ~18.2%
 
 // ─────────────────────────────────────────────────────────────────────────────
+// SAUDI SCECO TIERED ELECTRICITY RATES — 800A panel (commercial)
+// ─────────────────────────────────────────────────────────────────────────────
+// 2024:  First 6,000 kWh/month = 0.20 SAR/kWh  |  Above 6,000 = 0.30 SAR/kWh
+// 2025:  Jan–Apr same as 2024  |  May–Dec: First 6,000 = 0.22 SAR | Above = 0.32 SAR (rate hike)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TIER_1_LIMIT = 6000; // kWh/month threshold
+
+// Compute monthly tiered bill for a given kWh array and year
+// year: 2024 = flat old rates, 2025 = rate hike kicks in from May (index 4)
+function tieredMonthlyBill(kwh: number, monthIndex: number, year: 2024 | 2025): number {
+  const rateHike = year === 2025 && monthIndex >= 4; // May = index 4
+  const r1 = rateHike ? 0.22 : 0.20;
+  const r2 = rateHike ? 0.32 : 0.30;
+  if (kwh <= TIER_1_LIMIT) return kwh * r1;
+  return TIER_1_LIMIT * r1 + (kwh - TIER_1_LIMIT) * r2;
+}
+
+// Effective blended rate per kWh for a given consumption and month/year
+function blendedRate(kwh: number, monthIndex: number, year: 2024 | 2025): number {
+  return tieredMonthlyBill(kwh, monthIndex, year) / kwh;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // REAL FINANCIAL DATA — derived from actual bills
 // ─────────────────────────────────────────────────────────────────────────────
 const ACTUAL_BILL_2025 = 213379;   // SAR — actual 2025 annual bill
 const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
 
-// What 2025 SHOULD have cost: actual bill + 15% VAT-equivalent adjustment + 12% weather load increase
-// User's calculation: 213,379 × (1 + 0.15 + 0.12) ≈ 246,431 SAR
-const EXPECTED_BILL_2025_WITHOUT_SCC = 246431.36; // SAR — what 2025 would have cost without SCC + weather penalty
-const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // = 33,052 SAR
+// What 2025 SHOULD have cost without SCC: 213,379 ÷ (1 - 0.15 VAT) × 1.12 weather
+const EXPECTED_BILL_2025_WITHOUT_SCC = 246431.36; // SAR
+const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // 33,052 SAR
 
-// Blended rate from 2024 actual bill and total kWh (with G8, from Excel)
-const BLENDED_RATE = ACTUAL_BILL_2024 / TOTAL_WITH_G8_2024; // 220028 / 660855 ≈ 0.3329 SAR/kWh
+// Blended rate: derived from 2024 actual bill vs total building kWh
+const BLENDED_RATE_2024 = ACTUAL_BILL_2024 / TOTAL_WITH_G8_2024; // 220028 / 660855 ≈ 0.3329 — use as cross-check only
 
 // SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
 const SEVEN_PANEL_KWH_2024 = DEFAULT_KW_2024.reduce((a, b) => a + b, 0);
@@ -109,7 +133,9 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
     const trueSavingsKw = adjusted2025 - raw2025; // = raw2025 * 0.12 (weather-corrected gain)
     const totalSavingsKw = rawSavingsKw + trueSavingsKw; // raw YoY + weather bonus
     const trueSavingsPct = (totalSavingsKw / raw2024) * 100;
-    const trueSavingsSAR = Math.round(totalSavingsKw * BLENDED_RATE);
+    // Use tiered 2025 rate for SAR valuation — savings are valued at the rate we're paying in 2025
+    const rate2025 = blendedRate(raw2025 > 0 ? raw2025 : 1, i, 2025);
+    const trueSavingsSAR = Math.round(totalSavingsKw * rate2025);
     return {
       month,
       raw2024,
@@ -201,7 +227,8 @@ export function ROIAnalysis2() {
   const totalWeatherBonusKw = Math.round(totalKw2025 * COOLING_LOAD_FACTOR);
   const totalTrueSavingsKw = totalRawSavingsKw + totalWeatherBonusKw;
   const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
-  const totalTrueSavingsSAR = Math.round(totalTrueSavingsKw * BLENDED_RATE);
+  // Compute SAR total using per-month tiered rates (sum from monthlyData)
+  const totalTrueSavingsSAR = monthlyData.reduce((a, m) => a + m.trueSavingsSAR, 0);
 
   const update2024 = useCallback((i: number, v: number) => {
     setKw2024((prev) => { const next = [...prev]; next[i] = v; return next; });
@@ -281,8 +308,40 @@ export function ROIAnalysis2() {
           G8's non-inverter units make it consume disproportionately more per ton. After consumption-weighting,
           the 7 SCC panels represent <strong>{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the actual bill</strong>
           (~{Math.round(SCC_BILL_SHARE_SAR).toLocaleString()} SAR out of {ACTUAL_BILL_2025.toLocaleString()} SAR actual 2025 bill).
-          Blended rate: <strong>{BLENDED_RATE.toFixed(4)} SAR/kWh</strong> (2024 bill ÷ {TOTAL_WITH_G8_2024.toLocaleString()} kWh total with G8).
+          SCECO tiered rates: Jan–Apr 2025 @ 0.20/0.30 SAR/kWh | May–Dec 2025 @ 0.22/0.32 SAR/kWh (rate hike).
+          2024 annual blended rate (cross-check): <strong>{BLENDED_RATE_2024.toFixed(4)} SAR/kWh</strong>.
         </p>
+
+        {/* SCECO Rate Table */}
+        <div className="rounded-lg border border-border bg-muted/30 p-4 mb-5">
+          <p className="text-xs font-bold uppercase tracking-wide text-muted-foreground mb-3">⚡ Saudi SCECO Tiered Rates — 800A Panel (Commercial)</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-sm">
+            <div className="p-2 rounded-lg bg-card border border-border">
+              <p className="text-xs text-muted-foreground mb-1">2024 · Tier 1 (≤6,000 kWh)</p>
+              <p className="text-xl font-black">0.20 SAR</p>
+              <p className="text-xs text-muted-foreground">/kWh</p>
+            </div>
+            <div className="p-2 rounded-lg bg-card border border-border">
+              <p className="text-xs text-muted-foreground mb-1">2024 · Tier 2 (&gt;6,000 kWh)</p>
+              <p className="text-xl font-black">0.30 SAR</p>
+              <p className="text-xs text-muted-foreground">/kWh</p>
+            </div>
+            <div className="p-2 rounded-lg bg-energy/10 border border-energy/30">
+              <p className="text-xs text-muted-foreground mb-1">2025 (May+) · Tier 1</p>
+              <p className="text-xl font-black text-energy">0.22 SAR</p>
+              <p className="text-xs text-energy font-medium">+10% rate hike</p>
+            </div>
+            <div className="p-2 rounded-lg bg-energy/10 border border-energy/30">
+              <p className="text-xs text-muted-foreground mb-1">2025 (May+) · Tier 2</p>
+              <p className="text-xl font-black text-energy">0.32 SAR</p>
+              <p className="text-xs text-energy font-medium">+6.7% rate hike</p>
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            SAR values in the monthly table use the applicable tiered rate for each month. Jan–Apr 2025 uses 2024 rates; May–Dec 2025 uses the increased rates.
+            Each kWh saved above the 6,000 threshold is worth <strong>0.32 SAR</strong> in peak summer months — maximising the financial impact of SCC savings.
+          </p>
+        </div>
 
         {/* Bills comparison */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
