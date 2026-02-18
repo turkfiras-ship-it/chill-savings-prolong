@@ -493,7 +493,8 @@ export function ROIAnalysis2() {
         <div className="rounded-xl bg-card card-elevated p-5 text-center border-t-4 border-t-chart-blue">
           <p className="text-3xl font-bold">{totalRawSavingsPct.toFixed(1)}%</p>
           <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Raw Savings % (unadjusted)</p>
-          <p className="text-xs text-muted-foreground">Before weather correction</p>
+          <p className="text-xs text-muted-foreground">kWh reduction only — before weather correction <em>and</em> rate hike</p>
+          <p className="text-[10px] text-muted-foreground mt-1 italic">⚡ Rate hike May 2025: 0.30 → 0.32 SAR/kWh — each kWh saved is worth more in SAR</p>
         </div>
         <div className="rounded-xl bg-card card-elevated p-5 text-center border-t-4 border-t-energy">
           <p className="text-3xl font-bold text-energy">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</p>
@@ -501,6 +502,29 @@ export function ROIAnalysis2() {
           <p className="text-xs text-muted-foreground">Bill comparison: 246,431 − 213,379</p>
           <p className="text-xs text-energy font-medium">vs {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill saving</p>
         </div>
+      </div>
+
+      {/* ── WHY RAW % UNDERSTATES VALUE ── */}
+      <div className="rounded-xl bg-slate-800 text-white p-5">
+        <p className="text-sm font-bold text-teal-400 mb-3">⚡ Why {totalRawSavingsPct.toFixed(1)}% Raw Savings Understates the True Value — Two Compounding Factors</p>
+        <div className="grid grid-cols-2 gap-4 text-xs">
+          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <p className="font-semibold text-white mb-1">① Weather: 2025 was +1.3°C hotter → +12% cooling demand</p>
+            <p className="text-slate-400">The building <em>needed</em> 12% more energy just to maintain the same comfort. Any kWh savings on top of that is a true efficiency gain — the raw % ignores this extra demand pressure entirely.</p>
+            <p className="text-teal-400 font-semibold mt-1">Weather-only correction adds: +{totalTrueSavingsKw - (DEFAULT_KW_2024.reduce((a,b)=>a+b,0) - DEFAULT_KW_2025.reduce((a,b)=>a+b,0))} kWh → worth more SAR at 2025 rates</p>
+          </div>
+          <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+            <p className="font-semibold text-white mb-1">② SCECO Rate Hike: May 2025 — Tier 2 rose from 0.30 → 0.32 SAR/kWh (+6.7%)</p>
+            <p className="text-slate-400">Since May 2025, every kWh saved above the 6,000 kWh/month threshold is worth <strong className="text-white">0.32 SAR</strong> instead of 0.30 SAR. This means even a "small" kWh reduction translates to a larger SAR saving in the peak months (May–Sep) when both consumption and tariff are highest.</p>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
+              <div className="bg-white/5 rounded p-1.5 text-center"><p className="text-slate-400">2024 Tier 2</p><p className="text-white font-bold">0.30 SAR/kWh</p></div>
+              <div className="bg-teal-500/20 rounded p-1.5 text-center border border-teal-400/30"><p className="text-teal-300">2025 May+ Tier 2</p><p className="text-teal-400 font-bold">0.32 SAR/kWh ↑</p></div>
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-slate-400 mt-3 border-t border-white/10 pt-3">
+          <strong className="text-white">Net effect:</strong> The {totalRawSavingsPct.toFixed(1)}% raw kWh saving becomes a <strong className="text-teal-400">{totalTrueSavingsPct.toFixed(1)}% true efficiency gain</strong> once weather demand is added — and that gain is valued at the higher 2025 rate, producing <strong className="text-teal-400">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</strong> in true financial savings vs the {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill difference.
+        </p>
       </div>
 
       {/* ── BUILDING DEMAND SNAPSHOT ── */}
