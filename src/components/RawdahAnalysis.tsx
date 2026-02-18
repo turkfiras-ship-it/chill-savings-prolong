@@ -195,7 +195,7 @@ export function RawdahAnalysis() {
                 <div className="flex items-start gap-2">
                   <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
                   <p className="text-sm">
-                    G8 consumes <span className="font-bold">90,883 kWh/year</span> (13.9% of total) — comparable to a single package unit.
+                    G8 consumes <span className="font-bold">86,171 kWh/year</span> (13.1% of total) — comparable to a single package unit.
                     This <span className="font-semibold">dilutes the bill-level savings percentage</span> because G8 consumption is unaffected by the SCC system but still appears on the same meter.
                   </p>
                 </div>
