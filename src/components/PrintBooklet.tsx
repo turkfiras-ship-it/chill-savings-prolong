@@ -573,37 +573,38 @@ export function PrintBooklet() {
               </tr>
             </thead>
             <tbody>
-              {[
-                { m:'Jan', r24:25464, r25:26381, rate:0.20 },
-                { m:'Feb', r24:35426, r25:25607, rate:0.20 },
-                { m:'Mar', r24:36250, r25:40720, rate:0.20 },
-                { m:'Apr', r24:39224, r25:51248, rate:0.20 },
-                { m:'May', r24:60210, r25:51220, rate:0.32 },
-                { m:'Jun', r24:68993, r25:62835, rate:0.32 },
-                { m:'Jul', r24:72871, r25:68338, rate:0.32 },
-                { m:'Aug', r24:77243, r25:69715, rate:0.32 },
-                { m:'Sep', r24:60655, r25:56067, rate:0.32 },
-                { m:'Oct', r24:42915, r25:40182, rate:0.30 },
-                { m:'Nov', r24:33158, r25:32335, rate:0.20 },
-                { m:'Dec', r24:22304, r25:21823, rate:0.20 },
-              ].map((row) => {
+              {(
+                [
+                  { m:'Jan', r24:25464, r25:26381, rate:0.20 },
+                  { m:'Feb', r24:35426, r25:25607, rate:0.20 },
+                  { m:'Mar', r24:36250, r25:40720, rate:0.20 },
+                  { m:'Apr', r24:39224, r25:51248, rate:0.20 },
+                  { m:'May', r24:60210, r25:51220, rate:0.32 },
+                  { m:'Jun', r24:68993, r25:62835, rate:0.32 },
+                  { m:'Jul', r24:72871, r25:68338, rate:0.32 },
+                  { m:'Aug', r24:77243, r25:69715, rate:0.32 },
+                  { m:'Sep', r24:60655, r25:56067, rate:0.32 },
+                  { m:'Oct', r24:42915, r25:40182, rate:0.30 },
+                  { m:'Nov', r24:33158, r25:32335, rate:0.20 },
+                  { m:'Dec', r24:22304, r25:21823, rate:0.20 },
+                ] as { m: string; r24: number; r25: number; rate: number }[]
+              ).map((row) => {
                 const adj25 = Math.round(row.r25 * 1.12);
                 const rawDelta = row.r24 - row.r25;
                 const weatherBonus = Math.round(row.r25 * 0.12);
                 const trueKw = rawDelta + weatherBonus;
-                const blended = row.r25 <= 6000 ? row.rate * 0.667 : row.rate; // simplified blended
                 const sarVal = Math.round(trueKw * row.rate);
                 return (
                   <tr key={row.m} className="border-b border-slate-100">
                     <td className="py-0.5 px-2 font-medium">{row.m}</td>
                     <td className="py-0.5 px-2 text-right tabular-nums">{row.r24.toLocaleString()}</td>
-                    <td className="py-0.5 px-2 text-right tabular-nums text-muted-foreground">{row.r25.toLocaleString()}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums">{row.r25.toLocaleString()}</td>
                     <td className="py-0.5 px-2 text-right tabular-nums">{adj25.toLocaleString()}</td>
                     <td className={`py-0.5 px-2 text-right tabular-nums font-medium ${rawDelta >= 0 ? 'text-teal-600' : 'text-red-500'}`}>{rawDelta >= 0 ? '+' : ''}{rawDelta.toLocaleString()}</td>
-                    <td className="py-0.5 px-2 text-right tabular-nums text-amber-600">+{weatherBonus.toLocaleString()}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums">{'+' + weatherBonus.toLocaleString()}</td>
                     <td className={`py-0.5 px-2 text-right tabular-nums font-bold ${trueKw >= 0 ? 'text-teal-700' : 'text-red-600'}`}>{trueKw >= 0 ? '+' : ''}{trueKw.toLocaleString()}</td>
                     <td className={`py-0.5 px-2 text-right tabular-nums font-bold ${sarVal >= 0 ? 'text-teal-700' : 'text-red-600'}`}>{sarVal >= 0 ? '+' : ''}{sarVal.toLocaleString()}</td>
-                    <td className="py-0.5 px-2 text-right tabular-nums text-muted-foreground">{row.rate.toFixed(2)}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums">{row.rate.toFixed(2)}</td>
                   </tr>
                 );
               })}
@@ -727,21 +728,6 @@ export function PrintBooklet() {
             <p className="text-xs"><strong className="text-teal-400">Final Conclusion:</strong> {managementConclusion.headline}. Investment fully recovered in {roi.paybackPeriodYears.toFixed(1)} years, with {Math.round(savings.annualOperationalSavings).toLocaleString()} SAR pure profit every year thereafter, plus {replacement.avgTotal.toLocaleString()} SAR avoided at year 10.</p>
           </div>
         </div>
-      </div>
-
-      {/* Print Styles */}
-      <style>{`
-        @media print {
-          body * { visibility: hidden; }
-          .print-booklet, .print-booklet * { visibility: visible !important; }
-          .print-booklet { position: absolute; left: 0; top: 0; width: 100%; }
-          .print-page { page-break-inside: avoid; }
-          .print\\:hidden { display: none !important; }
-          @page { margin: 0.4in; size: A4; }
-          /* Force background colors in print */
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-        }
-      `}</style>
     </div>
   );
 }

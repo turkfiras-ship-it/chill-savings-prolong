@@ -165,3 +165,12 @@ a[href*="lovable.dev"][target="_blank"] {
 #lovable-badge {
   display: none !important;
 }
+
+@media print {
+  body * { visibility: hidden; }
+  .print-booklet, .print-booklet * { visibility: visible !important; }
+  .print-booklet { position: absolute; left: 0; top: 0; width: 100%; }
+  .print-page { page-break-inside: avoid; }
+  @page { margin: 0.4in; size: A4; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
