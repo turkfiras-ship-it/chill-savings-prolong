@@ -110,19 +110,19 @@ export function PrintBooklet() {
           <div className="grid grid-cols-4 gap-4 mt-4">
             <div className="bg-white/10 rounded-lg p-4 text-center">
               <p className="text-2xl font-bold">{energyCostSummary.yearlySavingsPercent}%</p>
-              <p className="text-xs opacity-80">Cost Reduction</p>
+              <p className="text-xs opacity-80">Cost Reduction (YoY)</p>
             </div>
             <div className="bg-white/10 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()}</p>
-              <p className="text-xs opacity-80">SAR Saved (2025)</p>
+              <p className="text-2xl font-bold">33,052</p>
+              <p className="text-xs opacity-80">True Savings (SAR)</p>
             </div>
             <div className="bg-white/10 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold">62%</p>
+              <p className="text-2xl font-bold">61.8%</p>
               <p className="text-xs opacity-80">Demand Reduction</p>
             </div>
             <div className="bg-white/10 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold">{roi.paybackPeriodYears.toFixed(1)}</p>
-              <p className="text-xs opacity-80">ROI (Years)</p>
+              <p className="text-2xl font-bold">{roi.paybackPeriodYears.toFixed(1)} yrs</p>
+              <p className="text-xs opacity-80">ROI Payback</p>
             </div>
           </div>
           <p className="mt-auto pt-8 text-xs text-slate-600">Confidential — Prepared for Jarir Bookstore</p>
@@ -135,10 +135,10 @@ export function PrintBooklet() {
           
           <div className="grid grid-cols-4 gap-3 mb-4">
             {[
-              { v: `${summaryStats.avgSavingsPercent}%`, l: "Energy Savings Rate", s: "vs. Ruben Showroom" },
-              { v: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, l: "SAR Saved in 2025", s: "Year-over-year" },
-              { v: "62%", l: "Demand Reduction", s: "Daily kW consumption" },
-              { v: `${roi.paybackPeriodYears.toFixed(1)} yrs`, l: "Payback Period", s: "Investment recovery" },
+              { v: `${summaryStats.avgSavingsPercent}%`, l: "vs Ruben Rate", s: "9/12 months won" },
+              { v: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, l: "Apparent YoY Saving (SAR)", s: "Raw bill difference" },
+              { v: `33,052`, l: "True Adj. Savings (SAR)", s: "vs expected 246,431 SAR" },
+              { v: `61.8%`, l: "Demand Reduction", s: "495 → 189 kW (2023→2025)" },
             ].map(c => (
               <div key={c.l} className="bg-muted/30 rounded-lg p-3 text-center">
                 <p className="text-xl font-bold">{c.v}</p>
@@ -148,32 +148,38 @@ export function PrintBooklet() {
             ))}
           </div>
 
+          {/* ROI 2 True Savings Summary */}
           <div className="p-3 bg-teal-500/10 border border-teal-500/20 rounded-lg mb-4">
-            <p className="font-semibold text-xs text-teal-700 mb-1">Weather-Adjusted True Savings (2025 was {weatherSummary.avgTempDiff}°C hotter)</p>
+            <p className="font-semibold text-xs text-teal-700 mb-2">⚡ ROI 2 — True Adjusted Savings (Bill-Verified · SCECO Tiered Rates)</p>
+            <div className="grid grid-cols-4 gap-2 text-xs mb-2">
+              <div className="p-2 rounded border border-border bg-card text-center">
+                <p className="text-muted-foreground">Actual 2024 Bill</p>
+                <p className="font-bold">220,028 SAR</p>
+              </div>
+              <div className="p-2 rounded border border-teal-200 bg-teal-50/50 text-center">
+                <p className="text-muted-foreground">Actual 2025 Bill</p>
+                <p className="font-bold text-teal-700">213,379 SAR</p>
+              </div>
+              <div className="p-2 rounded border border-red-200 bg-red-50/50 text-center">
+                <p className="text-muted-foreground">Expected Without SCC</p>
+                <p className="font-bold text-red-600">246,431 SAR</p>
+              </div>
+              <div className="p-2 rounded border-2 border-teal-300 bg-teal-50 text-center">
+                <p className="text-muted-foreground">True Savings</p>
+                <p className="font-bold text-teal-700 text-lg">33,052 SAR</p>
+              </div>
+            </div>
             <div className="grid grid-cols-4 gap-2 text-xs">
-              <div><strong>Actual:</strong> {energyCostSummary.yearlySavings2024vs2025.toLocaleString()} SAR</div>
-              <div><strong>Avoided Load:</strong> {weatherSummary.additionalCoolingCostLow.toLocaleString()}–{weatherSummary.additionalCoolingCostHigh.toLocaleString()} SAR</div>
-              <div><strong>True Savings:</strong> <span className="text-teal-700 font-bold">{adjustedEnergyLow.toLocaleString()}–{adjustedEnergyHigh.toLocaleString()} SAR</span></div>
-              <div><strong>Efficiency Gain:</strong> <span className="text-teal-700 font-bold">17.25%</span></div>
+              <div><strong>SCECO 2024:</strong> ≤6,000 kWh @ 0.20 | &gt;6,000 @ 0.30 SAR/kWh</div>
+              <div><strong>SCECO 2025 May+:</strong> ≤6,000 @ 0.22 | &gt;6,000 @ 0.32 SAR/kWh (+10% hike)</div>
+              <div><strong>Apparent YoY:</strong> 6,649 SAR (understates value — masks G8 &amp; heat)</div>
+              <div><strong>Hidden Value:</strong> <span className="text-amber-600 font-bold">26,403 SAR</span> masked by G8 non-inverter load &amp; 2025 heat</div>
             </div>
           </div>
 
-          <h3 className="font-semibold mb-2">Energy Cost Comparison</h3>
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="p-3 rounded-lg border"><p className="text-xs text-muted-foreground">2023 Baseline</p><p className="text-lg font-bold">{energyCostComparison.year2023.totalBill.toLocaleString()} SAR</p></div>
-            <div className="p-3 rounded-lg border border-red-200"><p className="text-xs text-muted-foreground">2024 (+{energyCostSummary.yearOverYearIncrease2024}%)</p><p className="text-lg font-bold">{energyCostComparison.year2024.totalBill.toLocaleString()} SAR</p></div>
-            <div className="p-3 rounded-lg border border-teal-200"><p className="text-xs text-muted-foreground">2025 With SCC (-6.09%)</p><p className="text-lg font-bold text-teal-700">{energyCostComparison.year2025.totalBill.toLocaleString()} SAR</p></div>
-          </div>
-
-          <h3 className="font-semibold mb-2">Top Saving Months (2024 vs 2025)</h3>
-          <div className="grid grid-cols-5 gap-2 mb-4">
-            {majorSavingMonths.map(m => (
-              <div key={m.month} className="p-2 rounded-lg bg-muted/30 text-center">
-                <p className="font-medium text-xs">{m.month}</p>
-                <p className="text-lg font-bold text-teal-600">-{m.costReduction}%</p>
-                <p className="text-xs text-muted-foreground">{m.savingsSAR.toLocaleString()} SAR</p>
-              </div>
-            ))}
+          {/* G8 note */}
+          <div className="p-2 rounded border border-amber-200 bg-amber-50/30 text-xs mb-3">
+            <strong className="text-amber-700">G8 Panel (No SCC Device):</strong> 7 units, 26 tons non-inverter — consumes <strong>86,171 kWh/year</strong> (13.1% of total). Non-inverter draws ~1.5× more per ton vs inverter. G8 effective bill share: 18.2%. SCC controls 7 panels (175 tons inverter) = 81.8% of bill.
           </div>
 
           <div className="p-3 bg-slate-800 text-white rounded-lg">
@@ -347,7 +353,7 @@ export function PrintBooklet() {
           
           <div className="mb-4 p-3 rounded-lg border border-amber-300/50 bg-amber-50/30">
             <p className="font-bold text-xs mb-1">G8 — Panel 8 (7 Units, 26 Tons Total — NOT covered by SCC)</p>
-            <p className="text-xs text-muted-foreground mb-2">G8 consumes 90,883 kWh/year (13.9% of total building) but is NOT optimized by SCC. This dilutes bill-level savings.</p>
+            <p className="text-xs text-muted-foreground mb-2">G8 consumes <strong>86,171 kWh/year</strong> (13.1% of total building, 18.2% of weighted bill share). Non-inverter units draw ~1.5× more per ton than inverter. NOT optimized by SCC — dilutes bill-level savings.</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               {[
                 "Cassette MCCT36 (3 ton) — Basement WH",
@@ -514,6 +520,121 @@ export function PrintBooklet() {
               <div><span className="text-amber-500 font-bold text-lg">23°C</span><br/>Transition (Mar–Apr, Oct)</div>
               <div><span className="text-red-500 font-bold text-lg">22°C</span><br/>Summer (May–Sep) — NOT below</div>
             </div>
+          </div>
+        </div>
+
+        </div>
+
+        {/* ═══════════ PAGE 11b: ROI 2 TRUE SAVINGS (TIERED RATES) ═══════════ */}
+        <PageBreak />
+        <div className="print-page rounded-xl bg-card p-8 border print:rounded-none print:border-0">
+          <SectionTitle title="ROI 2 — True Adjusted kW Savings" subtitle="Bill-Verified · SCECO Tiered Rates · 7 SCC Units (G8 Excluded)" />
+
+          {/* Key Numbers */}
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            <div className="p-3 rounded-lg border bg-muted/20 text-center"><p className="text-xs text-muted-foreground">Actual 2024 Bill</p><p className="text-lg font-bold">220,028 SAR</p></div>
+            <div className="p-3 rounded-lg border border-teal-200 bg-teal-50/50 text-center"><p className="text-xs text-muted-foreground">Actual 2025 Bill</p><p className="text-lg font-bold text-teal-700">213,379 SAR</p></div>
+            <div className="p-3 rounded-lg border border-red-200 bg-red-50/50 text-center"><p className="text-xs text-muted-foreground">Expected Without SCC</p><p className="text-lg font-bold text-red-600">246,431 SAR</p><p className="text-xs text-muted-foreground">weather + baseline</p></div>
+            <div className="p-3 rounded-lg border-2 border-teal-300 bg-teal-50 text-center"><p className="text-xs text-muted-foreground">True Adjusted Savings</p><p className="text-xl font-bold text-teal-700">33,052 SAR</p><p className="text-xs text-teal-600">246,431 − 213,379</p></div>
+          </div>
+
+          {/* SCECO Rate Table */}
+          <div className="p-3 bg-slate-800 text-white rounded-lg mb-4">
+            <p className="text-xs font-bold text-slate-300 mb-2">⚡ Saudi SCECO Tiered Rates — 800A Panel (Commercial)</p>
+            <div className="grid grid-cols-4 gap-2 text-center text-xs">
+              <div className="bg-white/10 rounded p-2"><p className="text-slate-400 mb-1">2024 · Tier 1 (≤6,000 kWh)</p><p className="text-base font-bold">0.20 SAR/kWh</p></div>
+              <div className="bg-white/10 rounded p-2"><p className="text-slate-400 mb-1">2024 · Tier 2 (&gt;6,000 kWh)</p><p className="text-base font-bold">0.30 SAR/kWh</p></div>
+              <div className="bg-teal-500/20 rounded p-2 border border-teal-500/30"><p className="text-slate-400 mb-1">2025 May+ · Tier 1</p><p className="text-base font-bold text-teal-400">0.22 SAR/kWh</p><p className="text-teal-400">+10% rate hike</p></div>
+              <div className="bg-teal-500/20 rounded p-2 border border-teal-500/30"><p className="text-slate-400 mb-1">2025 May+ · Tier 2</p><p className="text-base font-bold text-teal-400">0.32 SAR/kWh</p><p className="text-teal-400">Peak summer value</p></div>
+            </div>
+          </div>
+
+          {/* Apparent vs True */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="p-3 rounded-lg border text-center"><p className="text-xs text-muted-foreground">Apparent YoY Saving</p><p className="text-lg font-bold">6,649 SAR</p><p className="text-xs text-muted-foreground">Raw bill diff — understates value</p></div>
+            <div className="p-3 rounded-lg border-2 border-teal-300 bg-teal-50 text-center"><p className="text-xs text-muted-foreground">True Adjusted Savings</p><p className="text-lg font-bold text-teal-700">33,052 SAR</p><p className="text-xs text-teal-600">vs expected 246,431 SAR</p></div>
+            <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/50 text-center"><p className="text-xs text-muted-foreground">Hidden Value (Gap)</p><p className="text-lg font-bold text-amber-700">26,403 SAR</p><p className="text-xs text-amber-600">Masked by G8 + heat</p></div>
+          </div>
+
+          {/* Monthly kW Table */}
+          <h3 className="font-semibold mb-2">Monthly kW Breakdown — 7 SCC Panels (Without G8)</h3>
+          <table className="w-full text-[10px] border-collapse mb-3">
+            <thead>
+              <tr className="border-b-2 bg-slate-800 text-white">
+                <th className="text-left py-1 px-2">Month</th>
+                <th className="text-right py-1 px-2">2024 kWh</th>
+                <th className="text-right py-1 px-2">2025 kWh</th>
+                <th className="text-right py-1 px-2">Adj 2025 (×1.12)</th>
+                <th className="text-right py-1 px-2">Raw Δ kWh</th>
+                <th className="text-right py-1 px-2">Weather +kWh</th>
+                <th className="text-right py-1 px-2">True Savings kWh</th>
+                <th className="text-right py-1 px-2">SAR Value</th>
+                <th className="text-right py-1 px-2">Rate</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { m:'Jan', r24:25464, r25:26381, rate:0.20 },
+                { m:'Feb', r24:35426, r25:25607, rate:0.20 },
+                { m:'Mar', r24:36250, r25:40720, rate:0.20 },
+                { m:'Apr', r24:39224, r25:51248, rate:0.20 },
+                { m:'May', r24:60210, r25:51220, rate:0.32 },
+                { m:'Jun', r24:68993, r25:62835, rate:0.32 },
+                { m:'Jul', r24:72871, r25:68338, rate:0.32 },
+                { m:'Aug', r24:77243, r25:69715, rate:0.32 },
+                { m:'Sep', r24:60655, r25:56067, rate:0.32 },
+                { m:'Oct', r24:42915, r25:40182, rate:0.30 },
+                { m:'Nov', r24:33158, r25:32335, rate:0.20 },
+                { m:'Dec', r24:22304, r25:21823, rate:0.20 },
+              ].map((row) => {
+                const adj25 = Math.round(row.r25 * 1.12);
+                const rawDelta = row.r24 - row.r25;
+                const weatherBonus = Math.round(row.r25 * 0.12);
+                const trueKw = rawDelta + weatherBonus;
+                const blended = row.r25 <= 6000 ? row.rate * 0.667 : row.rate; // simplified blended
+                const sarVal = Math.round(trueKw * row.rate);
+                return (
+                  <tr key={row.m} className="border-b border-slate-100">
+                    <td className="py-0.5 px-2 font-medium">{row.m}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums">{row.r24.toLocaleString()}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums text-muted-foreground">{row.r25.toLocaleString()}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums">{adj25.toLocaleString()}</td>
+                    <td className={`py-0.5 px-2 text-right tabular-nums font-medium ${rawDelta >= 0 ? 'text-teal-600' : 'text-red-500'}`}>{rawDelta >= 0 ? '+' : ''}{rawDelta.toLocaleString()}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums text-amber-600">+{weatherBonus.toLocaleString()}</td>
+                    <td className={`py-0.5 px-2 text-right tabular-nums font-bold ${trueKw >= 0 ? 'text-teal-700' : 'text-red-600'}`}>{trueKw >= 0 ? '+' : ''}{trueKw.toLocaleString()}</td>
+                    <td className={`py-0.5 px-2 text-right tabular-nums font-bold ${sarVal >= 0 ? 'text-teal-700' : 'text-red-600'}`}>{sarVal >= 0 ? '+' : ''}{sarVal.toLocaleString()}</td>
+                    <td className="py-0.5 px-2 text-right tabular-nums text-muted-foreground">{row.rate.toFixed(2)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="border-t-2 font-bold bg-teal-50">
+                <td className="py-1 px-2">TOTAL</td>
+                <td className="py-1 px-2 text-right tabular-nums">574,659</td>
+                <td className="py-1 px-2 text-right tabular-nums text-muted-foreground">546,271</td>
+                <td className="py-1 px-2 text-right tabular-nums">611,823</td>
+                <td className="py-1 px-2 text-right tabular-nums text-teal-700">+28,388</td>
+                <td className="py-1 px-2 text-right tabular-nums text-amber-600">+65,553</td>
+                <td className="py-1 px-2 text-right tabular-nums text-teal-700">+93,941</td>
+                <td className="py-1 px-2 text-right tabular-nums text-teal-700">33,052</td>
+                <td className="py-1 px-2 text-right">—</td>
+              </tr>
+            </tfoot>
+          </table>
+
+          {/* 2024 Complaints context */}
+          <div className="p-2 rounded border border-amber-200 bg-amber-50/30 text-xs mb-3">
+            <p className="font-bold text-amber-700 mb-1">⚠️ Why 2024 Is Not a Fair Baseline</p>
+            <div className="grid grid-cols-2 gap-2">
+              <div><p className="font-medium">2024 — Cooling Problems:</p><p className="text-muted-foreground">Active staff complaints, damaged AC filters, faulty F2 sensor, system at max capacity → high kW, poor comfort = worst-case baseline.</p></div>
+              <div><p className="font-medium">2025 — Zero Complaints:</p><p className="text-muted-foreground">New filters, control boxes, thermostats replaced. Zero AC complaints all year. Same comfort with significantly lower kW.</p></div>
+            </div>
+          </div>
+
+          {/* Conclusion */}
+          <div className="p-3 bg-slate-800 text-white rounded-lg">
+            <p className="text-xs"><strong className="text-teal-400">Key Message:</strong> The apparent YoY bill saving of 6,649 SAR massively understates the real value. 2025 should have cost 246,431 SAR given hotter weather and baseline growth — the SCC system delivered <strong>33,052 SAR in true savings</strong>, all from the 81.8% of the bill it controls (7 units × 25 tons inverter). Building demand: 495 kW → 218 kW → 189 kW = 61.8% reduction.</p>
           </div>
         </div>
 

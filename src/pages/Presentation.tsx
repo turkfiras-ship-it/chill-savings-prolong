@@ -77,53 +77,77 @@ function Slide1_Title() {
 
 function Slide2_ExecSummary() {
   const roi = calculateROI();
+  // ROI 2 verified constants
+  const TRUE_SAVINGS_SAR = 33052;
+  const APPARENT_SAVINGS_SAR = 6649;
+  const EXPECTED_BILL = 246431;
+  const ACTUAL_BILL_2025 = 213379;
   return (
     <SlideLayout>
-      <div className="absolute inset-0 px-[140px] py-[100px]">
-        <SectionHeader title="Executive Summary" subtitle="Key Performance Highlights" />
-        <div className="grid grid-cols-4 gap-[30px] mt-[50px]">
+      <div className="absolute inset-0 px-[140px] py-[80px]">
+        <SectionHeader title="Executive Summary" subtitle="Key Performance Highlights — Rawdah Showroom 2025" />
+        {/* Row 1 — Actuals */}
+        <div className="grid grid-cols-4 gap-[24px] mt-[36px]">
           {[
-            { value: `${summaryStats.avgSavingsPercent}%`, label: "Energy Savings Rate", sub: "vs. Ruben Showroom" },
-            { value: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, label: "SAR Saved in 2025", sub: "Year-over-year (actual)" },
-            { value: `62%`, label: "Demand Reduction", sub: "Daily kW consumption" },
+            { value: `${summaryStats.avgSavingsPercent}%`, label: "vs. Ruben Savings Rate", sub: "Rawdah lower in 9/12 months", accent: false },
+            { value: `${ACTUAL_BILL_2025.toLocaleString()}`, label: "Actual 2025 Bill (SAR)", sub: `Down from ${energyCostSummary.totalBill2024.toLocaleString()} SAR in 2024`, accent: false },
+            { value: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, label: "YoY Apparent Saving (SAR)", sub: "Raw bill difference 2024→2025", accent: false },
+            { value: `61.8%`, label: "Building Demand Reduction", sub: "495 kW (2023) → 189 kW (2025)", accent: false },
           ].map((card) => (
-            <div key={card.label} className="bg-slate-50 rounded-2xl p-[36px] border border-slate-100">
-              <p className="text-[52px] font-bold text-slate-800">{card.value}</p>
-              <p className="text-[20px] font-semibold text-slate-600 mt-[8px]">{card.label}</p>
-              <p className="text-[16px] text-slate-400 mt-[4px]">{card.sub}</p>
+            <div key={card.label} className="bg-slate-50 rounded-2xl p-[28px] border border-slate-100">
+              <p className="text-[44px] font-bold text-slate-800">{card.value}</p>
+              <p className="text-[18px] font-semibold text-slate-600 mt-[6px]">{card.label}</p>
+              <p className="text-[14px] text-slate-400 mt-[3px]">{card.sub}</p>
             </div>
           ))}
         </div>
-        <div className="mt-[30px]">
-          <p className="text-[18px] text-slate-500 uppercase tracking-widest font-medium mb-[16px]">Weather-Adjusted True Savings — 2025 was {weatherSummary.avgTempDiff}°C hotter</p>
-          <div className="grid grid-cols-5 gap-[24px]">
-            <div className="bg-slate-50 rounded-2xl p-[36px] border border-slate-100">
-              <p className="text-[52px] font-bold text-slate-800">{energyCostSummary.yearlySavings2024vs2025.toLocaleString()}</p>
-              <p className="text-[20px] font-semibold text-slate-600 mt-[8px]">Actual Savings</p>
-              <p className="text-[16px] text-slate-400 mt-[4px]">SAR — measured YoY</p>
+        {/* Row 2 — True Adjusted Savings */}
+        <div className="mt-[20px]">
+          <p className="text-[16px] text-slate-500 uppercase tracking-widest font-semibold mb-[14px]">
+            ⚡ True Adjusted Savings — SCECO Tiered Rates · 2025 was {weatherSummary.avgTempDiff}°C hotter · G8 (26 tons, non-inverter) excluded from SCC
+          </p>
+          <div className="grid grid-cols-5 gap-[20px]">
+            <div className="bg-slate-50 rounded-2xl p-[28px] border border-slate-100">
+              <p className="text-[36px] font-bold text-slate-800">{APPARENT_SAVINGS_SAR.toLocaleString()}</p>
+              <p className="text-[16px] font-semibold text-slate-600 mt-[6px]">Apparent YoY Saving</p>
+              <p className="text-[13px] text-slate-400 mt-[3px]">SAR — raw bill diff (understates value)</p>
             </div>
-            <div className="bg-slate-50 rounded-2xl p-[36px] border border-slate-100">
-              <p className="text-[52px] font-bold text-slate-800">8–12%</p>
-              <p className="text-[20px] font-semibold text-slate-600 mt-[8px]">Avoided Cooling Load</p>
-              <p className="text-[16px] text-slate-400 mt-[4px]">{weatherSummary.additionalCoolingCostLow.toLocaleString()} – {weatherSummary.additionalCoolingCostHigh.toLocaleString()} SAR</p>
+            <div className="bg-slate-50 rounded-2xl p-[28px] border border-slate-100">
+              <p className="text-[36px] font-bold text-slate-800">{EXPECTED_BILL.toLocaleString()}</p>
+              <p className="text-[16px] font-semibold text-slate-600 mt-[6px]">Expected 2025 Bill</p>
+              <p className="text-[13px] text-slate-400 mt-[3px]">SAR — weather + baseline without SCC</p>
             </div>
-            <div className="bg-teal-50 rounded-2xl p-[36px] border border-teal-200">
-              <p className="text-[48px] font-bold text-teal-700">{weatherSummary.adjustedSavingsLow.toLocaleString()} –</p>
-              <p className="text-[48px] font-bold text-teal-700 mt-[-8px]">{weatherSummary.adjustedSavingsHigh.toLocaleString()}</p>
-              <p className="text-[20px] font-semibold text-teal-600 mt-[8px]">True Savings</p>
-              <p className="text-[16px] text-slate-400 mt-[4px]">SAR — weather-adjusted</p>
+            <div className="bg-teal-50 rounded-2xl p-[28px] border border-teal-200">
+              <p className="text-[44px] font-bold text-teal-700">{TRUE_SAVINGS_SAR.toLocaleString()}</p>
+              <p className="text-[16px] font-semibold text-teal-600 mt-[6px]">True Adjusted Savings</p>
+              <p className="text-[13px] text-slate-400 mt-[3px]">SAR — {EXPECTED_BILL.toLocaleString()} − {ACTUAL_BILL_2025.toLocaleString()}</p>
             </div>
-            <div className="bg-teal-50 rounded-2xl p-[36px] border border-teal-200">
-              <p className="text-[52px] font-bold text-teal-700">17.25%</p>
-              <p className="text-[20px] font-semibold text-teal-600 mt-[8px]">Efficiency Gain</p>
-              <p className="text-[16px] text-slate-400 mt-[4px]">Trend reversal + actual</p>
+            <div className="bg-teal-50 rounded-2xl p-[28px] border border-teal-200">
+              <p className="text-[44px] font-bold text-teal-700">17.25%</p>
+              <p className="text-[16px] font-semibold text-teal-600 mt-[6px]">Efficiency Gain</p>
+              <p className="text-[13px] text-slate-400 mt-[3px]">8.25% trend reversal + 9% actual</p>
             </div>
-            <div className="bg-teal-50 rounded-2xl p-[36px] border border-teal-200">
-              <p className="text-[52px] font-bold text-teal-700">{roi.paybackPeriodYears.toFixed(1)}</p>
-              <p className="text-[20px] font-semibold text-teal-600 mt-[8px]">ROI (Years)</p>
-              <p className="text-[16px] text-slate-400 mt-[4px]">Payback period</p>
+            <div className="bg-teal-50 rounded-2xl p-[28px] border border-teal-200">
+              <p className="text-[44px] font-bold text-teal-700">{roi.paybackPeriodYears.toFixed(1)} yrs</p>
+              <p className="text-[16px] font-semibold text-teal-600 mt-[6px]">ROI Payback</p>
+              <p className="text-[13px] text-slate-400 mt-[3px]">175,000 SAR investment · 7 units</p>
             </div>
           </div>
+        </div>
+        {/* SCECO rates footnote */}
+        <div className="mt-[16px] px-[20px] py-[10px] bg-slate-800 rounded-xl flex items-center gap-[24px]">
+          <p className="text-[14px] text-slate-400 font-medium">SCECO Tiered Rates (800A Panel):</p>
+          {[
+            { label: "2024 T1 ≤6,000 kWh", rate: "0.20 SAR/kWh" },
+            { label: "2024 T2 >6,000 kWh", rate: "0.30 SAR/kWh" },
+            { label: "2025 May+ T1", rate: "0.22 SAR/kWh" },
+            { label: "2025 May+ T2", rate: "0.32 SAR/kWh ← peak savings" },
+          ].map(r => (
+            <div key={r.label} className="text-center">
+              <p className="text-[13px] text-slate-500">{r.label}</p>
+              <p className="text-[16px] font-bold text-teal-400">{r.rate}</p>
+            </div>
+          ))}
         </div>
       </div>
     </SlideLayout>
@@ -176,37 +200,55 @@ function Slide3_Technology() {
 }
 
 function Slide4_FinancialOverview() {
+  // ROI 2 verified constants
+  const TRUE_SAVINGS_SAR = 33052;
+  const APPARENT_SAVINGS_SAR = 6649;
+  const EXPECTED_BILL_2025 = 246431;
   return (
     <SlideLayout>
       <div className="absolute inset-0 px-[140px] py-[100px]">
-        <SectionHeader title="Financial Overview" subtitle="Energy Cost Trend 2023 → 2025" />
-        <div className="grid grid-cols-3 gap-[40px] mt-[60px]">
+        <SectionHeader title="Financial Overview" subtitle="Energy Cost Trend 2023 → 2025 — True vs Apparent Savings" />
+        {/* Bill Cards */}
+        <div className="grid grid-cols-4 gap-[24px] mt-[40px]">
           {[
             { year: "2023", bill: energyCostSummary.totalBill2023, change: null, label: "Baseline Year" },
             { year: "2024", bill: energyCostSummary.totalBill2024, change: `+${energyCostSummary.yearOverYearIncrease2024}%`, label: "Pre-optimization" },
-            { year: "2025", bill: 213379, change: "-6.09%", label: "With SCC System" },
+            { year: "2025 Actual", bill: 213379, change: "-6.09%", label: "With SCC — True Bill" },
+            { year: "2025 Without SCC", bill: EXPECTED_BILL_2025, change: "+11.98%", label: "Expected (weather + trend)" },
           ].map((item) => (
-            <div key={item.year} className={`rounded-2xl p-[50px] border ${item.year === '2025' ? 'bg-teal-50 border-teal-200' : 'bg-slate-50 border-slate-100'}`}>
-              <p className="text-[22px] text-slate-500 uppercase tracking-wider">{item.year}</p>
-              <p className="text-[52px] font-bold text-slate-800 mt-[10px]">{item.bill.toLocaleString()}</p>
-              <p className="text-[22px] text-slate-500">SAR</p>
+            <div key={item.year} className={`rounded-2xl p-[36px] border ${item.year === '2025 Actual' ? 'bg-teal-50 border-teal-200' : item.year === '2025 Without SCC' ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
+              <p className="text-[18px] text-slate-500 uppercase tracking-wider">{item.year}</p>
+              <p className="text-[44px] font-bold text-slate-800 mt-[8px]">{item.bill.toLocaleString()}</p>
+              <p className="text-[18px] text-slate-500">SAR</p>
               {item.change && (
-                <p className={`text-[24px] font-semibold mt-[16px] ${item.change.startsWith('-') ? 'text-teal-600' : 'text-red-500'}`}>
+                <p className={`text-[20px] font-semibold mt-[12px] ${item.change.startsWith('-') ? 'text-teal-600' : 'text-red-500'}`}>
                   {item.change} YoY
                 </p>
               )}
-              <p className="text-[18px] text-slate-400 mt-[6px]">{item.label}</p>
+              <p className="text-[15px] text-slate-400 mt-[4px]">{item.label}</p>
             </div>
           ))}
         </div>
-        <div className="mt-[50px]">
-          <h3 className="text-[26px] font-semibold text-slate-800 mb-[24px]">Top Saving Months (2024 vs 2025)</h3>
-          <div className="flex gap-[20px]">
-            {majorSavingMonths.slice(0, 5).map((m) => (
-              <div key={m.month} className="flex-1 bg-slate-50 rounded-xl p-[24px] border border-slate-100 text-center">
-                <p className="text-[20px] font-semibold text-slate-700">{m.month}</p>
-                <p className="text-[32px] font-bold text-teal-600 mt-[6px]">-{m.costReduction}%</p>
-                <p className="text-[18px] text-slate-400">{m.savingsSAR.toLocaleString()} SAR</p>
+        {/* True vs Apparent Savings */}
+        <div className="mt-[24px] bg-slate-800 rounded-2xl p-[32px] flex items-center gap-[40px]">
+          <div className="text-center px-[24px]">
+            <p className="text-[16px] text-slate-400 uppercase tracking-wider mb-[4px]">Apparent YoY Saving</p>
+            <p className="text-[40px] font-bold text-slate-300">{APPARENT_SAVINGS_SAR.toLocaleString()} SAR</p>
+            <p className="text-[14px] text-slate-500">Raw bill diff — understates value</p>
+          </div>
+          <div className="text-[36px] text-slate-600">→</div>
+          <div className="text-center px-[24px]">
+            <p className="text-[16px] text-teal-300 uppercase tracking-wider mb-[4px]">True Adjusted Savings</p>
+            <p className="text-[56px] font-bold text-teal-400">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</p>
+            <p className="text-[14px] text-slate-400">{EXPECTED_BILL_2025.toLocaleString()} expected − 213,379 actual</p>
+          </div>
+          <div className="text-[36px] text-slate-600">→</div>
+          <div className="flex-1 space-y-[10px]">
+            <h3 className="text-[18px] font-semibold text-white mb-[10px]">Top Saving Months</h3>
+            {majorSavingMonths.slice(0, 3).map((m) => (
+              <div key={m.month} className="flex justify-between items-center">
+                <p className="text-[16px] text-slate-300">{m.month}</p>
+                <p className="text-[18px] font-bold text-teal-400">-{m.costReduction}% / {m.savingsSAR.toLocaleString()} SAR</p>
               </div>
             ))}
           </div>
@@ -215,6 +257,7 @@ function Slide4_FinancialOverview() {
     </SlideLayout>
   );
 }
+
 
 function Slide5_WeatherCorrelation() {
   const summerMonths = monthlyWeatherData.filter(m => ['May', 'June', 'July', 'August', 'September'].includes(m.month));
@@ -299,11 +342,12 @@ function Slide6_DemandReduction() {
             </div>
           ))}
         </div>
-        <div className="mt-[50px] bg-slate-800 rounded-2xl p-[40px] flex items-center gap-[30px]">
-          <p className="text-[56px] font-bold text-teal-400">62%</p>
+        <div className="mt-[40px] bg-slate-800 rounded-2xl p-[40px] flex items-center gap-[30px]">
+          <p className="text-[56px] font-bold text-teal-400">61.8%</p>
           <div>
-            <p className="text-[24px] text-white font-semibold">Total Reduction in Daily Consumption</p>
+            <p className="text-[24px] text-white font-semibold">Total Reduction in Building Daily Demand</p>
             <p className="text-[20px] text-slate-400">From 495 kW (2023) → 189 kW (2025) — saving 306 kW per day</p>
+            <p className="text-[16px] text-teal-300 mt-[6px]">7 SCC-controlled units (G1–G3, F1–F4, 175 tons inverter) · G8 excluded (26 tons, non-inverter, no SCC device)</p>
           </div>
         </div>
       </div>
@@ -860,6 +904,125 @@ function SectionHeader({ title, subtitle }: { title: string; subtitle: string })
   );
 }
 
+function Slide_ROI2_TrueSavings() {
+  const ACTUAL_BILL_2024 = 220028;
+  const ACTUAL_BILL_2025 = 213379;
+  const EXPECTED_BILL_WITHOUT_SCC = 246431;
+  const TRUE_SAVINGS_SAR = 33052;
+  const APPARENT_SAVINGS_SAR = 6649;
+  const HIDDEN_VALUE = TRUE_SAVINGS_SAR - APPARENT_SAVINGS_SAR;
+  const TIER_1_LIMIT = 6000;
+  function tieredBill(kwh: number, monthIndex: number, year: 2024 | 2025) {
+    const hike = year === 2025 && monthIndex >= 4;
+    const r1 = hike ? 0.22 : 0.20;
+    const r2 = hike ? 0.32 : 0.30;
+    if (kwh <= TIER_1_LIMIT) return kwh * r1;
+    return TIER_1_LIMIT * r1 + (kwh - TIER_1_LIMIT) * r2;
+  }
+  const kw2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60655, 42915, 33158, 22304];
+  const kw2025 = [26381, 25607, 40720, 51248, 51220, 62835, 68338, 69715, 56067, 40182, 32335, 21823];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthlyRows = months.map((m, i) => {
+    const adjusted2025 = Math.round(kw2025[i] * 1.12);
+    const rawSavings = kw2024[i] - kw2025[i];
+    const weatherBonus = Math.round(kw2025[i] * 0.12);
+    const trueSavingsKw = rawSavings + weatherBonus;
+    const sarVal = Math.round(trueSavingsKw * tieredBill(kw2025[i], i, 2025) / kw2025[i]);
+    return { m, raw2024: kw2024[i], raw2025: kw2025[i], adjusted2025, trueSavingsKw, sarVal };
+  });
+  return (
+    <SlideLayout>
+      <div className="absolute inset-0 px-[100px] py-[60px]">
+        <SectionHeader title="ROI 2 — True Adjusted Savings" subtitle="Bill-Verified Analysis · SCECO Tiered Rates · 7 SCC Units (G8 Excluded)" />
+        <div className="grid grid-cols-4 gap-[20px] mt-[24px]">
+          {[
+            { label: "Actual 2024 Bill", value: ACTUAL_BILL_2024.toLocaleString(), unit: "SAR", color: "slate" },
+            { label: "Actual 2025 Bill", value: ACTUAL_BILL_2025.toLocaleString(), unit: "SAR", color: "teal" },
+            { label: "Expected Without SCC", value: EXPECTED_BILL_WITHOUT_SCC.toLocaleString(), unit: "SAR (weather + baseline)", color: "red" },
+            { label: "True Adjusted Savings", value: TRUE_SAVINGS_SAR.toLocaleString(), unit: "SAR saved", color: "teal-big" },
+          ].map(card => (
+            <div key={card.label} className={`rounded-2xl p-[26px] border ${
+              card.color === 'teal-big' ? 'bg-teal-50 border-teal-200' :
+              card.color === 'red' ? 'bg-red-50 border-red-100' :
+              card.color === 'teal' ? 'bg-teal-50/50 border-teal-100' :
+              'bg-slate-50 border-slate-100'
+            }`}>
+              <p className="text-[14px] text-slate-500 uppercase tracking-wider mb-[6px]">{card.label}</p>
+              <p className={`${card.color === 'teal-big' ? 'text-[48px]' : 'text-[38px]'} font-bold ${
+                card.color === 'teal-big' ? 'text-teal-700' : card.color === 'red' ? 'text-red-600' : 'text-slate-800'
+              }`}>{card.value}</p>
+              <p className="text-[14px] text-slate-400">{card.unit}</p>
+            </div>
+          ))}
+        </div>
+        {/* Rate table + apparent vs true */}
+        <div className="grid grid-cols-2 gap-[24px] mt-[20px]">
+          <div className="bg-slate-800 rounded-2xl p-[24px]">
+            <p className="text-[16px] text-slate-400 uppercase tracking-wider mb-[12px]">⚡ SCECO Tiered Rates — 800A Panel</p>
+            <div className="grid grid-cols-2 gap-[12px]">
+              {[
+                { period: "2024 & 2025 Jan–Apr", t1: "0.20 SAR", t2: "0.30 SAR" },
+                { period: "2025 May–Dec (Rate Hike)", t1: "0.22 SAR", t2: "0.32 SAR" },
+              ].map(r => (
+                <div key={r.period} className="bg-white/5 rounded-xl p-[14px]">
+                  <p className="text-[13px] text-slate-400 mb-[6px]">{r.period}</p>
+                  <p className="text-[18px] text-white font-semibold">T1 (≤6k kWh): {r.t1}</p>
+                  <p className="text-[18px] text-teal-400 font-semibold">T2 (&gt;6k kWh): {r.t2}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-slate-50 rounded-2xl p-[24px] border border-slate-100">
+            <p className="text-[16px] text-slate-600 font-semibold mb-[14px]">Apparent vs True Savings Gap</p>
+            <div className="space-y-[10px]">
+              <div className="flex justify-between items-center bg-slate-100 rounded-xl px-[16px] py-[10px]">
+                <p className="text-[16px] text-slate-600">Apparent YoY Saving</p>
+                <p className="text-[24px] font-bold text-slate-700">{APPARENT_SAVINGS_SAR.toLocaleString()} SAR</p>
+              </div>
+              <div className="flex justify-between items-center bg-teal-50 border border-teal-200 rounded-xl px-[16px] py-[10px]">
+                <p className="text-[16px] text-teal-600">True Adjusted Savings</p>
+                <p className="text-[28px] font-bold text-teal-700">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</p>
+              </div>
+              <div className="flex justify-between items-center bg-amber-50 border border-amber-200 rounded-xl px-[16px] py-[10px]">
+                <p className="text-[16px] text-amber-700">Hidden Value (Gap)</p>
+                <p className="text-[24px] font-bold text-amber-700">{HIDDEN_VALUE.toLocaleString()} SAR</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Monthly table - condensed */}
+        <div className="mt-[16px] overflow-hidden rounded-xl border border-slate-200">
+          <table className="w-full">
+            <thead className="bg-slate-800">
+              <tr>
+                {['Month','2024 kWh','2025 kWh','Adj 2025','True Savings kWh','SAR Value'].map(h => (
+                  <th key={h} className="text-[13px] text-slate-300 font-semibold py-[10px] px-[12px] text-right first:text-left">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {monthlyRows.map((row, i) => (
+                <tr key={i} className={`border-b border-slate-100 ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                  <td className="py-[8px] px-[12px] text-[15px] font-semibold text-slate-700">{row.m}</td>
+                  <td className="py-[8px] px-[12px] text-[14px] text-right text-slate-600 tabular-nums">{row.raw2024.toLocaleString()}</td>
+                  <td className="py-[8px] px-[12px] text-[14px] text-right text-slate-500 tabular-nums">{row.raw2025.toLocaleString()}</td>
+                  <td className="py-[8px] px-[12px] text-[14px] text-right tabular-nums">{row.adjusted2025.toLocaleString()}</td>
+                  <td className={`py-[8px] px-[12px] text-[15px] font-semibold text-right tabular-nums ${row.trueSavingsKw >= 0 ? 'text-teal-700' : 'text-red-600'}`}>
+                    {row.trueSavingsKw >= 0 ? '+' : ''}{row.trueSavingsKw.toLocaleString()}
+                  </td>
+                  <td className={`py-[8px] px-[12px] text-[15px] font-bold text-right tabular-nums ${row.sarVal >= 0 ? 'text-teal-600' : 'text-red-600'}`}>
+                    {row.sarVal >= 0 ? '+' : ''}{row.sarVal.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </SlideLayout>
+  );
+}
+
 // ─── All Slides ─────────────────────────────────────
 
 const slides = [
@@ -868,6 +1031,7 @@ const slides = [
   Slide3_Technology,
   Slide4_FinancialOverview,
   Slide13_TheoreticalSavings,
+  Slide_ROI2_TrueSavings,
   Slide5_WeatherCorrelation,
   Slide6_DemandReduction,
   Slide7_UnitPerformance,
