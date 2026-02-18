@@ -267,8 +267,8 @@ export function RawdahAnalysis() {
                     borderRadius: "8px",
                   }}
                   formatter={(value: number, name: string) => {
-                    if (name === 'consumption') return [`${value} Kw`, 'Daily Consumption'];
-                    return [`${value} Kwh`, 'Average'];
+                    if (name === 'consumption') return [`${value} kW`, 'Daily Consumption'];
+                    return [`${value} kWh`, 'Average'];
                   }}
                 />
                 <Bar dataKey="consumption" fill="hsl(152, 60%, 40%)" radius={[4, 4, 0, 0]} name="consumption" />
@@ -297,11 +297,11 @@ export function RawdahAnalysis() {
                 </div>
                 <div className="flex gap-6">
                   <div>
-                    <p className="text-2xl font-bold">{snapshot.totalDailyConsumption} <span className="text-sm font-normal">Kw</span></p>
+                    <p className="text-2xl font-bold">{snapshot.totalDailyConsumption} <span className="text-sm font-normal">kW</span></p>
                     <p className="text-xs text-muted-foreground">Total Daily</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold">{snapshot.avgKwh} <span className="text-sm font-normal">Kwh</span></p>
+                    <p className="text-2xl font-bold">{snapshot.avgKwh} <span className="text-sm font-normal">kWh</span></p>
                     <p className="text-xs text-muted-foreground">Average</p>
                   </div>
                 </div>
@@ -313,10 +313,10 @@ export function RawdahAnalysis() {
         <div className="mt-6 p-4 bg-savings/10 border border-savings/20 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <ArrowDown className="h-5 w-5 text-savings" />
-            <span className="font-semibold text-savings">62% Total Reduction</span>
+            <span className="font-semibold text-savings">61.8% Total Reduction</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Daily consumption dropped from <strong>495 Kw</strong> (2023) to <strong>189 Kw</strong> (2025) - a reduction of <strong>306 Kw</strong> per day after SCC installation and filter replacement.
+            Daily consumption dropped from <strong>495 kW</strong> (2023) to <strong>189 kW</strong> (2025) — a reduction of <strong>306 kW</strong> per day after SCC installation and filter replacement.
           </p>
         </div>
       </div>
@@ -342,7 +342,7 @@ export function RawdahAnalysis() {
                     border: "1px solid hsl(var(--border))",
                     borderRadius: "8px",
                   }}
-                  formatter={(value: number) => [`${value} Kw`, '']}
+                  formatter={(value: number) => [`${value} kW`, '']}
                 />
                 <Legend />
                 <Bar dataKey="2024" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} />
@@ -363,11 +363,11 @@ export function RawdahAnalysis() {
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">2024:</span>
-                    <span>{unit.kw2024} Kw ({unit.avgKwh2024} avg)</span>
+                    <span>{unit.kw2024} kW ({unit.avgKwh2024} kWh avg)</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">2025:</span>
-                    <span className="text-savings font-medium">{unit.kw2025} Kw ({unit.avgKwh2025} avg)</span>
+                    <span className="text-savings font-medium">{unit.kw2025} kW ({unit.avgKwh2025} kWh avg)</span>
                   </div>
                 </div>
               </div>

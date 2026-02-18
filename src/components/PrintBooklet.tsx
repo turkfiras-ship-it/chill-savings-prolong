@@ -328,7 +328,7 @@ export function PrintBooklet() {
             ))}
           </div>
           <div className="p-3 bg-teal-500/10 border border-teal-500/20 rounded-lg mb-4">
-            <p className="font-bold text-teal-700 text-xs">62% Total Reduction — 495 kW (2023) → 189 kW (2025), saving 306 kW per day</p>
+            <p className="font-bold text-teal-700 text-xs">61.8% Total Reduction — 495 kW (2023) → 189 kW (2025), saving 306 kW per day</p>
           </div>
 
           <h3 className="font-semibold mb-2">Unit-Level Performance (2024 vs 2025)</h3>
