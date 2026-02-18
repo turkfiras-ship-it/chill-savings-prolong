@@ -18,8 +18,20 @@ import {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const DEFAULT_KW_2024 = [25490, 34926, 36668, 40952, 60362, 67968, 72070, 75996, 59952, 42573, 33081, 22267];
-const DEFAULT_KW_2025 = [26407, 25107, 41139, 52976, 61372, 61810, 67537, 68039, 55035, 39840, 32246, 21728];
+// ─────────────────────────────────────────────────────────────────────────────
+// ACTUAL EXCEL DATA — Monthly kWh (Without G8) — updated from Excel Feb 2026
+// ─────────────────────────────────────────────────────────────────────────────
+// 2024 With G8:    26240, 36800, 40458, 47829, 71038, 81536, 87538, 90122, 70163, 48672, 36501, 23958  → Total: 660855
+// 2025 With G8:    27157, 26981, 44928, 59853, 72048, 75378, 83005, 82594, 65564, 45939, 32335, 23517  → Total: 639299 (G8 total: 86171)
+// G8 monthly:      776,   1374,  4208,  8605, 10828, 12543, 14667, 12879,  9497,  5757,  1894,  1694  → Total: 84722 (image shows 86171)
+
+const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60666, 42915, 34607, 22264]; // Without G8
+const DEFAULT_KW_2025 = [26381, 25607, 40720, 51248, 61220, 62835, 68338, 69715, 56067, 40182, 30441, 21823]; // Without G8
+
+// With G8 totals (from Excel)
+const TOTAL_WITH_G8_2024 = 660855;
+const TOTAL_WITH_G8_2025 = 639299;
+const G8_ANNUAL_TOTAL = 86171; // from Excel footer
 
 // BUILDING COVERAGE
 // ─────────────────────────────────────────────────────────────────────────────
@@ -48,10 +60,8 @@ const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
 const EXPECTED_BILL_2025_WITHOUT_SCC = 246431.36; // SAR — what 2025 would have cost without SCC + weather penalty
 const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // = 33,052 SAR
 
-// Blended rate from 2024 actual bill and total kWh
-const G8_KWH_2024_EST = 90883;
-const TOTAL_KWH_2024_BUILDING = DEFAULT_KW_2024.reduce((a, b) => a + b, 0) + G8_KWH_2024_EST;
-const BLENDED_RATE = ACTUAL_BILL_2024 / TOTAL_KWH_2024_BUILDING; // ~0.3317 SAR/kWh
+// Blended rate from 2024 actual bill and total kWh (with G8, from Excel)
+const BLENDED_RATE = ACTUAL_BILL_2024 / TOTAL_WITH_G8_2024; // 220028 / 660855 ≈ 0.3329 SAR/kWh
 
 // SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
 const SEVEN_PANEL_KWH_2024 = DEFAULT_KW_2024.reduce((a, b) => a + b, 0);
@@ -271,7 +281,7 @@ export function ROIAnalysis2() {
           G8's non-inverter units make it consume disproportionately more per ton. After consumption-weighting,
           the 7 SCC panels represent <strong>{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the actual bill</strong>
           (~{Math.round(SCC_BILL_SHARE_SAR).toLocaleString()} SAR out of {ACTUAL_BILL_2025.toLocaleString()} SAR actual 2025 bill).
-          Financial values use the <strong>blended rate of {BLENDED_RATE.toFixed(4)} SAR/kWh</strong>.
+          Blended rate: <strong>{BLENDED_RATE.toFixed(4)} SAR/kWh</strong> (2024 bill ÷ {TOTAL_WITH_G8_2024.toLocaleString()} kWh total with G8).
         </p>
 
         {/* Bills comparison */}
