@@ -5,6 +5,7 @@ import {
   managementConclusion,
   energyCostComparison,
 } from "@/data/financialImpact";
+import { EditableText } from "@/components/editor/EditableText";
 import {
   TrendingDown,
   TrendingUp,
@@ -23,14 +24,14 @@ export function FinancialImpact() {
       <div className="rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
         <div className="flex items-center gap-2 mb-2">
           <DollarSign className="h-6 w-6" />
-          <h3 className="text-xl font-bold">Overall Financial Impact</h3>
+          <EditableText textKey="fi.header.title" defaultValue="Overall Financial Impact" as="h3" className="text-xl font-bold" />
         </div>
         <p className="text-lg opacity-90 mb-4">
           Total cost savings in 2025: <strong>{overallFinancialImpact.totalCostSavings2025.toLocaleString()} SAR</strong>
         </p>
         <div className="space-y-2 text-sm opacity-90">
-          <p>• Even with cost increases in early months, <strong>net annual performance is positive</strong></p>
-          <p>• Savings are <strong>concentrated in mid-to-late year</strong>, which is when tariffs and HVAC load hurt the most</p>
+          <EditableText textKey="fi.header.note1" defaultValue="Even with cost increases in early months, net annual performance is positive" as="p" className="opacity-90" />
+          <EditableText textKey="fi.header.note2" defaultValue="Savings are concentrated in mid-to-late year, which is when tariffs and HVAC load hurt the most" as="p" className="opacity-90" />
         </div>
       </div>
 
@@ -38,7 +39,7 @@ export function FinancialImpact() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <BarChart3 className="h-5 w-5 text-muted-foreground" />
-          <h4 className="text-lg font-semibold">Energy Cost Comparison Summary</h4>
+          <EditableText textKey="fi.costcomp.title" defaultValue="Energy Cost Comparison Summary" as="h4" className="text-lg font-semibold" />
         </div>
         <div className="space-y-4">
           {/* 2023 */}
@@ -93,11 +94,9 @@ export function FinancialImpact() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-1">
           <TrendingDown className="h-5 w-5 text-savings" />
-          <h4 className="text-lg font-semibold">Major Cost-Saving Months (Top Contributors)</h4>
+          <EditableText textKey="fi.savings.title" defaultValue="Major Cost-Saving Months (Top Contributors)" as="h4" className="text-lg font-semibold" />
         </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          These months align with <strong>high cooling demand</strong>, proving that cost control measures were effective under peak tariff conditions.
-        </p>
+        <EditableText textKey="fi.savings.subtitle" defaultValue="These months align with high cooling demand, proving that cost control measures were effective under peak tariff conditions." as="p" className="text-sm text-muted-foreground mb-4" />
         <div className="space-y-2">
           {majorSavingMonths.map((m, idx) => (
             <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
@@ -120,7 +119,7 @@ export function FinancialImpact() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="h-5 w-5 text-energy" />
-          <h4 className="text-lg font-semibold">Seasonal Cost Behavior</h4>
+          <EditableText textKey="fi.seasonal.title" defaultValue="Seasonal Cost Behavior" as="h4" className="text-lg font-semibold" />
         </div>
         <p className="text-sm text-muted-foreground mb-2">
           Highest costs occur <strong>{seasonalCostBehavior.peakCostPeriod}</strong> in both years.
@@ -140,8 +139,8 @@ export function FinancialImpact() {
 
       {/* Management-Ready Conclusion */}
       <div className="rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
-        <h4 className="text-lg font-bold mb-3">Management-Ready Conclusion</h4>
-        <p className="font-semibold mb-3">{managementConclusion.headline}</p>
+        <EditableText textKey="fi.mgmt.title" defaultValue="Management-Ready Conclusion" as="h4" className="text-lg font-bold mb-3" />
+        <EditableText textKey="fi.mgmt.headline" defaultValue={managementConclusion.headline} as="p" className="font-semibold mb-3" />
         <ul className="space-y-2">
           {managementConclusion.details.map((detail, idx) => (
             <li key={idx} className="flex items-start gap-2 text-sm opacity-90">

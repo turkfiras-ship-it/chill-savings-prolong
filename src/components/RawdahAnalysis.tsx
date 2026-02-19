@@ -7,11 +7,8 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-  LineChart,
-  Line,
-  ComposedChart,
-  Area,
 } from "recharts";
+import { EditableText } from "@/components/editor/EditableText";
 import {
   monthlyComparisonData,
   yearlyComparisonData,
@@ -25,20 +22,19 @@ import {
   operatingHoursImpact,
   demandSnapshots,
   unitComparisons,
-  energyCostSummary,
   systemMonitoringNotes,
 } from "@/data/rawdahAnalysis";
 import { FinancialImpact } from "@/components/FinancialImpact";
 import { WeatherComparison } from "@/components/WeatherComparison";
 import { useEditableData } from "@/context/EditableDataContext";
 import { EditableField } from "@/components/EditableField";
-import { 
-  AlertTriangle, 
-  CheckCircle, 
-  Wrench, 
-  Clock, 
-  Lightbulb, 
-  TrendingUp, 
+import {
+  AlertTriangle,
+  CheckCircle,
+  Wrench,
+  Clock,
+  Lightbulb,
+  TrendingUp,
   TrendingDown,
   AlertCircle,
   Zap,
@@ -100,8 +96,8 @@ export function RawdahAnalysis() {
       <div className="gradient-savings rounded-xl p-6 text-primary-foreground">
         <div className="flex items-start justify-between mb-2">
           <div>
-            <h2 className="text-2xl font-bold">Rawdah Showroom - Summary Analysis</h2>
-            <p className="opacity-90 mt-1">Comprehensive energy performance review — 2023 to 2025</p>
+            <EditableText textKey="rawdah.header.title" defaultValue="Rawdah Showroom - Summary Analysis" as="h2" className="text-2xl font-bold" />
+            <EditableText textKey="rawdah.header.subtitle" defaultValue="Comprehensive energy performance review — 2023 to 2025" as="p" className="opacity-90 mt-1" />
           </div>
           {isEditMode && (
             <span className="text-xs bg-amber-400/20 border border-amber-400/40 text-amber-200 rounded-full px-3 py-1 font-medium">
@@ -112,7 +108,7 @@ export function RawdahAnalysis() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{yoyChangePct.toFixed(2)}%</p>
-            <p className="text-sm opacity-80">Raw Bill Reduction (2024→2025)</p>
+            <EditableText textKey="rawdah.stat1.label" defaultValue="Raw Bill Reduction (2024→2025)" as="p" className="text-sm opacity-80" />
             <p className="text-xs opacity-60 mt-1">
               <EditableField
                 value={yoyChangeSAR}
@@ -132,7 +128,7 @@ export function RawdahAnalysis() {
                 format={(v) => v.toLocaleString()}
               />
             </p>
-            <p className="text-sm opacity-80">True Adjusted Savings (SAR)</p>
+            <EditableText textKey="rawdah.stat2.label" defaultValue="True Adjusted Savings (SAR)" as="p" className="text-sm opacity-80" />
             <p className="text-xs opacity-60 mt-1">Weather-normalized vs expected{' '}
               <EditableField
                 value={data.expectedBill2025}
@@ -144,9 +140,9 @@ export function RawdahAnalysis() {
             </p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">61.8%</p>
-            <p className="text-sm opacity-80">Building Demand Reduction</p>
-            <p className="text-xs opacity-60 mt-1">495 kW (2023) → 189 kW (2025)</p>
+            <EditableText textKey="rawdah.stat3.value" defaultValue="61.8%" as="p" className="text-3xl font-bold" />
+            <EditableText textKey="rawdah.stat3.label" defaultValue="Building Demand Reduction" as="p" className="text-sm opacity-80" />
+            <EditableText textKey="rawdah.stat3.sub" defaultValue="495 kW (2023) → 189 kW (2025)" as="p" className="text-xs opacity-60 mt-1" />
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">
@@ -157,8 +153,8 @@ export function RawdahAnalysis() {
                 format={(v) => `${v}`}
               />
             </p>
-            <p className="text-sm opacity-80">SCC-Controlled AC Units</p>
-            <p className="text-xs opacity-60 mt-1">G1–G3, F1–F4 (175 tons inverter)</p>
+            <EditableText textKey="rawdah.stat4.label" defaultValue="SCC-Controlled AC Units" as="p" className="text-sm opacity-80" />
+            <EditableText textKey="rawdah.stat4.sub" defaultValue="G1–G3, F1–F4 (175 tons inverter)" as="p" className="text-xs opacity-60 mt-1" />
           </div>
         </div>
       </div>
@@ -167,7 +163,7 @@ export function RawdahAnalysis() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-muted-foreground">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">2023 Total Bill</span>
+            <EditableText textKey="rawdah.bill2023.label" defaultValue="2023 Total Bill" as="span" className="text-sm text-muted-foreground" />
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </div>
           <p className="text-2xl font-bold">
@@ -178,11 +174,11 @@ export function RawdahAnalysis() {
               suffix=" SAR"
             />
           </p>
-          <p className="text-xs text-muted-foreground mt-1">Baseline — pre-SCC installation</p>
+          <EditableText textKey="rawdah.bill2023.sub" defaultValue="Baseline — pre-SCC installation" as="p" className="text-xs text-muted-foreground mt-1" />
         </div>
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-destructive">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">2024 Total Bill</span>
+            <EditableText textKey="rawdah.bill2024.label" defaultValue="2024 Total Bill" as="span" className="text-sm text-muted-foreground" />
             <ArrowUp className="h-4 w-4 text-destructive" />
           </div>
           <p className="text-2xl font-bold">
@@ -194,11 +190,11 @@ export function RawdahAnalysis() {
             />
           </p>
           <p className="text-xs text-destructive mt-1">+{yoy2024ChangePct.toFixed(2)}% (+{yoy2024ChangeSAR.toLocaleString()} SAR vs 2023)</p>
-          <p className="text-xs text-muted-foreground mt-1">SCC active but AC filters damaged + complaints</p>
+          <EditableText textKey="rawdah.bill2024.sub" defaultValue="SCC active but AC filters damaged + complaints" as="p" className="text-xs text-muted-foreground mt-1" />
         </div>
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-savings">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">2025 Total Bill</span>
+            <EditableText textKey="rawdah.bill2025.label" defaultValue="2025 Total Bill" as="span" className="text-sm text-muted-foreground" />
             <TrendingDown className="h-4 w-4 text-savings" />
           </div>
           <p className="text-2xl font-bold text-savings">
@@ -225,15 +221,15 @@ export function RawdahAnalysis() {
             G8
           </div>
           <div>
-            <h3 className="text-lg font-bold">Panel 8 — Multiple AC Units</h3>
-            <p className="text-sm text-muted-foreground">Why G8 is different from G1–G3 & F1–F4</p>
+            <EditableText textKey="rawdah.g8.title" defaultValue="Panel 8 — Multiple AC Units" as="h3" className="text-lg font-bold" />
+            <EditableText textKey="rawdah.g8.subtitle" defaultValue="Why G8 is different from G1–G3 & F1–F4" as="p" className="text-sm text-muted-foreground" />
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* G8 Composition */}
           <div className="space-y-3">
-            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">G8 Composition (7 Units on Panel 8)</h4>
+            <EditableText textKey="rawdah.g8.comp.title" defaultValue="G8 Composition (7 Units on Panel 8)" as="h4" className="font-semibold text-sm uppercase tracking-wide text-muted-foreground" />
             <div className="space-y-2 text-sm">
               {[
                 { type: "Cassette", model: "MCCT36HRN2", cap: 3, location: "Basement WH" },
@@ -253,17 +249,15 @@ export function RawdahAnalysis() {
                 </div>
               ))}
             </div>
-            <p className="text-xs text-muted-foreground italic">
-              Total G8 capacity: 26 tons across 7 individual units — all on a single panel
-            </p>
+            <EditableText textKey="rawdah.g8.comp.footer" defaultValue="Total G8 capacity: 26 tons across 7 individual units — all on a single panel" as="p" className="text-xs text-muted-foreground italic" />
           </div>
 
           {/* Savings Context */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Impact on Savings Calculation</h4>
+            <EditableText textKey="rawdah.g8.impact.title" defaultValue="Impact on Savings Calculation" as="h4" className="font-semibold text-sm uppercase tracking-wide text-muted-foreground" />
             <div className="space-y-3">
               <div className="p-4 rounded-lg bg-muted/40">
-                <p className="font-semibold text-sm mb-1">Rawdah Showroom</p>
+                <EditableText textKey="rawdah.g8.impact.label" defaultValue="Rawdah Showroom" as="p" className="font-semibold text-sm mb-1" />
                 <p className="text-sm text-muted-foreground">
                   <span className="font-bold text-foreground">7 package units</span> on 7 panels + <span className="font-bold text-foreground">8th panel (G8)</span> with 7 smaller units.
                   SCC device saves on <span className="font-bold text-savings">7 out of 8 systems</span> — but all 8 appear on <span className="underline">one electricity bill</span>.
@@ -272,10 +266,7 @@ export function RawdahAnalysis() {
               <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/5">
                 <div className="flex items-start gap-2">
                   <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                  <p className="text-sm">
-                    G8 consumes <span className="font-bold">86,171 kWh/year</span> (13.1% of total) — comparable to a single package unit.
-                    This <span className="font-semibold">dilutes the bill-level savings percentage</span> because G8 consumption is unaffected by the SCC system but still appears on the same meter.
-                  </p>
+                  <EditableText textKey="rawdah.g8.impact.note" defaultValue="G8 consumes 86,171 kWh/year (13.1% of total) — comparable to a single package unit. This dilutes the bill-level savings percentage because G8 consumption is unaffected by the SCC system but still appears on the same meter." as="p" className="text-sm" />
                 </div>
               </div>
             </div>
@@ -288,8 +279,8 @@ export function RawdahAnalysis() {
 
       {/* 2024 vs 2025 Year Comparison Chart */}
       <div className="rounded-xl bg-card p-6 card-elevated">
-        <h3 className="text-xl font-semibold mb-1">Energy Cost Comparison - Rawdah 2024 vs 2025</h3>
-        <p className="text-sm text-muted-foreground mb-6">Monthly energy cost trends year-over-year</p>
+        <EditableText textKey="rawdah.chart1.title" defaultValue="Energy Cost Comparison - Rawdah 2024 vs 2025" as="h3" className="text-xl font-semibold mb-1" />
+        <EditableText textKey="rawdah.chart1.subtitle" defaultValue="Monthly energy cost trends year-over-year" as="p" className="text-sm text-muted-foreground mb-6" />
         <div className="h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={yearComparisonChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -311,9 +302,12 @@ export function RawdahAnalysis() {
           </ResponsiveContainer>
         </div>
         <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            <strong className="text-savings">Raw YoY Result:</strong> Direct bill reduction 2024→2025: <strong className="text-savings">6,649 SAR</strong> (220,028 − 213,379 = 6,649 SAR / 3.02% reduction). Even with cost increases in early months, net annual performance is positive. Savings are concentrated in mid-to-late year. <strong className="text-savings">True adjusted savings = 33,052 SAR</strong> — once weather normalization (+12% hotter 2025) is accounted for. See ROI 2 tab for full detail.
-          </p>
+          <EditableText
+            textKey="rawdah.chart1.note"
+            defaultValue="Raw YoY Result: Direct bill reduction 2024→2025: 6,649 SAR (220,028 − 213,379 = 6,649 SAR / 3.02% reduction). Even with cost increases in early months, net annual performance is positive. Savings are concentrated in mid-to-late year. True adjusted savings = 33,052 SAR — once weather normalization (+12% hotter 2025) is accounted for. See ROI 2 tab for full detail."
+            as="p"
+            className="text-sm text-muted-foreground"
+          />
         </div>
       </div>
 
@@ -321,9 +315,9 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-1">
           <Activity className="h-5 w-5 text-savings" />
-          <h3 className="text-xl font-semibold">Building Demand Reduction — SCC Installation Impact</h3>
+          <EditableText textKey="rawdah.demand.title" defaultValue="Building Demand Reduction — SCC Installation Impact" as="h3" className="text-xl font-semibold" />
         </div>
-        <p className="text-sm text-muted-foreground mb-6">Full building daily kW demand comparison — same date (Oct 21) across all 3 years</p>
+        <EditableText textKey="rawdah.demand.subtitle" defaultValue="Full building daily kW demand comparison — same date (Oct 21) across all 3 years" as="p" className="text-sm text-muted-foreground mb-6" />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="h-[280px]">
@@ -350,8 +344,8 @@ export function RawdahAnalysis() {
 
           <div className="space-y-3">
             {demandSnapshots.map((snapshot, idx) => (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className={`p-4 rounded-lg border ${
                   snapshot.status === 'baseline' ? 'bg-muted/30 border-muted' :
                   snapshot.status === 'improved' ? 'bg-blue-500/10 border-blue-500/20' :
@@ -385,11 +379,9 @@ export function RawdahAnalysis() {
         <div className="mt-6 p-4 bg-savings/10 border border-savings/20 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <ArrowDown className="h-5 w-5 text-savings" />
-            <span className="font-semibold text-savings">61.8% Total Reduction</span>
+            <EditableText textKey="rawdah.demand.reduction.label" defaultValue="61.8% Total Reduction" as="span" className="font-semibold text-savings" />
           </div>
-          <p className="text-sm text-muted-foreground">
-            Daily consumption dropped from <strong>495 kW</strong> (2023) to <strong>189 kW</strong> (2025) — a reduction of <strong>306 kW</strong> per day after SCC installation and filter replacement.
-          </p>
+          <EditableText textKey="rawdah.demand.reduction.desc" defaultValue="Daily consumption dropped from 495 kW (2023) to 189 kW (2025) — a reduction of 306 kW per day after SCC installation and filter replacement." as="p" className="text-sm text-muted-foreground" />
         </div>
       </div>
 
@@ -397,9 +389,9 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-1">
           <Zap className="h-5 w-5 text-energy" />
-          <h3 className="text-xl font-semibold">Unit-Level Performance (2024 vs 2025)</h3>
+          <EditableText textKey="rawdah.unit.title" defaultValue="Unit-Level Performance (2024 vs 2025)" as="h3" className="text-xl font-semibold" />
         </div>
-        <p className="text-sm text-muted-foreground mb-6">Individual AC unit consumption comparison</p>
+        <EditableText textKey="rawdah.unit.subtitle" defaultValue="Individual AC unit consumption comparison" as="p" className="text-sm text-muted-foreground mb-6" />
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="h-[280px]">
@@ -452,7 +444,7 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <Lightbulb className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-xl font-semibold">Key Insights — Rawdah Performance (2024 vs 2025)</h3>
+          <EditableText textKey="rawdah.insights.title" defaultValue="Key Insights — Rawdah Performance (2024 vs 2025)" as="h3" className="text-xl font-semibold" />
         </div>
         <ul className="space-y-3">
           {rawdahInsights.map((insight, idx) => (
@@ -468,7 +460,7 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/10 border border-blue-500/20 p-6">
         <div className="flex items-center gap-2 mb-4">
           <Activity className="h-5 w-5 text-blue-500" />
-          <h3 className="text-xl font-semibold">System Monitoring & Energy Management</h3>
+          <EditableText textKey="rawdah.monitoring.title" defaultValue="System Monitoring & Energy Management" as="h3" className="text-xl font-semibold" />
         </div>
         <ul className="space-y-2">
           {systemMonitoringNotes.map((note, idx) => (
@@ -484,7 +476,7 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <AlertTriangle className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-xl font-semibold">Unit Performance Observations</h3>
+          <EditableText textKey="rawdah.obs.title" defaultValue="Unit Performance Observations" as="h3" className="text-xl font-semibold" />
         </div>
         <div className="space-y-4">
           {unitPerformanceObservations.map((obs, idx) => (
@@ -506,7 +498,7 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <Wrench className="h-5 w-5 text-blue-500" />
-          <h3 className="text-xl font-semibold">Maintenance & Filters</h3>
+          <EditableText textKey="rawdah.maint.title" defaultValue="Maintenance & Filters" as="h3" className="text-xl font-semibold" />
         </div>
         <div className="space-y-6">
           {maintenanceNotes.map((note, idx) => (
@@ -529,7 +521,7 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <AlertCircle className="h-5 w-5 text-muted-foreground" />
-          <h3 className="text-xl font-semibold">Monthly Issues</h3>
+          <EditableText textKey="rawdah.issues.title" defaultValue="Monthly Issues" as="h3" className="text-xl font-semibold" />
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           {monthlyIssues.map((issue, idx) => (
@@ -552,7 +544,7 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <Wrench className="h-5 w-5 text-purple-500" />
-          <h3 className="text-xl font-semibold">Equipment & Repairs</h3>
+          <EditableText textKey="rawdah.repairs.title" defaultValue="Equipment & Repairs" as="h3" className="text-xl font-semibold" />
         </div>
         <div className="space-y-3">
           {equipmentRepairs.map((repair, idx) => (
@@ -573,12 +565,12 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <Clock className="h-5 w-5 text-blue-500" />
-          <h3 className="text-xl font-semibold">Operating Hours Impact</h3>
+          <EditableText textKey="rawdah.hours.title" defaultValue="Operating Hours Impact" as="h3" className="text-xl font-semibold" />
         </div>
         <p className="text-muted-foreground mb-4">{operatingHoursImpact.description}</p>
         
         <div className="mb-4">
-          <h4 className="font-medium mb-2">Friday Opening Times in September:</h4>
+          <EditableText textKey="rawdah.hours.fridayLabel" defaultValue="Friday Opening Times in September:" as="h4" className="font-medium mb-2" />
           <div className="grid grid-cols-5 gap-2">
             {operatingHoursImpact.fridayOpeningTimes.map((time, idx) => (
               <div key={idx} className="text-center p-2 bg-muted/30 rounded-lg">
@@ -593,7 +585,7 @@ export function RawdahAnalysis() {
         <div className="bg-muted/50 border border-border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            <p className="font-medium text-foreground">Additional Consumption Impact</p>
+            <EditableText textKey="rawdah.hours.impact.title" defaultValue="Additional Consumption Impact" as="p" className="font-medium text-foreground" />
           </div>
           <p className="text-sm text-muted-foreground">
             Opening earlier led to additional consumption of <strong>{operatingHoursImpact.additionalConsumption.toLocaleString()} kWh</strong> = <strong>SAR {operatingHoursImpact.additionalCost.toLocaleString()}</strong>
@@ -608,8 +600,8 @@ export function RawdahAnalysis() {
             <GitCompareArrows className="h-6 w-6 text-blue-500" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold">Benchmark: Rawdah vs. Ruben</h2>
-            <p className="text-sm text-muted-foreground">Side-by-side comparison with Ruben Showroom (2025, Without G8)</p>
+            <EditableText textKey="rawdah.ruben.title" defaultValue="Benchmark: Rawdah vs. Ruben" as="h2" className="text-2xl font-bold" />
+            <EditableText textKey="rawdah.ruben.subtitle" defaultValue="Side-by-side comparison with Ruben Showroom (2025, Without G8)" as="p" className="text-sm text-muted-foreground" />
           </div>
         </div>
 
@@ -617,27 +609,27 @@ export function RawdahAnalysis() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="rounded-xl bg-card p-4 card-elevated text-center">
             <p className="text-3xl font-bold text-savings">{summaryStats.avgSavingsPercent}%</p>
-            <p className="text-sm text-muted-foreground">Avg Savings vs Ruben</p>
+            <EditableText textKey="rawdah.ruben.stat1" defaultValue="Avg Savings vs Ruben" as="p" className="text-sm text-muted-foreground" />
           </div>
           <div className="rounded-xl bg-card p-4 card-elevated text-center">
             <p className="text-3xl font-bold text-savings">{summaryStats.totalAnnualSavings.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground">Annual Savings (SAR)</p>
+            <EditableText textKey="rawdah.ruben.stat2" defaultValue="Annual Savings (SAR)" as="p" className="text-sm text-muted-foreground" />
           </div>
           <div className="rounded-xl bg-card p-4 card-elevated text-center">
             <p className="text-3xl font-bold">{summaryStats.monthsWonByRawdah}/{summaryStats.totalMonths}</p>
-            <p className="text-sm text-muted-foreground">Months Won (Rawdah)</p>
+            <EditableText textKey="rawdah.ruben.stat3" defaultValue="Months Won (Rawdah)" as="p" className="text-sm text-muted-foreground" />
           </div>
           <div className="rounded-xl bg-card p-4 card-elevated text-center">
             <p className="text-3xl font-bold text-savings">Rawdah</p>
-            <p className="text-sm text-muted-foreground">Most Efficient</p>
+            <EditableText textKey="rawdah.ruben.stat4" defaultValue="Most Efficient" as="p" className="text-sm text-muted-foreground" />
           </div>
         </div>
       </div>
 
       {/* Monthly Comparison Chart - Rawdah vs Ruben */}
       <div className="rounded-xl bg-card p-6 card-elevated">
-        <h3 className="text-xl font-semibold mb-1">Monthly Consumption Comparison</h3>
-        <p className="text-sm text-muted-foreground mb-6">Rawdah vs. Ruben Showroom (2025, Without G8)</p>
+        <EditableText textKey="rawdah.ruben.chart.title" defaultValue="Monthly Consumption Comparison" as="h3" className="text-xl font-semibold mb-1" />
+        <EditableText textKey="rawdah.ruben.chart.subtitle" defaultValue="Rawdah vs. Ruben Showroom (2025, Without G8)" as="p" className="text-sm text-muted-foreground mb-6" />
         <div className="h-[350px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={vsRubenChartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -663,8 +655,8 @@ export function RawdahAnalysis() {
       {/* Detailed Comparison Table */}
       <div className="rounded-xl bg-card card-elevated overflow-hidden">
         <div className="p-6 border-b">
-          <h3 className="text-xl font-semibold">Monthly Breakdown - Rawdah vs Ruben</h3>
-          <p className="text-sm text-muted-foreground mt-1">Detailed comparison with savings per month</p>
+          <EditableText textKey="rawdah.ruben.table.title" defaultValue="Monthly Breakdown - Rawdah vs Ruben" as="h3" className="text-xl font-semibold" />
+          <EditableText textKey="rawdah.ruben.table.subtitle" defaultValue="Detailed comparison with savings per month" as="p" className="text-sm text-muted-foreground mt-1" />
         </div>
         <div className="overflow-x-auto">
           <Table>
@@ -692,8 +684,8 @@ export function RawdahAnalysis() {
                   </TableCell>
                   <TableCell className="text-center">
                     <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${
-                      row.winner === 'RAWDAH' 
-                        ? 'bg-savings/20 text-savings' 
+                      row.winner === 'RAWDAH'
+                        ? 'bg-savings/20 text-savings'
                         : 'bg-muted text-muted-foreground'
                     }`}>
                       {row.winner}
@@ -728,7 +720,7 @@ export function RawdahAnalysis() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center gap-2 mb-4">
           <Lightbulb className="h-5 w-5 text-blue-500" />
-          <h3 className="text-xl font-semibold">Key Insights — Rawdah vs Ruben</h3>
+          <EditableText textKey="rawdah.ruben.insights.title" defaultValue="Key Insights — Rawdah vs Ruben" as="h3" className="text-xl font-semibold" />
         </div>
         <ul className="space-y-3">
           {comparisonInsights.map((insight, idx) => (
