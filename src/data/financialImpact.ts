@@ -41,7 +41,7 @@ export const seasonalCostBehavior = {
 };
 
 export const managementConclusion = {
-  headline: 'Rawdah achieved 33,052 SAR in true adjusted savings in 2025 (expected 246,431 SAR → actual 213,379 SAR)',
+  headline: 'Rawdah achieved 33,052 SAR in true adjusted savings in 2025 (Expected 2025 weather-adjusted only, +12%: 246,431 SAR → actual 213,379 SAR)',
   apparentHeadline: 'Direct bill reduction: 6,649 SAR (220,028 → 213,379 SAR) — understates true value',
   details: [
     'True adjusted savings: 33,052 SAR — accounting for 2025 being 1.3°C hotter than 2024 (12% extra cooling demand)',

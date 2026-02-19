@@ -115,7 +115,7 @@ function Slide2_ExecSummary() {
             <div className="bg-slate-50 rounded-2xl p-[28px] border border-slate-100">
               <p className="text-[36px] font-bold text-slate-800">{EXPECTED_BILL.toLocaleString()}</p>
               <p className="text-[16px] font-semibold text-slate-600 mt-[6px]">Expected 2025 Bill</p>
-              <p className="text-[13px] text-slate-400 mt-[3px]">SAR — weather + baseline without SCC</p>
+              <p className="text-[13px] text-slate-400 mt-[3px]">SAR — Expected 2025 (weather-adjusted only, +12%)</p>
             </div>
             <div className="bg-teal-50 rounded-2xl p-[28px] border border-teal-200">
               <p className="text-[44px] font-bold text-teal-700">{TRUE_SAVINGS_SAR.toLocaleString()}</p>
@@ -214,7 +214,7 @@ function Slide4_FinancialOverview() {
             { year: "2023", bill: energyCostSummary.totalBill2023, change: null, label: "Baseline Year" },
             { year: "2024", bill: energyCostSummary.totalBill2024, change: `+${energyCostSummary.yearOverYearIncrease2024}%`, label: "Pre-optimization" },
             { year: "2025 Actual", bill: 213379, change: "-6.09%", label: "With SCC — True Bill" },
-            { year: "2025 Without SCC", bill: EXPECTED_BILL_2025, change: "+11.98%", label: "Expected (weather + trend)" },
+            { year: "2025 Without SCC", bill: EXPECTED_BILL_2025, change: "+12%", label: "Expected (weather-adjusted only, +12%)" },
           ].map((item) => (
             <div key={item.year} className={`rounded-2xl p-[36px] border ${item.year === '2025 Actual' ? 'bg-teal-50 border-teal-200' : item.year === '2025 Without SCC' ? 'bg-red-50 border-red-100' : 'bg-slate-50 border-slate-100'}`}>
               <p className="text-[18px] text-slate-500 uppercase tracking-wider">{item.year}</p>
@@ -727,7 +727,7 @@ function Slide13_TheoreticalSavings() {
           </div>
         </div>
         <div className="mt-[30px] p-[20px] bg-teal-50 border border-teal-200 rounded-xl">
-          <p className="text-[18px] text-slate-600"><strong className="text-teal-700">Key Insight:</strong> The SCC system reversed a +{trendWithout}% upward cost trend despite 2025 being {weatherSummary.avgTempDiff}°C hotter — delivering <strong className="text-teal-700">{trueSavingsSAR.toLocaleString()} SAR</strong> in true adjusted savings vs. the weather-normalized baseline of {expectedBill2025.toLocaleString()} SAR.</p>
+          <p className="text-[18px] text-slate-600"><strong className="text-teal-700">Key Insight:</strong> The SCC system reversed a +{trendWithout}% upward cost trend despite 2025 being {weatherSummary.avgTempDiff}°C hotter — delivering <strong className="text-teal-700">{trueSavingsSAR.toLocaleString()} SAR</strong> in true adjusted savings vs. the expected 2025 (weather-adjusted only, +12%): {expectedBill2025.toLocaleString()} SAR.</p>
         </div>
       </div>
     </SlideLayout>
@@ -940,7 +940,7 @@ function Slide_ROI2_TrueSavings() {
           {[
             { label: "Actual 2024 Bill", value: ACTUAL_BILL_2024.toLocaleString(), unit: "SAR", color: "slate" },
             { label: "Actual 2025 Bill", value: ACTUAL_BILL_2025.toLocaleString(), unit: "SAR", color: "teal" },
-            { label: "Expected Without SCC", value: EXPECTED_BILL_WITHOUT_SCC.toLocaleString(), unit: "SAR (weather + baseline)", color: "red" },
+            { label: "Expected Without SCC", value: EXPECTED_BILL_WITHOUT_SCC.toLocaleString(), unit: "SAR (weather-adjusted only, +12%)", color: "red" },
             { label: "True Adjusted Savings", value: TRUE_SAVINGS_SAR.toLocaleString(), unit: "SAR saved", color: "teal-big" },
           ].map(card => (
             <div key={card.label} className={`rounded-2xl p-[26px] border ${
