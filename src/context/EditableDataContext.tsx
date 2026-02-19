@@ -187,8 +187,9 @@ const initialState: EditableDataState = {
 };
 
 function energySav_init() {
-  // 220028 - 213379 = 6649
-  return energyCostSummary.yearlySavings2024vs2025;
+  // True adjusted savings: 33,052 SAR (weather-normalised: 246,431 expected − 213,379 actual)
+  // This is the correct energy savings basis for ROI calculations
+  return energySavings.annualSavingsRawdah; // 33,052 SAR
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────

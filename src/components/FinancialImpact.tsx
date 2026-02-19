@@ -26,10 +26,24 @@ export function FinancialImpact() {
           <DollarSign className="h-6 w-6" />
           <EditableText textKey="fi.header.title" defaultValue="Overall Financial Impact" as="h3" className="text-xl font-bold" />
         </div>
-        <p className="text-lg opacity-90 mb-4">
-          Total cost savings in 2025: <strong>{overallFinancialImpact.totalCostSavings2025.toLocaleString()} SAR</strong>
-        </p>
-        <div className="space-y-2 text-sm opacity-90">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div className="bg-white/10 rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold">{overallFinancialImpact.totalCostSavings2025.toLocaleString()} SAR</p>
+            <p className="text-sm opacity-80 mt-1">Apparent YoY Savings</p>
+            <p className="text-xs opacity-60">Direct bill reduction (220,028 → 213,379)</p>
+          </div>
+          <div className="bg-savings/30 border border-savings/50 rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold">{overallFinancialImpact.trueAdjustedSavings2025.toLocaleString()} SAR</p>
+            <p className="text-sm opacity-90 mt-1 font-semibold">True Adjusted Savings ✓</p>
+            <p className="text-xs opacity-70">Weather-normalized (expected 246,431 SAR)</p>
+          </div>
+          <div className="bg-white/10 rounded-lg p-4 text-center">
+            <p className="text-3xl font-bold">{overallFinancialImpact.trueAdjustedSavingsKwh.toLocaleString()} kWh</p>
+            <p className="text-sm opacity-80 mt-1">True Adjusted kWh Saved</p>
+            <p className="text-xs opacity-60">{overallFinancialImpact.trueAdjustedSavingsPct}% of 2024 baseline (7 SCC panels)</p>
+          </div>
+        </div>
+        <div className="mt-4 space-y-1 text-sm opacity-90">
           <EditableText textKey="fi.header.note1" defaultValue="Even with cost increases in early months, net annual performance is positive" as="p" className="opacity-90" />
           <EditableText textKey="fi.header.note2" defaultValue="Savings are concentrated in mid-to-late year, which is when tariffs and HVAC load hurt the most" as="p" className="opacity-90" />
         </div>
@@ -68,7 +82,7 @@ export function FinancialImpact() {
           {/* Arrow 2024 → 2025 */}
           <div className="flex items-center gap-2 ml-6 text-savings text-sm">
             <ArrowDown className="h-4 w-4" />
-            <span>Decrease: {energyCostComparison.year2025.changePercent}% — Spent SAR {Math.abs(energyCostComparison.year2025.changeSAR).toLocaleString()} less than last year</span>
+            <span>Apparent: {energyCostComparison.year2025.changePercent}% — SAR {Math.abs(energyCostComparison.year2025.changeSAR).toLocaleString()} less. True adjusted savings: <strong>33,052 SAR</strong> (weather-normalised vs expected 246,431 SAR)</span>
           </div>
 
           {/* 2025 */}
@@ -76,6 +90,7 @@ export function FinancialImpact() {
             <div>
               <p className="font-semibold">{energyCostComparison.year2025.label}</p>
               <p className="text-2xl font-bold text-savings">{energyCostComparison.year2025.totalBill.toLocaleString()} SAR</p>
+              <p className="text-xs text-muted-foreground mt-1">Expected without SCC: <strong className="text-destructive">{energyCostComparison.expected2025WithoutSCC.toLocaleString()} SAR</strong> — True savings: <strong className="text-savings">{energyCostComparison.trueSavings.toLocaleString()} SAR</strong></p>
             </div>
             <ArrowDown className="h-5 w-5 text-savings" />
           </div>
