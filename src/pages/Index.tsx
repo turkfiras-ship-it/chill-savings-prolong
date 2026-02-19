@@ -13,6 +13,7 @@ import {
   Printer,
   Pencil,
   Lock,
+  GripVertical,
 } from "lucide-react";
 import { useEditableData } from "@/context/EditableDataContext";
 import { StatCard } from "@/components/StatCard";
@@ -29,6 +30,7 @@ import { Recommendations } from "@/components/Recommendations";
 import { PrintBooklet } from "@/components/PrintBooklet";
 import { ROIAnalysis2 } from "@/components/ROIAnalysis2";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SortableSections, SectionDef } from "@/components/SortableSections";
 import {
   totalYearlySavings25,
   totalYearlySavings30,
@@ -39,10 +41,178 @@ import {
   acReplacementSavings,
 } from "@/data/savingsData";
 
+
 const Index = () => {
   const { isEditMode, toggleEditMode } = useEditableData();
   const paybackMonths = Math.ceil((systemCost / yearlySavingsConservative) * 12);
-  const co2Savings = Math.round((totalConsumption * 0.25 * 0.0007)); // ~0.7kg CO2 per kWh in Saudi
+  const co2Savings = Math.round((totalConsumption * 0.25 * 0.0007));
+
+  // ─── Section definitions per tab ─────────────────────────────────────────
+  const rawdahSections: SectionDef[] = [
+    { id: "excel-upload", label: "Data Upload", node: <ExcelUpload /> },
+    { id: "rawdah-analysis", label: "Rawdah Analysis", node: <RawdahAnalysis /> },
+  ];
+
+  const unitsSections: SectionDef[] = [
+    { id: "unit-monthly", label: "Unit Monthly Data", node: <UnitMonthlyAnalysis /> },
+  ];
+
+  const recommendationsSections: SectionDef[] = [
+    { id: "recommendations", label: "Recommendations", node: <Recommendations /> },
+  ];
+
+  const roiSections: SectionDef[] = [
+    { id: "roi-analysis", label: "ROI Analysis", node: <ROIAnalysis /> },
+  ];
+
+  const roi2Sections: SectionDef[] = [
+    { id: "roi2-analysis", label: "ROI 2 Analysis", node: <ROIAnalysis2 /> },
+  ];
+
+  const overviewSections: SectionDef[] = [
+    {
+      id: "stat-cards",
+      label: "KPI Cards",
+      node: (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            title="Annual Savings (25%)"
+            value={`${(totalYearlySavings25 / 1000).toFixed(0)}K SAR`}
+            subtitle="Conservative estimate"
+            icon={<TrendingDown className="h-5 w-5" />}
+            variant="savings"
+          />
+          <StatCard
+            title="Annual Savings (30%)"
+            value={`${(totalYearlySavings30 / 1000).toFixed(0)}K SAR`}
+            subtitle="Optimistic estimate"
+            icon={<BadgePercent className="h-5 w-5" />}
+            variant="savings"
+          />
+          <StatCard
+            title="Payback Period"
+            value={`~${Math.ceil(paybackMonths / 12)} Years`}
+            subtitle={`${paybackMonths} months at 25% savings`}
+            icon={<Clock className="h-5 w-5" />}
+            variant="energy"
+          />
+          <StatCard
+            title="CO₂ Reduction"
+            value={`${co2Savings.toLocaleString()} tons`}
+            subtitle="Annual environmental impact"
+            icon={<Leaf className="h-5 w-5" />}
+            variant="default"
+          />
+        </div>
+      ),
+    },
+    {
+      id: "key-benefits",
+      label: "Key Benefits",
+      node: (
+        <div>
+          <h2 className="text-2xl font-bold mb-6">Key Benefits</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 rounded-xl bg-card card-elevated border-l-4 border-l-savings">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-savings-light">
+                  <Zap className="h-5 w-5 text-savings" />
+                </div>
+                <h3 className="font-semibold">Energy Reduction</h3>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                25-30% reduction in electricity consumption across all AC units,
+                translating to <span className="text-savings font-semibold">1M+ SAR</span> annual savings.
+              </p>
+            </div>
+            <div className="p-6 rounded-xl bg-card card-elevated border-l-4 border-l-energy">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-energy-light">
+                  <Wrench className="h-5 w-5 text-energy" />
+                </div>
+                <h3 className="font-semibold">Extended Equipment Life</h3>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                AC lifespan extended from 10 to <span className="text-energy font-semibold">15 years</span>,
+                reducing replacement costs by millions over the equipment lifecycle.
+              </p>
+            </div>
+            <div className="p-6 rounded-xl bg-card card-elevated border-l-4 border-l-chart-blue">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 rounded-lg bg-secondary">
+                  <Building2 className="h-5 w-5 text-chart-blue" />
+                </div>
+                <h3 className="font-semibold">Operational Efficiency</h3>
+              </div>
+              <p className="text-muted-foreground text-sm">
+                Reduced compressor stress leads to fewer breakdowns,
+                lower maintenance costs, and improved cooling performance.
+              </p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      id: "charts-grid",
+      label: "Charts",
+      node: (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ConsumptionChart />
+          <ROITimeline />
+        </div>
+      ),
+    },
+    {
+      id: "savings-lifespan",
+      label: "Savings & Lifespan",
+      node: (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SavingsSummary />
+          <LifespanComparison />
+        </div>
+      ),
+    },
+    { id: "showroom-table", label: "Showroom Table", node: <ShowroomTable /> },
+    {
+      id: "ten-year",
+      label: "10-Year Projection",
+      node: (
+        <div className="gradient-savings rounded-2xl p-8 text-primary-foreground">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="h-8 w-8" />
+            <h2 className="text-2xl font-bold">10-Year Financial Projection</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
+              <p className="text-sm opacity-80 mb-1">Total Energy Savings</p>
+              <p className="text-3xl font-bold">
+                {(totalYearlySavings25 * 10 / 1000000).toFixed(1)}M SAR
+              </p>
+            </div>
+            <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
+              <p className="text-sm opacity-80 mb-1">Equipment Savings</p>
+              <p className="text-3xl font-bold">{(acReplacementSavings / 1000000).toFixed(1)}M SAR</p>
+              <p className="text-xs opacity-70 mt-1">Avoided replacements</p>
+            </div>
+            <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
+              <p className="text-sm opacity-80 mb-1">Total 10-Year Benefit</p>
+              <p className="text-3xl font-bold">
+                {((totalYearlySavings25 * 10 + acReplacementSavings) / 1000000).toFixed(1)}M SAR
+              </p>
+            </div>
+            <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
+              <p className="text-sm opacity-80 mb-1">ROI</p>
+              <p className="text-3xl font-bold">
+                {(((totalYearlySavings25 * 10) - systemCost) / systemCost * 100).toFixed(0)}%+
+              </p>
+              <p className="text-xs opacity-70 mt-1">On initial investment</p>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -105,6 +275,14 @@ const Index = () => {
               )}
             </button>
           </div>
+
+          {/* Edit mode hint banner */}
+          {isEditMode && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-amber-200 bg-amber-500/20 border border-amber-400/30 rounded-xl px-4 py-2 w-fit">
+              <GripVertical className="h-4 w-4 shrink-0" />
+              <span>Drag mode active — hover any section to reveal the handle, then drag to reorder</span>
+            </div>
+          )}
         </div>
       </header>
 
@@ -138,168 +316,37 @@ const Index = () => {
               Print
             </TabsTrigger>
           </TabsList>
-          
-          {/* Rawdah Summary Analysis Tab */}
-          <TabsContent value="rawdah" className="space-y-6">
-            {/* Excel Upload */}
-            <ExcelUpload />
-            
-            <RawdahAnalysis />
+
+          <TabsContent value="rawdah">
+            <SortableSections sections={rawdahSections} isEditMode={isEditMode} />
           </TabsContent>
 
-          {/* Unit Monthly Data Tab */}
-          <TabsContent value="units" className="space-y-6">
-            <UnitMonthlyAnalysis />
+          <TabsContent value="units">
+            <SortableSections sections={unitsSections} isEditMode={isEditMode} />
           </TabsContent>
 
-          {/* Recommendations Tab */}
-          <TabsContent value="recommendations" className="space-y-6">
-            <Recommendations />
+          <TabsContent value="recommendations">
+            <SortableSections sections={recommendationsSections} isEditMode={isEditMode} />
           </TabsContent>
 
-          {/* ROI Analysis Tab */}
-          <TabsContent value="roi" className="space-y-6">
-            <ROIAnalysis />
+          <TabsContent value="roi">
+            <SortableSections sections={roiSections} isEditMode={isEditMode} />
           </TabsContent>
 
-          {/* ROI 2 — True Adjusted KW Savings */}
-          <TabsContent value="roi2" className="space-y-6">
-            <ROIAnalysis2 />
+          <TabsContent value="roi2">
+            <SortableSections sections={roi2Sections} isEditMode={isEditMode} />
           </TabsContent>
 
-          {/* Print Booklet Tab */}
           <TabsContent value="print" className="space-y-6">
             <PrintBooklet />
           </TabsContent>
 
-          {/* All Showrooms Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            {/* Main Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <StatCard
-                title="Annual Savings (25%)"
-                value={`${(totalYearlySavings25 / 1000).toFixed(0)}K SAR`}
-                subtitle="Conservative estimate"
-                icon={<TrendingDown className="h-5 w-5" />}
-                variant="savings"
-              />
-              <StatCard
-                title="Annual Savings (30%)"
-                value={`${(totalYearlySavings30 / 1000).toFixed(0)}K SAR`}
-                subtitle="Optimistic estimate"
-                icon={<BadgePercent className="h-5 w-5" />}
-                variant="savings"
-              />
-              <StatCard
-                title="Payback Period"
-                value={`~${Math.ceil(paybackMonths / 12)} Years`}
-                subtitle={`${paybackMonths} months at 25% savings`}
-                icon={<Clock className="h-5 w-5" />}
-                variant="energy"
-              />
-              <StatCard
-                title="CO₂ Reduction"
-                value={`${co2Savings.toLocaleString()} tons`}
-                subtitle="Annual environmental impact"
-                icon={<Leaf className="h-5 w-5" />}
-                variant="default"
-              />
-            </div>
-
-            {/* Key Benefits */}
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Key Benefits</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="p-6 rounded-xl bg-card card-elevated border-l-4 border-l-savings">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-savings-light">
-                      <Zap className="h-5 w-5 text-savings" />
-                    </div>
-                    <h3 className="font-semibold">Energy Reduction</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    25-30% reduction in electricity consumption across all AC units, 
-                    translating to <span className="text-savings font-semibold">1M+ SAR</span> annual savings.
-                  </p>
-                </div>
-                
-                <div className="p-6 rounded-xl bg-card card-elevated border-l-4 border-l-energy">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-energy-light">
-                      <Wrench className="h-5 w-5 text-energy" />
-                    </div>
-                    <h3 className="font-semibold">Extended Equipment Life</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    AC lifespan extended from 10 to <span className="text-energy font-semibold">15 years</span>, 
-                    reducing replacement costs by millions over the equipment lifecycle.
-                  </p>
-                </div>
-                
-                <div className="p-6 rounded-xl bg-card card-elevated border-l-4 border-l-chart-blue">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-secondary">
-                      <Building2 className="h-5 w-5 text-chart-blue" />
-                    </div>
-                    <h3 className="font-semibold">Operational Efficiency</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    Reduced compressor stress leads to fewer breakdowns, 
-                    lower maintenance costs, and improved cooling performance.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Charts Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <ConsumptionChart />
-              <ROITimeline />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SavingsSummary />
-              <LifespanComparison />
-            </div>
-
-            {/* Showroom Table */}
-            <ShowroomTable />
-
-            {/* 10-Year Projection */}
-            <div className="gradient-savings rounded-2xl p-8 text-primary-foreground">
-              <div className="flex items-center gap-3 mb-6">
-                <Calendar className="h-8 w-8" />
-                <h2 className="text-2xl font-bold">10-Year Financial Projection</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
-                  <p className="text-sm opacity-80 mb-1">Total Energy Savings</p>
-                  <p className="text-3xl font-bold">
-                    {(totalYearlySavings25 * 10 / 1000000).toFixed(1)}M SAR
-                  </p>
-                </div>
-                <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
-                  <p className="text-sm opacity-80 mb-1">Equipment Savings</p>
-                  <p className="text-3xl font-bold">{(acReplacementSavings / 1000000).toFixed(1)}M SAR</p>
-                  <p className="text-xs opacity-70 mt-1">Avoided replacements</p>
-                </div>
-                <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
-                  <p className="text-sm opacity-80 mb-1">Total 10-Year Benefit</p>
-                  <p className="text-3xl font-bold">
-                    {((totalYearlySavings25 * 10 + acReplacementSavings) / 1000000).toFixed(1)}M SAR
-                  </p>
-                </div>
-                <div className="bg-primary-foreground/10 rounded-xl p-5 backdrop-blur">
-                  <p className="text-sm opacity-80 mb-1">ROI</p>
-                  <p className="text-3xl font-bold">
-                    {(((totalYearlySavings25 * 10) - systemCost) / systemCost * 100).toFixed(0)}%+
-                  </p>
-                  <p className="text-xs opacity-70 mt-1">On initial investment</p>
-                </div>
-              </div>
-            </div>
+          <TabsContent value="overview">
+            <SortableSections sections={overviewSections} isEditMode={isEditMode} />
           </TabsContent>
         </Tabs>
       </section>
+
 
       {/* Footer */}
       <footer className="bg-card border-t py-8 px-6 mt-12">
