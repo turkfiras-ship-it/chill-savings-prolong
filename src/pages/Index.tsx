@@ -11,9 +11,6 @@ import {
   Target,
   Presentation,
   Printer,
-  Pencil,
-  Lock,
-  GripVertical,
 } from "lucide-react";
 import {
   DndContext,
@@ -29,7 +26,7 @@ import {
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useState } from "react";
 
-import { useEditableData } from "@/context/EditableDataContext";
+
 import { EditorProvider, BlockDef, useEditor } from "@/context/EditorContext";
 import { EditorShell } from "@/components/editor/EditorShell";
 import { SelectableBlock } from "@/components/editor/SelectableBlock";
@@ -69,8 +66,6 @@ const EDITOR_BLOCKS: BlockDef[] = [
 // ─── Individual block content components ──────────────────────────────────
 
 function HeroBlock() {
-  const { isEditMode, toggleEditMode } = useEditableData();
-
   return (
     <header className="gradient-hero text-primary-foreground py-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -116,34 +111,13 @@ function HeroBlock() {
             <Presentation className="h-4 w-4" />
             View Presentation
           </Link>
-          <button
-            onClick={toggleEditMode}
-            className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition-colors border ${
-              isEditMode
-                ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600"
-                : "bg-primary-foreground/10 backdrop-blur border-primary-foreground/20 hover:bg-primary-foreground/20"
-            }`}
-          >
-            {isEditMode ? (
-              <><Lock className="h-4 w-4" />Lock Editing</>
-            ) : (
-              <><Pencil className="h-4 w-4" />Edit Data</>
-            )}
-          </button>
         </div>
-        {isEditMode && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-amber-200 bg-amber-500/20 border border-amber-400/30 rounded-xl px-4 py-2 w-fit">
-            <GripVertical className="h-4 w-4 shrink-0" />
-            <span>Data edit active — hover section handles to drag and reorder</span>
-          </div>
-        )}
       </div>
     </header>
   );
 }
 
 function TabsBlock() {
-  const { isEditMode } = useEditableData();
   const paybackMonths = Math.ceil((systemCost / yearlySavingsConservative) * 12);
   const co2Savings = Math.round(totalConsumption * 0.25 * 0.0007);
 
@@ -222,13 +196,13 @@ function TabsBlock() {
           <TabsTrigger value="overview">All Showrooms</TabsTrigger>
           <TabsTrigger value="print" className="flex items-center gap-2"><Printer className="h-4 w-4" />Print</TabsTrigger>
         </TabsList>
-        <TabsContent value="rawdah"><SortableSections sections={rawdahSections} isEditMode={isEditMode} /></TabsContent>
-        <TabsContent value="units"><SortableSections sections={unitsSections} isEditMode={isEditMode} /></TabsContent>
-        <TabsContent value="recommendations"><SortableSections sections={recommendationsSections} isEditMode={isEditMode} /></TabsContent>
-        <TabsContent value="roi"><SortableSections sections={roiSections} isEditMode={isEditMode} /></TabsContent>
-        <TabsContent value="roi2"><SortableSections sections={roi2Sections} isEditMode={isEditMode} /></TabsContent>
+        <TabsContent value="rawdah"><SortableSections sections={rawdahSections} isEditMode={false} /></TabsContent>
+        <TabsContent value="units"><SortableSections sections={unitsSections} isEditMode={false} /></TabsContent>
+        <TabsContent value="recommendations"><SortableSections sections={recommendationsSections} isEditMode={false} /></TabsContent>
+        <TabsContent value="roi"><SortableSections sections={roiSections} isEditMode={false} /></TabsContent>
+        <TabsContent value="roi2"><SortableSections sections={roi2Sections} isEditMode={false} /></TabsContent>
         <TabsContent value="print" className="space-y-6"><PrintBooklet /></TabsContent>
-        <TabsContent value="overview"><SortableSections sections={overviewSections} isEditMode={isEditMode} /></TabsContent>
+        <TabsContent value="overview"><SortableSections sections={overviewSections} isEditMode={false} /></TabsContent>
       </Tabs>
     </section>
   );
