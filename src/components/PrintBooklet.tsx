@@ -137,7 +137,7 @@ export function PrintBooklet() {
             {[
               { v: `${summaryStats.avgSavingsPercent}%`, l: "vs Ruben Rate", s: "9/12 months won" },
               { v: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, l: "Apparent YoY Saving (SAR)", s: "Raw bill difference" },
-              { v: `33,052`, l: "True Adj. Savings (SAR)", s: "vs expected 246,431 SAR" },
+              { v: `33,052`, l: "True Adj. Savings (SAR)", s: "Expected 2025 (weather-adjusted only, +12%): 246,431 SAR" },
               { v: `61.8%`, l: "Demand Reduction", s: "495 → 189 kW (2023→2025)" },
             ].map(c => (
               <div key={c.l} className="bg-muted/30 rounded-lg p-3 text-center">
@@ -163,6 +163,7 @@ export function PrintBooklet() {
               <div className="p-2 rounded border border-red-200 bg-red-50/50 text-center">
                 <p className="text-muted-foreground">Expected Without SCC</p>
                 <p className="font-bold text-red-600">246,431 SAR</p>
+                <p className="text-xs text-muted-foreground">weather-adjusted only, +12%</p>
               </div>
               <div className="p-2 rounded border-2 border-teal-300 bg-teal-50 text-center">
                 <p className="text-muted-foreground">True Savings</p>
@@ -534,7 +535,7 @@ export function PrintBooklet() {
           <div className="grid grid-cols-4 gap-3 mb-4">
             <div className="p-3 rounded-lg border bg-muted/20 text-center"><p className="text-xs text-muted-foreground">Actual 2024 Bill</p><p className="text-lg font-bold">220,028 SAR</p></div>
             <div className="p-3 rounded-lg border border-teal-200 bg-teal-50/50 text-center"><p className="text-xs text-muted-foreground">Actual 2025 Bill</p><p className="text-lg font-bold text-teal-700">213,379 SAR</p></div>
-            <div className="p-3 rounded-lg border border-red-200 bg-red-50/50 text-center"><p className="text-xs text-muted-foreground">Expected Without SCC</p><p className="text-lg font-bold text-red-600">246,431 SAR</p><p className="text-xs text-muted-foreground">weather + baseline</p></div>
+            <div className="p-3 rounded-lg border border-red-200 bg-red-50/50 text-center"><p className="text-xs text-muted-foreground">Expected Without SCC</p><p className="text-lg font-bold text-red-600">246,431 SAR</p><p className="text-xs text-muted-foreground">weather-adjusted only, +12%</p></div>
             <div className="p-3 rounded-lg border-2 border-teal-300 bg-teal-50 text-center"><p className="text-xs text-muted-foreground">True Adjusted Savings</p><p className="text-xl font-bold text-teal-700">33,052 SAR</p><p className="text-xs text-teal-600">246,431 − 213,379</p></div>
           </div>
 
@@ -635,7 +636,7 @@ export function PrintBooklet() {
 
           {/* Conclusion */}
           <div className="p-3 bg-slate-800 text-white rounded-lg">
-            <p className="text-xs"><strong className="text-teal-400">Key Message:</strong> The apparent YoY bill saving of 6,649 SAR massively understates the real value. 2025 should have cost 246,431 SAR given hotter weather and baseline growth — the SCC system delivered <strong>33,052 SAR in true savings</strong>, all from the 81.8% of the bill it controls (7 units × 25 tons inverter). Building demand: 495 kW → 218 kW → 189 kW = 61.8% reduction.</p>
+            <p className="text-xs"><strong className="text-teal-400">Key Message:</strong> The apparent YoY bill saving of 6,649 SAR massively understates the real value. 2025 should have cost 246,431 SAR (weather-adjusted only, +12%) — the SCC system delivered <strong>33,052 SAR in true savings</strong>, all from the 81.8% of the bill it controls (7 units × 25 tons inverter). Building demand: 495 kW → 218 kW → 189 kW = 61.8% reduction.</p>
           </div>
         </div>
 

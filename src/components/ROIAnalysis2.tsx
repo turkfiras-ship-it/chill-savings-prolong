@@ -80,8 +80,12 @@ function blendedRate(kwh: number, monthIndex: number, year: 2024 | 2025): number
 const ACTUAL_BILL_2025 = 213379;   // SAR — actual 2025 annual bill
 const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
 
-// What 2025 SHOULD have cost without SCC: 213,379 ÷ (1 - 0.15 VAT) × 1.12 weather
-const EXPECTED_BILL_2025_WITHOUT_SCC = 246431.36; // SAR
+// GLOBAL DEFINITIONS — Single Source of Truth
+// Expected_2025_NoSCC = Actual_2024_Bill × Weather_Factor (1.12)
+// = 220,028 × 1.12 = 246,431.36 SAR
+const WEATHER_ADJUSTMENT = 0.12; // 12% hotter in 2025
+const WEATHER_FACTOR = 1 + WEATHER_ADJUSTMENT; // 1.12
+const EXPECTED_BILL_2025_WITHOUT_SCC = ACTUAL_BILL_2024 * WEATHER_FACTOR; // 246,431.36 SAR
 const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // 33,052 SAR
 
 // Blended rate: derived from 2024 actual bill vs total building kWh
@@ -242,8 +246,19 @@ export function ROIAnalysis2() {
     setKw2025([...DEFAULT_KW_2025]);
   };
 
+  // ── VALIDATION: Expected 2025 must equal Actual 2024 × 1.12 ──
+  const expectedCheck = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR);
+  const expectedMismatch = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC) !== expectedCheck;
+
   return (
     <div className="space-y-8">
+
+      {/* ── VALIDATION BANNER ── */}
+      {expectedMismatch && (
+        <div className="rounded-xl bg-destructive/10 border-2 border-destructive/40 p-4 text-destructive font-semibold text-sm">
+          ⚠️ Expected 2025 logic mismatch — check assumptions. Expected_2025_NoSCC ({Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}) ≠ Actual_2024 × 1.12 ({expectedCheck.toLocaleString()})
+        </div>
+      )}
 
       {/* ── HEADER ── */}
       <div className="rounded-xl bg-card p-6 card-elevated border-l-4 border-l-savings">
@@ -358,7 +373,7 @@ export function ROIAnalysis2() {
           <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-center">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Expected 2025 (No SCC + Heat)</p>
             <p className="text-3xl font-black text-destructive">{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}</p>
-            <p className="text-xs text-destructive font-medium">Without SCC + 12% heat + 15% baseline</p>
+            <p className="text-xs text-destructive font-medium">Expected 2025 (weather-adjusted only, +12%)</p>
           </div>
           <div className="p-4 rounded-xl bg-savings/10 border border-savings/30 text-center">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">True Savings vs Expected</p>
@@ -409,7 +424,7 @@ export function ROIAnalysis2() {
           <p className="mt-4 text-xs text-muted-foreground">
             <strong className="text-foreground">Key message:</strong> The apparent YoY bill saving of {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR
             <em> massively understates</em> the real value. 2025 should have cost <strong>{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()} SAR</strong> given
-            hotter weather and baseline growth — the SCC system delivered <strong className="text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR in true savings</strong>,
+            hotter weather (+12% weather adjustment) — the SCC system delivered <strong className="text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR in true savings</strong>,
             all from the {SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the bill it controls.
           </p>
         </div>
