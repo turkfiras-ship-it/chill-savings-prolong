@@ -25,8 +25,8 @@ export const unitMonthlyData2025: UnitMonthlyData[] = [
   { month: 'May',       G1: 10096, G2: 9308, G3: 7775, F1: 11385, F2: 8666, F3: 8676, F4: 5313, G8: 10828, total: 61220, totalWithG8: 72048 },
   { month: 'June',      G1: 11510, G2: 9686, G3: 7573, F1: 11700, F2: 9093, F3: 9128, F4: 4145, G8: 12543, total: 62835, totalWithG8: 75378 },
   { month: 'July',      G1: 11665, G2: 9915, G3: 10072, F1: 13824, F2: 8396, F3: 10910, F4: 3555, G8: 14667, total: 68338, totalWithG8: 83005 },
-  { month: 'August',    G1: 11511, G2: 10027, G3: 9891, F1: 14098, F2: 12236, F3: 9802, F4: 4021, G8: 15608, total: 71586, totalWithG8: 87194 },
-  { month: 'September', G1: 7039, G2: 9227, G3: 7999, F1: 10680, F2: 10021, F3: 7989, F4: 4296, G8: 14249, total: 57251, totalWithG8: 71500 },
+  { month: 'August',    G1: 11511, G2: 10027, G3: 9891, F1: 14098, F2: 12236, F3: 9802, F4: 4021, G8: 13308, total: 71586, totalWithG8: 84894 },
+  { month: 'September', G1: 7039, G2: 9227, G3: 7999, F1: 10680, F2: 10021, F3: 7989, F4: 4296, G8: 9813,  total: 57251, totalWithG8: 67064 },
   { month: 'October',   G1: 5992, G2: 5785, G3: 5809, F1: 6264, F2: 7261, F3: 5870, F4: 3201, G8: 5757,  total: 40182, totalWithG8: 45939 },
   { month: 'November',  G1: 5359, G2: 4590, G3: 5049, F1: 5000, F2: 5880, F3: 5137, F4: 2408, G8: 3454,  total: 33424, totalWithG8: 36878 },
   { month: 'December',  G1: 2197, G2: 4248, G3: 3074, F1: 4216, F2: 3145, F3: 3214, F4: 2423, G8: 1750,  total: 22517, totalWithG8: 24267 },
@@ -41,9 +41,9 @@ export const unitAnnualTotals = {
   F2: 86749,
   F3: 82325,
   F4: 45730,
-  G8: 93819,
+  G8: 87083,
   total: 561308,       // Without G8
-  totalWithG8: 655127, // With G8
+  totalWithG8: 648391, // With G8
 };
 
 // Unit metadata
@@ -55,14 +55,14 @@ export const unitInfo: Record<string, { location: string; notes: string }> = {
   F2: { location: 'First Floor — Central Area', notes: 'Sensor issue resolved. Consumption spiked in August (12,236 kW).' },
   F3: { location: 'First Floor — Rear Section', notes: 'Consistent performer. Peak in July (10,910 kW).' },
   F4: { location: 'First Floor — Book Area', notes: 'Lowest consumption unit (45,730 kWh/year). Consistent low load with peak in April (6,975 kW).' },
-  G8: { location: 'Ground Floor — 8th Panel', notes: 'Consists of cassettes, ducted split, and split units. Not part of SCC system. Sep 2025 +3,000 kWh extra consumption recorded. 3–18% of total building consumption depending on season.' },
+  G8: { location: 'Ground Floor — 8th Panel', notes: 'Consists of cassettes, ducted split, and split units. Not part of SCC system. 87,083 kWh/year. 3–18% of total building consumption depending on season.' },
 };
 
 // G8 consumption as percentage of total building
-export const g8PercentOfTotal = [3, 5, 9, 14, 15, 17, 18, 18, 17, 13, 9, 7]; // Jan-Dec
+export const g8PercentOfTotal = [3, 5, 9, 14, 15, 17, 18, 16, 15, 13, 9, 7]; // Jan-Dec
 
 // G8 monthly cost (SAR)
-export const g8MonthlyCost = [268, 474, 1452, 2969, 3736, 4327, 5060, 5385, 3903, 1986, 1192, 604];
+export const g8MonthlyCost = [268, 474, 1452, 2969, 3736, 4327, 5060, 4591, 3386, 1986, 1192, 604];
 
 export const unitNames = ['G1', 'G2', 'G3', 'F1', 'F2', 'F3', 'F4'] as const;
 export const unitNamesWithG8 = ['G1', 'G2', 'G3', 'F1', 'F2', 'F3', 'F4', 'G8'] as const;
