@@ -125,8 +125,10 @@ export const calculateReplacementSavings = () => {
 
 // Energy Savings (from analysis)
 export const energySavings = {
-  annualSavingsRawdah: 13003, // SAR/year — Actual YoY bill savings 2024 vs 2025 (220,028 − 213,379)
-  annualSavingsPercent: 6.09, // YoY cost reduction percentage (13,003 / 213,379 ≈ 6.09%)
+  annualSavingsRawdah: 33052, // SAR/year — True Adjusted Savings (weather-normalised: 246,431 expected vs 213,379 actual)
+  annualSavingsPercent: 16.3, // True adjusted savings % (93,819 kWh / 574,713 kWh × ~0.35 blended rate)
+  apparentYoYSavings: 6649, // SAR — direct bill reduction (220,028 − 213,379)
+  apparentYoYSavingsSum: 13003, // SAR — sum of positive-saving months only
   rawdahVsRubenSavings: 17671.82, // SAR/year — Rawdah vs Ruben comparison (Without G8)
   rawdahVsRubenPercent: 11.11, // Average savings vs Ruben
   projectedAnnualSavings25: 50812, // at 25% efficiency (from original 20-showroom projection)
