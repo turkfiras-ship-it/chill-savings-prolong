@@ -30,6 +30,8 @@ import {
 } from "@/data/rawdahAnalysis";
 import { FinancialImpact } from "@/components/FinancialImpact";
 import { WeatherComparison } from "@/components/WeatherComparison";
+import { useEditableData } from "@/context/EditableDataContext";
+import { EditableField } from "@/components/EditableField";
 import { 
   AlertTriangle, 
   CheckCircle, 
@@ -57,6 +59,15 @@ import {
 } from "@/components/ui/table";
 
 export function RawdahAnalysis() {
+  const { data, updateNested, update, isEditMode } = useEditableData();
+  const { bills } = data;
+
+  // Derived from editable bills
+  const yoyChangeSAR = bills.totalBill2024 - bills.totalBill2025;
+  const yoyChangePct = bills.totalBill2024 > 0 ? ((yoyChangeSAR / bills.totalBill2024) * 100) : 0;
+  const yoy2024ChangeSAR = bills.totalBill2024 - bills.totalBill2023;
+  const yoy2024ChangePct = bills.totalBill2023 > 0 ? ((yoy2024ChangeSAR / bills.totalBill2023) * 100) : 0;
+
   const vsRubenChartData = monthlyComparisonData.map(d => ({
     month: d.month.substring(0, 3),
     Ruben: d.ruben,
@@ -87,18 +98,50 @@ export function RawdahAnalysis() {
     <div className="space-y-8">
       {/* Header Summary - Rawdah Focused */}
       <div className="gradient-savings rounded-xl p-6 text-primary-foreground">
-        <h2 className="text-2xl font-bold mb-2">Rawdah Showroom - Summary Analysis</h2>
-        <p className="opacity-90 mb-4">Comprehensive energy performance review — 2023 to 2025</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h2 className="text-2xl font-bold">Rawdah Showroom - Summary Analysis</h2>
+            <p className="opacity-90 mt-1">Comprehensive energy performance review — 2023 to 2025</p>
+          </div>
+          {isEditMode && (
+            <span className="text-xs bg-amber-400/20 border border-amber-400/40 text-amber-200 rounded-full px-3 py-1 font-medium">
+              ✏️ Edit Mode — click any value to edit
+            </span>
+          )}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">{energyCostSummary.yearlySavingsPercent}%</p>
+            <p className="text-3xl font-bold">{yoyChangePct.toFixed(2)}%</p>
             <p className="text-sm opacity-80">Raw Bill Reduction (2024→2025)</p>
-            <p className="text-xs opacity-60 mt-1">6,649 SAR direct bill saving</p>
+            <p className="text-xs opacity-60 mt-1">
+              <EditableField
+                value={yoyChangeSAR}
+                onChange={(v) => updateNested('bills', 'totalBill2025', bills.totalBill2024 - v)}
+                isEditMode={isEditMode}
+                format={(v) => `${v.toLocaleString()} SAR direct bill saving`}
+                className="opacity-60 text-xs"
+              />
+            </p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">33,052</p>
+            <p className="text-3xl font-bold">
+              <EditableField
+                value={data.trueSavings}
+                onChange={(v) => update('trueSavings', v)}
+                isEditMode={isEditMode}
+                format={(v) => v.toLocaleString()}
+              />
+            </p>
             <p className="text-sm opacity-80">True Adjusted Savings (SAR)</p>
-            <p className="text-xs opacity-60 mt-1">Weather-normalized vs expected 246,431 SAR</p>
+            <p className="text-xs opacity-60 mt-1">Weather-normalized vs expected{' '}
+              <EditableField
+                value={data.expectedBill2025}
+                onChange={(v) => update('expectedBill2025', v)}
+                isEditMode={isEditMode}
+                format={(v) => `${v.toLocaleString()} SAR`}
+                className="opacity-60 text-xs"
+              />
+            </p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">61.8%</p>
@@ -106,7 +149,14 @@ export function RawdahAnalysis() {
             <p className="text-xs opacity-60 mt-1">495 kW (2023) → 189 kW (2025)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <p className="text-3xl font-bold">7</p>
+            <p className="text-3xl font-bold">
+              <EditableField
+                value={data.systemCfg.numberOfUnits}
+                onChange={(v) => updateNested('systemCfg', 'numberOfUnits', Math.round(v))}
+                isEditMode={isEditMode}
+                format={(v) => `${v}`}
+              />
+            </p>
             <p className="text-sm opacity-80">SCC-Controlled AC Units</p>
             <p className="text-xs opacity-60 mt-1">G1–G3, F1–F4 (175 tons inverter)</p>
           </div>
@@ -120,7 +170,14 @@ export function RawdahAnalysis() {
             <span className="text-sm text-muted-foreground">2023 Total Bill</span>
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </div>
-          <p className="text-2xl font-bold">{energyCostSummary.totalBill2023.toLocaleString()} SAR</p>
+          <p className="text-2xl font-bold">
+            <EditableField
+              value={bills.totalBill2023}
+              onChange={(v) => updateNested('bills', 'totalBill2023', v)}
+              isEditMode={isEditMode}
+              suffix=" SAR"
+            />
+          </p>
           <p className="text-xs text-muted-foreground mt-1">Baseline — pre-SCC installation</p>
         </div>
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-destructive">
@@ -128,8 +185,15 @@ export function RawdahAnalysis() {
             <span className="text-sm text-muted-foreground">2024 Total Bill</span>
             <ArrowUp className="h-4 w-4 text-destructive" />
           </div>
-          <p className="text-2xl font-bold">{energyCostSummary.totalBill2024.toLocaleString()} SAR</p>
-          <p className="text-xs text-destructive mt-1">+{energyCostSummary.yearOverYearIncrease2024}% (+{energyCostSummary.increaseAmount2024.toLocaleString()} SAR vs 2023)</p>
+          <p className="text-2xl font-bold">
+            <EditableField
+              value={bills.totalBill2024}
+              onChange={(v) => updateNested('bills', 'totalBill2024', v)}
+              isEditMode={isEditMode}
+              suffix=" SAR"
+            />
+          </p>
+          <p className="text-xs text-destructive mt-1">+{yoy2024ChangePct.toFixed(2)}% (+{yoy2024ChangeSAR.toLocaleString()} SAR vs 2023)</p>
           <p className="text-xs text-muted-foreground mt-1">SCC active but AC filters damaged + complaints</p>
         </div>
         <div className="rounded-xl bg-card p-5 card-elevated border-l-4 border-l-savings">
@@ -137,9 +201,17 @@ export function RawdahAnalysis() {
             <span className="text-sm text-muted-foreground">2025 Total Bill</span>
             <TrendingDown className="h-4 w-4 text-savings" />
           </div>
-          <p className="text-2xl font-bold text-savings">{energyCostSummary.totalBill2025.toLocaleString()} SAR</p>
-          <p className="text-xs text-savings mt-1">−{energyCostSummary.yearlySavingsPercent}% (6,649 SAR direct bill reduction vs 2024)</p>
-          <p className="text-xs text-muted-foreground mt-1">True adjusted savings: <strong className="text-savings">33,052 SAR</strong> — see ROI 2 tab</p>
+          <p className="text-2xl font-bold text-savings">
+            <EditableField
+              value={bills.totalBill2025}
+              onChange={(v) => updateNested('bills', 'totalBill2025', v)}
+              isEditMode={isEditMode}
+              suffix=" SAR"
+              className="text-savings"
+            />
+          </p>
+          <p className="text-xs text-savings mt-1">−{yoyChangePct.toFixed(2)}% ({yoyChangeSAR.toLocaleString()} SAR direct bill reduction vs 2024)</p>
+          <p className="text-xs text-muted-foreground mt-1">True adjusted savings: <strong className="text-savings">{data.trueSavings.toLocaleString()} SAR</strong> — see ROI 2 tab</p>
         </div>
       </div>
 

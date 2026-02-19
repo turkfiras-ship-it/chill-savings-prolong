@@ -11,7 +11,10 @@ import {
   Target,
   Presentation,
   Printer,
+  Pencil,
+  Lock,
 } from "lucide-react";
+import { useEditableData } from "@/context/EditableDataContext";
 import { StatCard } from "@/components/StatCard";
 import { ShowroomTable } from "@/components/ShowroomTable";
 import { ConsumptionChart } from "@/components/ConsumptionChart";
@@ -37,6 +40,7 @@ import {
 } from "@/data/savingsData";
 
 const Index = () => {
+  const { isEditMode, toggleEditMode } = useEditableData();
   const paybackMonths = Math.ceil((systemCost / yearlySavingsConservative) * 12);
   const co2Savings = Math.round((totalConsumption * 0.25 * 0.0007)); // ~0.7kg CO2 per kWh in Saudi
 
@@ -62,7 +66,7 @@ const Index = () => {
             Comprehensive ROI analysis for power saving devices installed at Rawdah Showroom
             with 7 package AC units totaling 25+ tons capacity each.
           </p>
-          <div className="flex flex-wrap gap-4 mt-6">
+          <div className="flex flex-wrap gap-4 mt-6 items-center">
             <div className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur text-sm">
               📊 2023-2025 Consumption Data
             </div>
@@ -79,6 +83,27 @@ const Index = () => {
               <Presentation className="h-4 w-4" />
               View Presentation
             </Link>
+            {/* Edit Mode Toggle */}
+            <button
+              onClick={toggleEditMode}
+              className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition-colors border ${
+                isEditMode
+                  ? "bg-amber-500 text-white border-amber-400 hover:bg-amber-600"
+                  : "bg-primary-foreground/10 backdrop-blur border-primary-foreground/20 hover:bg-primary-foreground/20"
+              }`}
+            >
+              {isEditMode ? (
+                <>
+                  <Lock className="h-4 w-4" />
+                  Lock Editing
+                </>
+              ) : (
+                <>
+                  <Pencil className="h-4 w-4" />
+                  Edit Data
+                </>
+              )}
+            </button>
           </div>
         </div>
       </header>
