@@ -13,6 +13,7 @@ import {
   Printer,
   Pencil,
   Lock,
+  LayoutDashboard,
 } from "lucide-react";
 import { useEditableData } from "@/context/EditableDataContext";
 import { StatCard } from "@/components/StatCard";
@@ -82,6 +83,13 @@ const Index = () => {
             >
               <Presentation className="h-4 w-4" />
               View Presentation
+            </Link>
+            <Link 
+              to="/builder" 
+              className="px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur border border-primary-foreground/20 text-sm font-medium flex items-center gap-2 hover:bg-primary-foreground/20 transition-colors"
+            >
+              <LayoutDashboard className="h-4 w-4" />
+              Page Builder
             </Link>
             {/* Edit Mode Toggle */}
             <button
