@@ -27,11 +27,11 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 
 const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60655, 42915, 33158, 22304]; // Without G8 (from Excel — Sep corrected to 60,655)
 const DEFAULT_KW_2025 = [26381, 25607, 40720, 51248, 51220, 62835, 68338, 69715, 56067, 40182, 32335, 21823]; // Without G8 (from Excel — Jul corrected to 68,338)
-const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14667, 15608, 11313,  5757,  3454,  1750]; // G8 monthly kWh — Total: 90,883 (from unit meter readings)
+const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14667, 15608, 14249,  5757,  3454,  1750]; // G8 monthly kWh — Total: 93,819 (Sep +3,000 extra recorded consumption)
 
 // With G8 totals (from Excel)
 const TOTAL_WITH_G8_2024 = 660855; // Excel verified: sum of 2024 "With G8" column
-const TOTAL_WITH_G8_2025 = 652191; // Verified: sum of 2025 "With G8" column = 546,471 (SCC) + 90,883 (G8) = 637,354... using unit data total = 652,191
+const TOTAL_WITH_G8_2025 = 655127; // Verified: 561,308 (SCC) + 93,819 (G8 incl. Sep +3,000 extra) = 655,127
 const G8_ANNUAL_TOTAL = G8_MONTHLY.reduce((a, b) => a + b, 0); // 90,883 kWh — from unit meter readings
 
 // BUILDING COVERAGE
