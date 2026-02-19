@@ -266,7 +266,7 @@ export function RawdahAnalysis() {
               <div className="p-4 rounded-lg border border-amber-500/30 bg-amber-500/5">
                 <div className="flex items-start gap-2">
                   <Info className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
-                  <EditableText textKey="rawdah.g8.impact.note" defaultValue="G8 consumes 90,883 kWh/year (13.9% of total with G8: 652,191 kWh) — comparable to a single large package unit. This dilutes the bill-level savings percentage because G8 consumption is unaffected by the SCC system but still appears on the same meter. The 7 SCC panels represent 81.8% of the effective bill share (consumption-weighted)." as="p" className="text-sm" />
+                  <EditableText textKey="rawdah.g8.impact.note" defaultValue="G8 consumes 87,083 kWh/year (13.4% of total with G8: 648,391 kWh) — comparable to a single large package unit. This dilutes the bill-level savings percentage because G8 consumption is unaffected by the SCC system but still appears on the same meter. The 7 SCC panels represent 86.6% of the effective bill share (consumption-weighted)." as="p" className="text-sm" />
                 </div>
               </div>
             </div>
