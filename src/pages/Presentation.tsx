@@ -312,6 +312,68 @@ function StepArrow() {
   return <span className="text-2xl text-exec-divider font-light hidden md:block">→</span>;
 }
 
+// ─── RISK-ADJUSTED SCENARIOS ────────────────────────
+function RiskScenarios() {
+  const conservativeEnergy = Math.round(ENERGY_SAVINGS_SAR * 0.85);
+  const conservativeMaint = Math.round(MAINTENANCE_DOWNTIME_SAR * 0.70);
+  const conservativeTotal = conservativeEnergy + conservativeMaint;
+  const conservativePayback = +(SYSTEM_COST / conservativeTotal).toFixed(1);
+
+  const stressEnergy = Math.round(ENERGY_SAVINGS_SAR * 0.75);
+  const stressMaint = Math.round(MAINTENANCE_DOWNTIME_SAR * 0.50);
+  const stressTotal = stressEnergy + stressMaint;
+  const stressPayback = +(SYSTEM_COST / stressTotal).toFixed(1);
+
+  const scenarios = [
+    { name: "Base Case", energy: ENERGY_SAVINGS_SAR, maint: MAINTENANCE_DOWNTIME_SAR, total: RECURRING_ANNUAL, payback: CAPITAL_RECOVERY_YRS, highlight: true },
+    { name: "Conservative (−15% / −30%)", energy: conservativeEnergy, maint: conservativeMaint, total: conservativeTotal, payback: conservativePayback },
+    { name: "Stress (−25% / −50%)", energy: stressEnergy, maint: stressMaint, total: stressTotal, payback: stressPayback },
+  ];
+
+  return (
+    <section className="py-8 px-6">
+      <div className="max-w-5xl mx-auto">
+        <p className="text-sm font-semibold tracking-widest uppercase text-exec-navy/60 mb-3">
+          Risk-Adjusted Scenarios
+        </p>
+        <h2 className="text-2xl font-bold text-exec-navy mb-6">
+          Downside Sensitivity Analysis
+        </h2>
+
+        <div className="overflow-hidden rounded-xl border border-exec-divider">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-exec-surface">
+                <th className="text-left px-5 py-3 font-semibold text-exec-navy/70">Scenario</th>
+                <th className="text-right px-5 py-3 font-semibold text-exec-navy/70">Energy (SAR)</th>
+                <th className="text-right px-5 py-3 font-semibold text-exec-navy/70">Maint + Downtime (SAR)</th>
+                <th className="text-right px-5 py-3 font-semibold text-exec-navy/70">Recurring Total (SAR)</th>
+                <th className="text-right px-5 py-3 font-semibold text-exec-navy/70">Payback (Years)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {scenarios.map((s) => (
+                <tr key={s.name} className={`border-t border-exec-divider ${s.highlight ? "bg-exec-green-light/40" : ""}`}>
+                  <td className={`px-5 py-3.5 ${s.highlight ? "font-semibold text-exec-navy" : "text-exec-navy/80"}`}>{s.name}</td>
+                  <td className="text-right px-5 py-3.5 tabular-nums text-exec-navy/80">{s.energy.toLocaleString()}</td>
+                  <td className="text-right px-5 py-3.5 tabular-nums text-exec-navy/80">{s.maint.toLocaleString()}</td>
+                  <td className={`text-right px-5 py-3.5 tabular-nums font-semibold ${s.highlight ? "text-exec-green" : "text-exec-navy"}`}>{s.total.toLocaleString()}</td>
+                  <td className={`text-right px-5 py-3.5 tabular-nums font-semibold ${s.highlight ? "text-exec-green" : "text-exec-navy"}`}>{s.payback}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-xs text-exec-navy/50 mt-4 leading-relaxed">
+          Deferred capital impact (385,000 SAR) excluded from conservative and stress cases.
+          All scenarios confirm capital recovery within 5 years under downside assumptions.
+        </p>
+      </div>
+    </section>
+  );
+}
+
 // ─── NARRATIVE LOCK ─────────────────────────────────
 function NarrativeLock() {
   return (
@@ -363,6 +425,8 @@ export default function Presentation() {
       <ROISection />
       <Divider />
       <Methodology />
+      <Divider />
+      <RiskScenarios />
       <Divider />
       <NarrativeLock />
     </div>
