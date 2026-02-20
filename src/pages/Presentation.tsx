@@ -123,9 +123,9 @@ function Slide2_ExecSummary() {
               <p className="text-[13px] text-slate-400 mt-[3px]">SAR — {EXPECTED_BILL.toLocaleString()} − {ACTUAL_BILL_2025.toLocaleString()}</p>
             </div>
             <div className="bg-teal-50 rounded-2xl p-[28px] border border-teal-200">
-              <p className="text-[44px] font-bold text-teal-700">17.25%</p>
-              <p className="text-[16px] font-semibold text-teal-600 mt-[6px]">Efficiency Gain</p>
-              <p className="text-[13px] text-slate-400 mt-[3px]">8.25% trend reversal + 9% actual</p>
+              <p className="text-[44px] font-bold text-teal-700">14.1%</p>
+              <p className="text-[16px] font-semibold text-teal-600 mt-[6px]">Efficiency Improvement</p>
+              <p className="text-[13px] text-slate-400 mt-[3px]">Weather-normalised kWh savings</p>
             </div>
             <div className="bg-teal-50 rounded-2xl p-[28px] border border-teal-200">
               <p className="text-[44px] font-bold text-teal-700">{roi.paybackPeriodYears.toFixed(1)} yrs</p>
@@ -662,7 +662,7 @@ function Slide13_TheoreticalSavings() {
   // All numbers aligned with verified ROI 2 analysis
   const trendWithout = 8.25; // 2024 increase trend (2023→2024)
   const actualDecrease = 6.09; // 2025 actual YoY decrease
-  const theoreticalEfficiencyGain = trendWithout + actualDecrease; // ~14.34% — but we use the verified 17.25% which includes the anomaly-excluded 9%
+  // CFO-locked: 14.1% efficiency improvement (80,763 / 574,713)
   const bill2024 = energyCostSummary.totalBill2024; // 220,028
   // Use the VERIFIED expected bill from ROI 2 (weather-normalized baseline)
   const expectedBill2025 = 246431; // SAR — verified from ROI 2 analysis
@@ -687,10 +687,10 @@ function Slide13_TheoreticalSavings() {
             <p className="text-[16px] text-slate-400 mt-[4px]">220,028 → 213,379 SAR</p>
           </div>
           <div className="bg-slate-800 rounded-2xl p-[40px] text-white">
-            <p className="text-[18px] text-slate-400 uppercase tracking-wider">Efficiency Gain Total</p>
-            <p className="text-[64px] font-bold text-teal-400">17.25%</p>
-            <p className="text-[20px] text-slate-300 mt-[6px]">True efficiency improvement</p>
-            <p className="text-[16px] text-slate-500 mt-[4px]">8.25% trend reversal + 9% (excl. anomalies)</p>
+            <p className="text-[18px] text-slate-400 uppercase tracking-wider">Efficiency Improvement</p>
+            <p className="text-[64px] font-bold text-teal-400">14.1%</p>
+            <p className="text-[20px] text-slate-300 mt-[6px]">Weather-normalised efficiency gain</p>
+            <p className="text-[16px] text-slate-500 mt-[4px]">80,763 kWh saved / 574,713 kWh baseline</p>
           </div>
         </div>
         <div className="mt-[40px] bg-slate-50 border border-slate-200 rounded-2xl p-[40px]">

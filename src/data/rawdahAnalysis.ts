@@ -115,8 +115,8 @@ export const summaryStats = {
   avgSavingsPercent: 11.11, // From Excel summary: Rawdah vs Ruben (Without G8)
   totalAnnualSavings: 17671.82, // From Excel summary: total annual savings SAR (Rawdah vs Ruben)
   trueAdjustedSavingsSAR: 33052, // Weather-normalised true savings (246,431 expected − 213,379 actual)
-  trueAdjustedSavingsKwh: 93819, // True kWh saved (weather-corrected, 7 SCC panels only, without G8)
-  trueAdjustedSavingsPct: 16.3, // % of 574,713 kWh 2024 baseline
+  trueAdjustedSavingsKwh: 80763, // True kWh saved (weather-normalised, 7 SCC panels only, without G8)
+  trueAdjustedSavingsPct: 14.1, // % of 574,713 kWh 2024 baseline
   apparentYoYSavingsSAR: 6649, // Direct bill reduction (220,028 − 213,379)
   mostEfficientShowroom: 'Rawdah', // Rawdah won 9 of 12 months
   monthsWonByRawdah: 9,
@@ -128,7 +128,7 @@ export const summaryStats = {
 // Rawdah-specific insights (standalone performance)
 export const rawdahInsights = [
   'Rawdah achieved 6,649 SAR in direct bill savings in 2025 (YoY: 220,028 → 213,379 SAR). True adjusted savings are 33,052 SAR once weather normalization is applied — reflecting the full value of the SCC system',
-  'True adjusted kWh savings: 93,819 kWh (16.3% of 2024 baseline) — accounting for 2025 being 1.3°C hotter, which required 12% more cooling demand that the system absorbed without increasing the bill',
+  'True adjusted kWh savings: 80,763 kWh (14.1% of 2024 baseline) — accounting for 2025 being 1.3°C hotter, which required 12% more cooling demand that the system absorbed without increasing the bill',
   'Major cost-saving months (YoY): February (28.1%, 3,387 SAR), August (9.0%, 2,745 SAR), June (7.7%, 2,125 SAR), July (5.3%, 1,564 SAR), September (7.2%, 1,696 SAR)',
   'Q1 cost increases (Jan +3.8%, Mar +11.6%, Apr +26.2%) were driven by early-season inefficiencies, thermostat misuse, and system updates — these represent clear opportunities for further optimization',
   'During high-load summer months (May–August), Rawdah demonstrated consistent improvement over 2024, proving cost control measures are effective under peak tariff conditions',
