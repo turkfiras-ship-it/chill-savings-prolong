@@ -236,6 +236,19 @@ export function EditableDataProvider({ children }: { children: ReactNode }) {
 
 export function useEditableData() {
   const ctx = useContext(EditableDataContext);
-  if (!ctx) throw new Error("useEditableData must be used within EditableDataProvider");
+  if (!ctx) {
+    // During HMR or module reload the provider may momentarily be absent.
+    // Return a safe fallback so components don't crash.
+    const fallback: EditableDataContextValue = {
+      data: initialState,
+      update: () => {},
+      updateNested: () => {},
+      updateMaintenanceItem: () => {},
+      isEditMode: false,
+      toggleEditMode: () => {},
+      derived: computeDerived(initialState),
+    };
+    return fallback;
+  }
   return ctx;
 }
