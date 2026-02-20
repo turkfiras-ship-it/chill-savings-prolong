@@ -47,6 +47,7 @@ import { PrintBooklet } from "@/components/PrintBooklet";
 import { ROIAnalysis2 } from "@/components/ROIAnalysis2";
 import { WeatherSensitivity } from "@/components/WeatherSensitivity";
 import { ExpansionSimulator } from "@/components/ExpansionSimulator";
+import { MaintenanceSimulator } from "@/components/MaintenanceSimulator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SortableSections, SectionDef } from "@/components/SortableSections";
 import {
@@ -146,6 +147,9 @@ function TabsBlock() {
   const expansionSections: SectionDef[] = [
     { id: "expansion-simulator", label: "Expansion Simulator", node: <ExpansionSimulator /> },
   ];
+  const maintenanceSimSections: SectionDef[] = [
+    { id: "maintenance-simulator", label: "Maintenance Simulator", node: <MaintenanceSimulator /> },
+  ];
   const overviewSections: SectionDef[] = [
     {
       id: "stat-cards",
@@ -204,6 +208,7 @@ function TabsBlock() {
           <TabsTrigger value="roi2" className="flex items-center gap-2"><Target className="h-4 w-4" />ROI 2</TabsTrigger>
           <TabsTrigger value="weather" className="flex items-center gap-2"><Thermometer className="h-4 w-4" />Weather</TabsTrigger>
           <TabsTrigger value="expansion" className="flex items-center gap-2"><Building2 className="h-4 w-4" />Expansion</TabsTrigger>
+          <TabsTrigger value="maintenance-sim" className="flex items-center gap-2"><Wrench className="h-4 w-4" />Simulator</TabsTrigger>
           <TabsTrigger value="overview">All Showrooms</TabsTrigger>
           <TabsTrigger value="print" className="flex items-center gap-2"><Printer className="h-4 w-4" />Print</TabsTrigger>
         </TabsList>
@@ -214,6 +219,7 @@ function TabsBlock() {
         <TabsContent value="roi2"><SortableSections sections={roi2Sections} isEditMode={false} /></TabsContent>
         <TabsContent value="weather"><SortableSections sections={weatherSections} isEditMode={false} /></TabsContent>
         <TabsContent value="expansion"><SortableSections sections={expansionSections} isEditMode={false} /></TabsContent>
+        <TabsContent value="maintenance-sim"><SortableSections sections={maintenanceSimSections} isEditMode={false} /></TabsContent>
         <TabsContent value="print" className="space-y-6"><PrintBooklet /></TabsContent>
         <TabsContent value="overview"><SortableSections sections={overviewSections} isEditMode={false} /></TabsContent>
       </Tabs>
