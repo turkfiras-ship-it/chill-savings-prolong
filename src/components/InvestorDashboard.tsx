@@ -10,9 +10,10 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area,
 } from "recharts";
 import {
-  TrendingUp, DollarSign, BarChart3, Shield, Landmark, LogOut, Users,
+  TrendingUp, DollarSign, BarChart3, Shield, Landmark, LogOut, Users, FileText,
 } from "lucide-react";
 import { FounderCompensation } from "@/components/FounderCompensation";
+import { ExecutiveSummary } from "@/components/ExecutiveSummary";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -517,6 +518,7 @@ function Metric({ label, value, sub }: { label: string; value: string; sub?: str
 
 export function InvestorDashboard() {
   const sections = [
+    { id: "exec-summary", icon: <FileText className="h-4 w-4" />, label: "Executive Summary", content: <ExecutiveSummary /> },
     { id: "thesis", icon: <TrendingUp className="h-4 w-4" />, label: "Thesis", content: <InvestmentThesis /> },
     { id: "unit", icon: <DollarSign className="h-4 w-4" />, label: "Unit Economics", content: <UnitEconomics /> },
     { id: "scale", icon: <BarChart3 className="h-4 w-4" />, label: "Scale Model", content: <ScaleProjection /> },
@@ -528,7 +530,7 @@ export function InvestorDashboard() {
 
   return (
     <div className="space-y-8">
-      <Tabs defaultValue="thesis" className="w-full">
+      <Tabs defaultValue="exec-summary" className="w-full">
         <TabsList className="flex flex-wrap h-auto gap-1 mb-6">
           {sections.map((s) => (
             <TabsTrigger key={s.id} value={s.id} className="flex items-center gap-2">

@@ -178,7 +178,9 @@ a[href*="lovable.dev"][target="_blank"] {
   body * { visibility: hidden; }
   .print-booklet, .print-booklet * { visibility: visible !important; }
   .print-booklet { position: absolute; left: 0; top: 0; width: 100%; }
+  .exec-summary-print, .exec-summary-print * { visibility: visible !important; }
+  .exec-summary-print { position: absolute; left: 0; top: 0; width: 100%; }
   .print-page { page-break-inside: avoid; }
-  @page { margin: 0.4in; size: A4; }
+  @page { margin: 0.5in; size: A4; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
