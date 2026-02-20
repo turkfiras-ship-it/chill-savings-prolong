@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Thermometer } from "lucide-react";
+import { Thermometer, Landmark } from "lucide-react";
 import {
   Zap,
   TrendingDown,
@@ -49,6 +49,7 @@ import { ROIAnalysis3 } from "@/components/ROIAnalysis3";
 import { WeatherSensitivity } from "@/components/WeatherSensitivity";
 import { ExpansionSimulator } from "@/components/ExpansionSimulator";
 import { MaintenanceSimulator } from "@/components/MaintenanceSimulator";
+import { InvestorDashboard } from "@/components/InvestorDashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SortableSections, SectionDef } from "@/components/SortableSections";
 import {
@@ -154,6 +155,9 @@ function TabsBlock() {
   const maintenanceSimSections: SectionDef[] = [
     { id: "maintenance-simulator", label: "Maintenance Simulator", node: <MaintenanceSimulator /> },
   ];
+  const investorSections: SectionDef[] = [
+    { id: "investor-dashboard", label: "Investor Dashboard", node: <InvestorDashboard /> },
+  ];
   const overviewSections: SectionDef[] = [
     {
       id: "stat-cards",
@@ -214,6 +218,7 @@ function TabsBlock() {
           <TabsTrigger value="weather" className="flex items-center gap-2"><Thermometer className="h-4 w-4" />Weather</TabsTrigger>
           <TabsTrigger value="expansion" className="flex items-center gap-2"><Building2 className="h-4 w-4" />Expansion</TabsTrigger>
           <TabsTrigger value="maintenance-sim" className="flex items-center gap-2"><Wrench className="h-4 w-4" />Simulator</TabsTrigger>
+          <TabsTrigger value="investor" className="flex items-center gap-2"><Landmark className="h-4 w-4" />Investor</TabsTrigger>
           <TabsTrigger value="overview">All Showrooms</TabsTrigger>
           <TabsTrigger value="print" className="flex items-center gap-2"><Printer className="h-4 w-4" />Print</TabsTrigger>
         </TabsList>
@@ -226,6 +231,7 @@ function TabsBlock() {
         <TabsContent value="weather"><SortableSections sections={weatherSections} isEditMode={false} /></TabsContent>
         <TabsContent value="expansion"><SortableSections sections={expansionSections} isEditMode={false} /></TabsContent>
         <TabsContent value="maintenance-sim"><SortableSections sections={maintenanceSimSections} isEditMode={false} /></TabsContent>
+        <TabsContent value="investor"><SortableSections sections={investorSections} isEditMode={false} /></TabsContent>
         <TabsContent value="print" className="space-y-6"><PrintBooklet /></TabsContent>
         <TabsContent value="overview"><SortableSections sections={overviewSections} isEditMode={false} /></TabsContent>
       </Tabs>
