@@ -71,7 +71,7 @@ function SlideCover() {
           Business Plan
         </div>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
-          Thermo Dynamics Engineer
+          Thermo Dynamics Engineering
         </h1>
         <p className="text-lg md:text-xl text-white/60 font-light tracking-wide">
           Premium Cooling Performance Optimization
@@ -519,7 +519,7 @@ function SlidePartnerControl() {
               <div className="p-4 rounded-xl border bg-muted/10 text-center w-48">
                 <Building2 className="h-5 w-5 mx-auto mb-1 text-primary" />
                 <p className="font-bold text-xs">Operating Company</p>
-                <p className="text-[10px] text-muted-foreground">Thermo Dynamics Engineer</p>
+                <p className="text-[10px] text-muted-foreground">Thermo Dynamics Engineering</p>
               </div>
             </div>
             <div className="flex flex-col items-center">
