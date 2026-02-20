@@ -10,8 +10,9 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area,
 } from "recharts";
 import {
-  TrendingUp, DollarSign, BarChart3, Shield, Landmark, LogOut,
+  TrendingUp, DollarSign, BarChart3, Shield, Landmark, LogOut, Users,
 } from "lucide-react";
+import { FounderCompensation } from "@/components/FounderCompensation";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -522,6 +523,7 @@ export function InvestorDashboard() {
     { id: "risk", icon: <Shield className="h-4 w-4" />, label: "Risk Model", content: <RiskModel /> },
     { id: "fundraising", icon: <Landmark className="h-4 w-4" />, label: "Fundraising", content: <FundraisingStructure /> },
     { id: "exit", icon: <LogOut className="h-4 w-4" />, label: "Exit Model", content: <ExitModel /> },
+    { id: "founder", icon: <Users className="h-4 w-4" />, label: "Founder & Capital", content: <FounderCompensation /> },
   ];
 
   return (
