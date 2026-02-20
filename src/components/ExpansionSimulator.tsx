@@ -129,7 +129,12 @@ export function ExpansionSimulator() {
       </div>
 
       {/* Results */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="rounded-xl bg-card p-5 card-elevated text-center border-t-4 border-t-muted-foreground">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Total Initial Investment</p>
+          <p className="text-3xl font-black text-foreground">{results.totalSystemCost.toLocaleString()}</p>
+          <p className="text-xs text-muted-foreground">SAR ({branches} branches)</p>
+        </div>
         <div className="rounded-xl bg-card p-5 card-elevated text-center border-t-4 border-t-destructive">
           <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Expected Bill (No SCC)</p>
           <p className="text-3xl font-black text-destructive">{results.expectedNoSCC.toLocaleString()}</p>
