@@ -21,7 +21,7 @@ export function ExecutiveSummary() {
         {/* Title Block */}
         <div className="text-center space-y-2 pb-2">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight" style={{ color: "hsl(var(--exec-navy))" }}>
-            Thermo Dynamics Engineer
+            Thermo Dynamics Engineering
           </h1>
           <p className="text-lg font-medium text-muted-foreground tracking-wide">
             Premium Cooling Performance Optimization
@@ -127,7 +127,7 @@ export function ExecutiveSummary() {
         {/* Footer */}
         <Separator />
         <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
-          <span>Thermo Dynamics Engineer — Confidential</span>
+          <span>Thermo Dynamics Engineering — Confidential</span>
           <span>Prepared {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
         </div>
       </div>

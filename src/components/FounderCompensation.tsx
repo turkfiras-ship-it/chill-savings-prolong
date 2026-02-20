@@ -212,7 +212,7 @@ function HoldingStructure() {
             <div className="w-px h-6 bg-border" />
             <div className="flex flex-wrap justify-center gap-6">
               <div className="border-2 border-primary rounded-lg px-5 py-3 text-center min-w-[180px]">
-                <p className="font-semibold text-sm text-foreground">Thermo Dynamics Engineer</p>
+                <p className="font-semibold text-sm text-foreground">Thermo Dynamics Engineering</p>
                 <p className="text-xs text-muted-foreground">Operating Company</p>
                 <p className="text-xs text-muted-foreground mt-1">Revenue · Operations · Staff</p>
               </div>

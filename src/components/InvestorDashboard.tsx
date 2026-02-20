@@ -56,10 +56,10 @@ function InvestmentThesis() {
     <div className="space-y-6">
       <div>
       <h2 className="text-2xl font-bold tracking-tight text-foreground">
-          Thermo Dynamics Engineer — Scalable Energy Optimization Platform
+          Thermo Dynamics Engineering — Scalable Energy Optimization Platform
         </h2>
         <p className="text-muted-foreground mt-3 max-w-3xl leading-relaxed">
-          Thermo Dynamics Engineer transforms high cooling demand environments into recurring energy efficiency value
+          Thermo Dynamics Engineering transforms high cooling demand environments into recurring energy efficiency value
           through smart retrofit control systems validated under real invoice conditions.
         </p>
       </div>
