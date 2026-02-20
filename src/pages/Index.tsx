@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Thermometer, Landmark } from "lucide-react";
+import { Thermometer, Landmark, Briefcase } from "lucide-react";
 import {
   Zap,
   TrendingDown,
@@ -50,6 +50,7 @@ import { WeatherSensitivity } from "@/components/WeatherSensitivity";
 import { ExpansionSimulator } from "@/components/ExpansionSimulator";
 import { MaintenanceSimulator } from "@/components/MaintenanceSimulator";
 import { InvestorDashboard } from "@/components/InvestorDashboard";
+import { BusinessPlanPresentation } from "@/components/BusinessPlanPresentation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SortableSections, SectionDef } from "@/components/SortableSections";
 import {
@@ -219,6 +220,7 @@ function TabsBlock() {
           <TabsTrigger value="expansion" className="flex items-center gap-2"><Building2 className="h-4 w-4" />Expansion</TabsTrigger>
           <TabsTrigger value="maintenance-sim" className="flex items-center gap-2"><Wrench className="h-4 w-4" />Simulator</TabsTrigger>
           <TabsTrigger value="investor" className="flex items-center gap-2"><Landmark className="h-4 w-4" />Investor</TabsTrigger>
+          <TabsTrigger value="business-plan" className="flex items-center gap-2"><Briefcase className="h-4 w-4" />Business Plan</TabsTrigger>
           <TabsTrigger value="overview">All Showrooms</TabsTrigger>
           <TabsTrigger value="print" className="flex items-center gap-2"><Printer className="h-4 w-4" />Print</TabsTrigger>
         </TabsList>
@@ -232,6 +234,7 @@ function TabsBlock() {
         <TabsContent value="expansion"><SortableSections sections={expansionSections} isEditMode={false} /></TabsContent>
         <TabsContent value="maintenance-sim"><SortableSections sections={maintenanceSimSections} isEditMode={false} /></TabsContent>
         <TabsContent value="investor"><SortableSections sections={investorSections} isEditMode={false} /></TabsContent>
+        <TabsContent value="business-plan"><BusinessPlanPresentation /></TabsContent>
         <TabsContent value="print" className="space-y-6"><PrintBooklet /></TabsContent>
         <TabsContent value="overview"><SortableSections sections={overviewSections} isEditMode={false} /></TabsContent>
       </Tabs>
