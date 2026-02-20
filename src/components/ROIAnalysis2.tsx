@@ -91,8 +91,8 @@ const EXPECTED_BILL_2025_WITHOUT_SCC = ACTUAL_BILL_2024 * WEATHER_FACTOR; // 246
 const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // 33,052 SAR
 
 // CFO-LOCKED: Bill-based all-in avoided rate (NOT tier rates)
-// AvoidedRate = True_Savings_SAR / Annual_True_Savings_kWh = 33052 / 80763 = 0.4092468
-const ANNUAL_TRUE_SAVINGS_KWH = 80763; // LOCKED
+// AvoidedRate = True_Savings_SAR / Annual_True_Savings_kWh = 33052 / 80762 = 0.4092975
+const ANNUAL_TRUE_SAVINGS_KWH = 80762; // LOCKED
 const AVOIDED_RATE_SAR_PER_KWH = TRUE_SAVINGS_SAR / ANNUAL_TRUE_SAVINGS_KWH; // 0.4092468 SAR/kWh
 
 // SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
@@ -348,7 +348,7 @@ export function ROIAnalysis2() {
           G8's non-inverter units make it consume disproportionately more per ton. After consumption-weighting,
           the 7 SCC panels represent <strong>{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the actual bill</strong>
           (~{Math.round(SCC_BILL_SHARE_SAR).toLocaleString()} SAR out of {ACTUAL_BILL_2025.toLocaleString()} SAR actual 2025 bill).
-          SAR values use a bill-based all-in avoided rate: <strong>{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> (33,052 ÷ 80,763).
+          SAR values use a bill-based all-in avoided rate: <strong>{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> (33,052 ÷ 80,762).
           All values derived from actual SCECO invoices (VAT included).
         </p>
 
@@ -378,7 +378,7 @@ export function ROIAnalysis2() {
             </div>
           </div>
         <p className="text-xs text-muted-foreground mt-3">
-            SAR values in the monthly table use a bill-based all-in avoided rate ({AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh) derived from 33,052 SAR ÷ 80,763 kWh.
+            SAR values in the monthly table use a bill-based all-in avoided rate ({AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh) derived from 33,052 SAR ÷ 80,762 kWh.
             This rate includes VAT, demand charges, and all bill components — ensuring the annual SAR total matches the true financial savings exactly.
           </p>
         </div>
@@ -555,7 +555,7 @@ export function ROIAnalysis2() {
           </div>
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
             <p className="font-semibold text-white mb-1">② Bill-Based All-In Avoided Rate</p>
-            <p className="text-slate-400">SAR values use an all-in avoided rate of <strong className="text-white">{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> derived from actual SCECO invoices (33,052 SAR ÷ 80,763 kWh). This rate includes VAT, demand charges, and all bill components.</p>
+            <p className="text-slate-400">SAR values use an all-in avoided rate of <strong className="text-white">{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> derived from actual SCECO invoices (33,052 SAR ÷ 80,762 kWh). This rate includes VAT, demand charges, and all bill components.</p>
           </div>
         </div>
         <p className="text-xs text-slate-400 mt-3 border-t border-white/10 pt-3">

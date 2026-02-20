@@ -3,7 +3,7 @@
 export const overallFinancialImpact = {
   totalCostSavings2025: 6649, // SAR — actual YoY bill reduction (220,028 − 213,379 = 6,649)
   trueAdjustedSavings2025: 33052, // SAR — weather-normalised true savings (246,431 expected − 213,379 actual)
-  trueAdjustedSavingsKwh: 80763, // kWh — true adjusted kWh saved (7 SCC panels, weather-normalised)
+  trueAdjustedSavingsKwh: 80762, // kWh — true adjusted kWh saved (7 SCC panels, weather-normalised)
   trueAdjustedSavingsPct: 14.1, // % of 574,713 kWh 2024 baseline
   netAnnualPerformance: 'positive',
   savingsConcentration: 'mid-to-late year',
@@ -45,7 +45,7 @@ export const managementConclusion = {
   apparentHeadline: 'Direct bill reduction: 6,649 SAR (220,028 → 213,379 SAR) — understates true value',
   details: [
     'True adjusted savings: 33,052 SAR — weather-normalised avoided cost (Expected 2025 weather-adjusted only, +12%: 246,431 SAR)',
-    'True adjusted kWh saved: 80,763 kWh (14.1% of 2024 baseline) — from the 7 SCC-controlled panels only',
+    'True adjusted kWh saved: 80,762 kWh (14.1% of 2024 baseline) — from the 7 SCC-controlled panels only',
     'In a ~12% hotter year, electricity cost decreased. All values derived from actual SCECO invoices (VAT included)',
     'Additional savings potential through early-season optimization',
   ],
@@ -57,6 +57,6 @@ export const energyCostComparison = {
   year2025: { totalBill: 213379, label: '2025 Total Bill', changePercent: -3.02, changeSAR: -6649, direction: 'decrease' as const },
   expected2025WithoutSCC: 246431, // SAR — weather-normalised expected bill without SCC
   trueSavings: 33052, // SAR — 246,431 − 213,379
-  trueAdjustedKwh: 80763, // kWh saved (weather-normalised, 7 SCC panels)
+  trueAdjustedKwh: 80762, // kWh saved (weather-normalised, 7 SCC panels)
   anomalyNote: 'During 2025, two months (March and April) experienced operational issues that temporarily inflated consumption. When excluding these months, the overall data shows strong savings. Weather-normalised avoided cost: 33,052 SAR. Efficiency improvement: 14.1%.',
 };
