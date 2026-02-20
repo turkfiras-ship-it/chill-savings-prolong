@@ -1,4 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   BarChart,
   Bar,
@@ -219,8 +221,19 @@ export function ROIAnalysis2() {
   const [kw2024, setKw2024] = useState<number[]>([...DEFAULT_KW_2024]);
   const [kw2025, setKw2025] = useState<number[]>([...DEFAULT_KW_2025]);
   const [isEditing, setIsEditing] = useState(false);
+  const [sarMode, setSarMode] = useState<'bill' | 'tier'>('bill');
 
   const monthlyData = computeMonthly(kw2024, kw2025);
+
+  // Tier-based SAR computation for Mode 2
+  const monthlyDataWithSarMode = useMemo(() => {
+    return monthlyData.map((row, i) => {
+      if (sarMode === 'bill') return row;
+      // Tier estimate: Jan-Apr (i<4) = 0.30, May-Dec (i>=4) = 0.32
+      const tierRate = i < 4 ? 0.30 : 0.32;
+      return { ...row, trueSavingsSAR: Math.round(row.trueSavingsKw * tierRate) };
+    });
+  }, [monthlyData, sarMode]);
 
   const totalKw2024 = kw2024.reduce((a, b) => a + b, 0);
   const totalKw2025 = kw2025.reduce((a, b) => a + b, 0);
@@ -232,7 +245,7 @@ export function ROIAnalysis2() {
   const totalTrueSavingsKw = totalKw2024 - Math.round(0.88 * totalKw2025);
   const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
   // SAR total using avoided rate (must equal 33,052 ±1 SAR)
-  const totalTrueSavingsSAR = monthlyData.reduce((a, m) => a + m.trueSavingsSAR, 0);
+  const totalTrueSavingsSAR = monthlyDataWithSarMode.reduce((a, m) => a + m.trueSavingsSAR, 0);
 
   const update2024 = useCallback((i: number, v: number) => {
     setKw2024((prev) => { const next = [...prev]; next[i] = v; return next; });
@@ -250,7 +263,7 @@ export function ROIAnalysis2() {
   const expectedCheck = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR);
   const expectedMismatch = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC) !== expectedCheck;
   const kwhMismatch = totalTrueSavingsKw !== ANNUAL_TRUE_SAVINGS_KWH;
-  const sarMismatch = Math.abs(totalTrueSavingsSAR - TRUE_SAVINGS_SAR) > 1;
+  const sarMismatch = sarMode === 'bill' && Math.abs(totalTrueSavingsSAR - TRUE_SAVINGS_SAR) > 1;
 
   return (
     <div className="space-y-8">
@@ -703,13 +716,24 @@ export function ROIAnalysis2() {
       {/* ── EDITABLE MONTHLY TABLE ── */}
       <div className="rounded-xl bg-card p-6 card-elevated overflow-x-auto">
         <div className="flex items-center justify-between mb-4">
-          <div>
+        <div>
             <h3 className="text-lg font-semibold">Full Monthly Breakdown — kW Without G8</h3>
             <p className="text-xs text-muted-foreground mt-0.5">
               {isEditing ? '✏️ Edit mode — click any 2024 or 2025 kW value to change it. All calculations update live.' : 'Click "Edit Data" to update kW values directly.'}
             </p>
           </div>
-          <div className="flex gap-2">
+          {/* SAR Calculation Mode Toggle */}
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
+              <Label htmlFor="sar-mode" className="text-xs font-medium whitespace-nowrap">SAR Mode:</Label>
+              <span className={`text-xs ${sarMode === 'bill' ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>Bill-Based</span>
+              <Switch
+                id="sar-mode"
+                checked={sarMode === 'tier'}
+                onCheckedChange={(checked) => setSarMode(checked ? 'tier' : 'bill')}
+              />
+              <span className={`text-xs ${sarMode === 'tier' ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>Tier Estimate</span>
+            </div>
             {isEditing && (
               <button
                 onClick={resetData}
@@ -745,11 +769,15 @@ export function ROIAnalysis2() {
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">Raw Savings</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True Savings kW</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True %</th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">SAR Value (All-In Bill-Based)</th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">
+                {sarMode === 'bill'
+                  ? 'SAR Value (All-In Bill-Based, incl. VAT & charges)'
+                  : 'SAR Value (Energy Tariff Estimate Only)'}
+              </th>
             </tr>
           </thead>
           <tbody>
-            {monthlyData.map((row, i) => (
+            {monthlyDataWithSarMode.map((row, i) => (
               <tr key={i} className={`border-b border-border/50 transition-colors ${isEditing ? 'hover:bg-primary/5' : 'hover:bg-muted/20'}`}>
                 <td className="py-2 pr-4 font-medium">{MONTHS[i]}</td>
                 <td className="text-right py-2 px-3">
@@ -785,7 +813,10 @@ export function ROIAnalysis2() {
               </td>
               <td className="text-right py-3 px-3 text-savings">{totalTrueSavingsKw >= 0 ? '+' : ''}{totalTrueSavingsKw.toLocaleString()}</td>
               <td className="text-right py-3 px-3 text-savings">{totalTrueSavingsPct.toFixed(1)}%</td>
-              <td className="text-right py-3 px-3 text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</td>
+              <td className="text-right py-3 px-3 text-savings">
+                {totalTrueSavingsSAR.toLocaleString()} SAR
+                {sarMode === 'tier' && <span className="block text-xs text-muted-foreground font-normal">(Tier estimate — energy only)</span>}
+              </td>
             </tr>
           </tfoot>
         </table>
