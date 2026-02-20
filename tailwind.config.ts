@@ -61,6 +61,14 @@ export default {
           amber: "hsl(var(--chart-amber))",
           red: "hsl(var(--chart-red))",
         },
+        exec: {
+          navy: "hsl(var(--exec-navy))",
+          "navy-light": "hsl(var(--exec-navy-light))",
+          green: "hsl(var(--exec-green))",
+          "green-light": "hsl(var(--exec-green-light))",
+          surface: "hsl(var(--exec-surface))",
+          divider: "hsl(var(--exec-divider))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
