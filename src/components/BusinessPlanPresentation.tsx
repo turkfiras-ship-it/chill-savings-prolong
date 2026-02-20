@@ -71,7 +71,7 @@ function SlideCover() {
           Business Plan
         </div>
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-tight">
-          SCC Engineering
+          Thermo Dynamics Engineer
         </h1>
         <p className="text-lg md:text-xl text-white/60 font-light tracking-wide">
           Premium Cooling Performance Optimization
@@ -132,7 +132,7 @@ function SlideValidatedPerformance() {
 
   return (
     <Slide>
-      <SlideHeader number={3} title="Validated Performance" subtitle="Invoice-backed results from Jarir Bookstore Rawdah showroom" />
+      <SlideHeader number={3} title="Validated Performance" subtitle="Invoice-backed results from Jarir Bookstore Rawdah showroom — 7 SCC units, 175 tons capacity" />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <KPI label="Efficiency Gain" value="14.1%" accent />
         <KPI label="Invoice Savings" value="33,052 SAR" accent />
@@ -465,9 +465,9 @@ function SlideRiskModel() {
 function SlideCompetitiveAdvantage() {
   const advantages = [
     { title: "Extreme-Climate Specialization", desc: "Purpose-built for GCC high-ambient environments where standard solutions underperform" },
-    { title: "Invoice-Backed Validation", desc: "Performance proven through real utility billing data, not theoretical models" },
-    { title: "Monitoring Revenue Layer", desc: "Recurring subscription model creates predictable cash flow and client retention" },
-    { title: "Engineering Precision", desc: "Deep technical expertise in HVAC optimization separates SCC from generalist competitors" },
+    { title: "Invoice-Backed Validation", desc: "Performance proven through real utility billing data — 33,052 SAR savings, 80,762 kWh, 14.1% efficiency gain" },
+    { title: "Monitoring Revenue Layer", desc: "Recurring subscription model creates predictable cash flow and long-term client retention" },
+    { title: "Engineering Precision", desc: "Deep technical thermodynamics expertise in HVAC optimization separates us from generalist competitors" },
     { title: "Selective Client Strategy", desc: "Focus on high-value commercial accounts ensures premium positioning and margin protection" },
   ];
 
@@ -519,7 +519,7 @@ function SlidePartnerControl() {
               <div className="p-4 rounded-xl border bg-muted/10 text-center w-48">
                 <Building2 className="h-5 w-5 mx-auto mb-1 text-primary" />
                 <p className="font-bold text-xs">Operating Company</p>
-                <p className="text-[10px] text-muted-foreground">SCC Engineering</p>
+                <p className="text-[10px] text-muted-foreground">Thermo Dynamics Engineer</p>
               </div>
             </div>
             <div className="flex flex-col items-center">
