@@ -48,6 +48,14 @@ All colors MUST be HSL.
     --chart-amber: 200 60% 45%;
     --chart-red: 0 72% 51%;
 
+    /* Executive presentation tokens */
+    --exec-navy: 220 30% 15%;
+    --exec-navy-light: 220 20% 25%;
+    --exec-green: 152 45% 42%;
+    --exec-green-light: 152 40% 95%;
+    --exec-surface: 210 20% 98%;
+    --exec-divider: 220 15% 90%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
