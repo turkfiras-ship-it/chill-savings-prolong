@@ -45,7 +45,7 @@ export function WeatherComparison() {
     diff: w.tempDiff,
   }));
 
-  function TemperatureCoolingExplainer() {
+  const TemperatureCoolingExplainer = () => {
     return (
       <Collapsible open={explainerOpen} onOpenChange={setExplainerOpen}>
         <div className="rounded-xl border border-border bg-card p-5 card-elevated">
