@@ -12,7 +12,20 @@ import {
 } from "recharts";
 import { monthlyWeatherData, weatherSummary } from "@/data/weatherData";
 import { yearlyComparisonData } from "@/data/rawdahAnalysis";
-import { Thermometer, TrendingUp, Sun } from "lucide-react";
+import { Thermometer, TrendingUp, Sun, Info } from "lucide-react";
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
 
 export function WeatherComparison() {
   const chartData = monthlyWeatherData.map((w, idx) => ({
@@ -23,12 +36,59 @@ export function WeatherComparison() {
     consumption2025: yearlyComparisonData[idx]?.year2025 || 0,
   }));
 
+  const [explainerOpen, setExplainerOpen] = useState(false);
+
   const tempChartData = monthlyWeatherData.map(w => ({
     month: w.month.substring(0, 3),
     '2024 Temp': w.avgTemp2024,
     '2025 Temp': w.avgTemp2025,
     diff: w.tempDiff,
   }));
+
+  function TemperatureCoolingExplainer() {
+    return (
+      <Collapsible open={explainerOpen} onOpenChange={setExplainerOpen}>
+        <div className="rounded-xl border border-border bg-card p-5 card-elevated">
+          <CollapsibleTrigger className="flex items-center justify-between w-full text-left">
+            <div className="flex items-center gap-2">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              <span className="font-semibold text-sm">How Temperature Affects Cooling Demand</span>
+            </div>
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${explainerOpen ? 'rotate-180' : ''}`} />
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5 pt-4 border-t border-border">
+              <div className="p-4 rounded-lg bg-muted/30">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Engineering View</p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>• +1.3°C measured ambient increase</li>
+                  <li>• HVAC load sensitivity in hot climates ≈ 5–8% per °C</li>
+                  <li>• Peak degradation may approach 8–10% per °C</li>
+                  <li>• Estimated impact range: 8–12%</li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/30">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">CFO View</p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>• 12% used as base-case assumption</li>
+                  <li>• Sensitivity tested from 8%–14%</li>
+                  <li>• Financial model remains positive under lower assumptions</li>
+                </ul>
+              </div>
+              <div className="p-4 rounded-lg bg-muted/30">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Executive View</p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>• Hotter year</li>
+                  <li>• Higher cooling demand</li>
+                  <li>• Lower total cost achieved</li>
+                </ul>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </div>
+      </Collapsible>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -44,7 +104,7 @@ export function WeatherComparison() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-white/10 rounded-lg p-3 text-center">
             <p className="text-2xl font-bold">+{weatherSummary.avgTempDiff}°C</p>
-            <p className="text-xs opacity-80">Avg Temp Increase</p>
+            <p className="text-xs opacity-80">Average Ambient Temperature Increase (Measured)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-3 text-center">
             <p className="text-2xl font-bold">{weatherSummary.hottestTemp2025}°C</p>
@@ -54,12 +114,29 @@ export function WeatherComparison() {
             <p className="text-2xl font-bold">{weatherSummary.peakMonths.length}</p>
             <p className="text-xs opacity-80">Months Above 40°C</p>
           </div>
-          <div className="bg-white/10 rounded-lg p-3 text-center">
-            <p className="text-2xl font-bold">{weatherSummary.coolingDegreeIncrease}</p>
-            <p className="text-xs opacity-80">More Cooling Load</p>
-          </div>
+          <TooltipProvider>
+            <UITooltip>
+              <TooltipTrigger asChild>
+                <div className="bg-white/10 rounded-lg p-3 text-center cursor-help">
+                  <p className="text-2xl font-bold">{weatherSummary.coolingDegreeIncrease}</p>
+                  <p className="text-xs opacity-80 flex items-center justify-center gap-1">
+                    Estimated Cooling Demand Increase <Info className="h-3 w-3 opacity-60" />
+                  </p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-xs">
+                Estimated additional cooling energy required due to higher ambient temperatures. Not a direct temperature percentage conversion.
+              </TooltipContent>
+            </UITooltip>
+          </TooltipProvider>
         </div>
+        <p className="text-xs opacity-70 mt-4 leading-relaxed">
+          Cooling demand increase is derived from HVAC load response to ambient temperature rise. Temperature change (°C) and cooling demand (%) are related but not equivalent metrics.
+        </p>
       </div>
+
+      {/* Expandable Engineering / CFO / Executive Info */}
+      <TemperatureCoolingExplainer />
 
       {/* Temperature Chart */}
       <div className="rounded-xl bg-card p-6 card-elevated">

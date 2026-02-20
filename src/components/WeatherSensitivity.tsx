@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Thermometer } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 const ACTUAL_BILL_2024 = 220028;
 const ACTUAL_BILL_2025 = 213379;
@@ -59,7 +60,7 @@ export function WeatherSensitivity() {
       {/* Slider */}
       <div className="rounded-xl bg-card p-6 card-elevated">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold">Weather Increase %</h3>
+          <h3 className="font-semibold">Estimated Cooling Demand Increase %</h3>
           <span className="text-2xl font-black text-energy">{weatherPct}%</span>
         </div>
         <Slider
@@ -74,6 +75,14 @@ export function WeatherSensitivity() {
           <span>0% (Same weather)</span>
           <span>12% (Locked actual)</span>
           <span>20% (Extreme heat)</span>
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">
+          Default 12% based on +1.3°C observed temperature rise.
+        </p>
+        <div className="mt-3">
+          <Badge variant="outline" className="text-xs font-medium">
+            Model robust between 8%–14% demand increase
+          </Badge>
         </div>
       </div>
 
