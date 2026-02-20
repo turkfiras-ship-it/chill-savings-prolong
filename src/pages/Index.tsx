@@ -45,6 +45,7 @@ import { UnitMonthlyAnalysis } from "@/components/UnitMonthlyAnalysis";
 import { Recommendations } from "@/components/Recommendations";
 import { PrintBooklet } from "@/components/PrintBooklet";
 import { ROIAnalysis2 } from "@/components/ROIAnalysis2";
+import { ROIAnalysis3 } from "@/components/ROIAnalysis3";
 import { WeatherSensitivity } from "@/components/WeatherSensitivity";
 import { ExpansionSimulator } from "@/components/ExpansionSimulator";
 import { MaintenanceSimulator } from "@/components/MaintenanceSimulator";
@@ -141,6 +142,9 @@ function TabsBlock() {
   const roi2Sections: SectionDef[] = [
     { id: "roi2-analysis", label: "ROI 2 Analysis", node: <ROIAnalysis2 /> },
   ];
+  const roi3Sections: SectionDef[] = [
+    { id: "roi3-analysis", label: "ROI 3 Combined", node: <ROIAnalysis3 /> },
+  ];
   const weatherSections: SectionDef[] = [
     { id: "weather-sensitivity", label: "Weather Sensitivity", node: <WeatherSensitivity /> },
   ];
@@ -206,6 +210,7 @@ function TabsBlock() {
           <TabsTrigger value="recommendations" className="flex items-center gap-2"><Leaf className="h-4 w-4" />Recommendations</TabsTrigger>
           <TabsTrigger value="roi" className="flex items-center gap-2"><Target className="h-4 w-4" />ROI</TabsTrigger>
           <TabsTrigger value="roi2" className="flex items-center gap-2"><Target className="h-4 w-4" />ROI 2</TabsTrigger>
+          <TabsTrigger value="roi3" className="flex items-center gap-2"><Target className="h-4 w-4" />ROI 3</TabsTrigger>
           <TabsTrigger value="weather" className="flex items-center gap-2"><Thermometer className="h-4 w-4" />Weather</TabsTrigger>
           <TabsTrigger value="expansion" className="flex items-center gap-2"><Building2 className="h-4 w-4" />Expansion</TabsTrigger>
           <TabsTrigger value="maintenance-sim" className="flex items-center gap-2"><Wrench className="h-4 w-4" />Simulator</TabsTrigger>
@@ -217,6 +222,7 @@ function TabsBlock() {
         <TabsContent value="recommendations"><SortableSections sections={recommendationsSections} isEditMode={false} /></TabsContent>
         <TabsContent value="roi"><SortableSections sections={roiSections} isEditMode={false} /></TabsContent>
         <TabsContent value="roi2"><SortableSections sections={roi2Sections} isEditMode={false} /></TabsContent>
+        <TabsContent value="roi3"><SortableSections sections={roi3Sections} isEditMode={false} /></TabsContent>
         <TabsContent value="weather"><SortableSections sections={weatherSections} isEditMode={false} /></TabsContent>
         <TabsContent value="expansion"><SortableSections sections={expansionSections} isEditMode={false} /></TabsContent>
         <TabsContent value="maintenance-sim"><SortableSections sections={maintenanceSimSections} isEditMode={false} /></TabsContent>
