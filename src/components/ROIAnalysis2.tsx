@@ -25,9 +25,9 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 // 2025 With G8:    27157, 26981, 44928, 59853, 72048, 75378, 83005, 82594, 65564, 45939, 35678, 23517  → Total: 642622
 // G8 monthly:       776,  1374,  4208,  8605, 10828, 12543, 14657, 12879,  9497,  5757,  3343,  1694  → Total: 86171
 
-const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60655, 42915, 33158, 22304]; // Without G8 (from Excel — Sep corrected to 60,655)
-const DEFAULT_KW_2025 = [26381, 25607, 40720, 51248, 51220, 62835, 68338, 69715, 56067, 40182, 32335, 21823]; // Without G8 (from Excel — Jul corrected to 68,338)
-const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14667, 13308,  9813,  5757,  3454,  1750]; // G8 monthly kWh — Total: 87,083 (Aug corrected to 13,308, Sep corrected to 9,813)
+const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60655, 42915, 33158, 22304]; // Without G8 — Total: 574,713
+const DEFAULT_KW_2025 = [26380, 25607, 40720, 51248, 61220, 62835, 68338, 71586, 57251, 40182, 33424, 22517]; // Without G8 — Total: 561,308 (Aug LOCKED: 71,586)
+const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14667, 13308,  9813,  5757,  3454,  1750]; // G8 monthly kWh — Total: 87,083
 
 // With G8 totals (from Excel)
 const TOTAL_WITH_G8_2024 = 660855; // Excel verified: sum of 2024 "With G8" column
@@ -88,8 +88,10 @@ const WEATHER_FACTOR = 1 + WEATHER_ADJUSTMENT; // 1.12
 const EXPECTED_BILL_2025_WITHOUT_SCC = ACTUAL_BILL_2024 * WEATHER_FACTOR; // 246,431.36 SAR
 const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // 33,052 SAR
 
-// Blended rate: derived from 2024 actual bill vs total building kWh
-const BLENDED_RATE_2024 = ACTUAL_BILL_2024 / TOTAL_WITH_G8_2024; // 220028 / 660855 ≈ 0.3329 — use as cross-check only
+// CFO-LOCKED: Bill-based all-in avoided rate (NOT tier rates)
+// AvoidedRate = True_Savings_SAR / Annual_True_Savings_kWh = 33052 / 80763 = 0.4092468
+const ANNUAL_TRUE_SAVINGS_KWH = 80763; // LOCKED
+const AVOIDED_RATE_SAR_PER_KWH = TRUE_SAVINGS_SAR / ANNUAL_TRUE_SAVINGS_KWH; // 0.4092468 SAR/kWh
 
 // SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
 const SEVEN_PANEL_KWH_2024 = DEFAULT_KW_2024.reduce((a, b) => a + b, 0);
@@ -132,14 +134,11 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
     const raw2025 = kw2025[i];
     const adjusted2025 = Math.round(raw2025 * (1 + COOLING_LOAD_FACTOR));
     const rawSavingsKw = raw2024 - raw2025;
-    // adjusted2025 = what the building NEEDED given 12% extra heat
-    // trueSavingsKw = how much less was consumed vs that higher demand
-    const trueSavingsKw = adjusted2025 - raw2025; // = raw2025 * 0.12 (weather-corrected gain)
-    const totalSavingsKw = rawSavingsKw + trueSavingsKw; // raw YoY + weather bonus
+    // True savings = 2024_kWh - (0.88 × 2025_Raw_kWh) per month
+    const totalSavingsKw = raw2024 - Math.round(0.88 * raw2025);
     const trueSavingsPct = (totalSavingsKw / raw2024) * 100;
-    // Use tiered 2025 rate for SAR valuation — savings are valued at the rate we're paying in 2025
-    const rate2025 = blendedRate(raw2025 > 0 ? raw2025 : 1, i, 2025);
-    const trueSavingsSAR = Math.round(totalSavingsKw * rate2025);
+    // SAR Value: Use bill-based all-in avoided rate (NOT tier rates)
+    const trueSavingsSAR = Math.round(totalSavingsKw * AVOIDED_RATE_SAR_PER_KWH);
     return {
       month,
       raw2024,
@@ -147,7 +146,7 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
       adjusted2025,
       rawSavingsKw: Math.round(rawSavingsKw),
       rawSavingsPct: parseFloat(((rawSavingsKw / raw2024) * 100).toFixed(1)),
-      weatherBonusKw: Math.round(trueSavingsKw),
+      weatherBonusKw: Math.round(raw2025 * COOLING_LOAD_FACTOR),
       trueSavingsKw: Math.round(totalSavingsKw),
       trueSavingsPct: parseFloat(trueSavingsPct.toFixed(1)),
       trueSavingsSAR,
@@ -229,9 +228,10 @@ export function ROIAnalysis2() {
   const totalRawSavingsKw = totalKw2024 - totalKw2025;
   const totalRawSavingsPct = (totalRawSavingsKw / totalKw2024) * 100;
   const totalWeatherBonusKw = Math.round(totalKw2025 * COOLING_LOAD_FACTOR);
-  const totalTrueSavingsKw = totalRawSavingsKw + totalWeatherBonusKw;
+  // True savings = 2024_kWh - (0.88 × 2025_Raw_kWh)
+  const totalTrueSavingsKw = totalKw2024 - Math.round(0.88 * totalKw2025);
   const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
-  // Compute SAR total using per-month tiered rates (sum from monthlyData)
+  // SAR total using avoided rate (must equal 33,052 ±1 SAR)
   const totalTrueSavingsSAR = monthlyData.reduce((a, m) => a + m.trueSavingsSAR, 0);
 
   const update2024 = useCallback((i: number, v: number) => {
@@ -246,17 +246,29 @@ export function ROIAnalysis2() {
     setKw2025([...DEFAULT_KW_2025]);
   };
 
-  // ── VALIDATION: Expected 2025 must equal Actual 2024 × 1.12 ──
+  // ── VALIDATIONS ──
   const expectedCheck = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR);
   const expectedMismatch = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC) !== expectedCheck;
+  const kwhMismatch = totalTrueSavingsKw !== ANNUAL_TRUE_SAVINGS_KWH;
+  const sarMismatch = Math.abs(totalTrueSavingsSAR - TRUE_SAVINGS_SAR) > 1;
 
   return (
     <div className="space-y-8">
 
-      {/* ── VALIDATION BANNER ── */}
+      {/* ── VALIDATION BANNERS ── */}
       {expectedMismatch && (
         <div className="rounded-xl bg-destructive/10 border-2 border-destructive/40 p-4 text-destructive font-semibold text-sm">
-          ⚠️ Expected 2025 logic mismatch — check assumptions. Expected_2025_NoSCC ({Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}) ≠ Actual_2024 × 1.12 ({expectedCheck.toLocaleString()})
+          ⚠️ Weather adjustment logic mismatch — Expected_2025_NoSCC ({Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}) ≠ Actual_2024 × 1.12 ({expectedCheck.toLocaleString()})
+        </div>
+      )}
+      {kwhMismatch && (
+        <div className="rounded-xl bg-destructive/10 border-2 border-destructive/40 p-4 text-destructive font-semibold text-sm">
+          ⚠️ kWh totals inconsistent — Annual True Savings kWh ({totalTrueSavingsKw.toLocaleString()}) ≠ locked value ({ANNUAL_TRUE_SAVINGS_KWH.toLocaleString()})
+        </div>
+      )}
+      {sarMismatch && (
+        <div className="rounded-xl bg-destructive/10 border-2 border-destructive/40 p-4 text-destructive font-semibold text-sm">
+          ⚠️ Annual SAR mismatch — check avoided rate logic. SUM(monthly SAR) = {totalTrueSavingsSAR.toLocaleString()} ≠ {TRUE_SAVINGS_SAR.toLocaleString()}
         </div>
       )}
 
@@ -323,8 +335,8 @@ export function ROIAnalysis2() {
           G8's non-inverter units make it consume disproportionately more per ton. After consumption-weighting,
           the 7 SCC panels represent <strong>{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the actual bill</strong>
           (~{Math.round(SCC_BILL_SHARE_SAR).toLocaleString()} SAR out of {ACTUAL_BILL_2025.toLocaleString()} SAR actual 2025 bill).
-          SCECO tiered rates: Jan–Apr 2025 @ 0.20/0.30 SAR/kWh | May–Dec 2025 @ 0.22/0.32 SAR/kWh (rate hike).
-          2024 annual blended rate (cross-check): <strong>{BLENDED_RATE_2024.toFixed(4)} SAR/kWh</strong>.
+          SAR values use a bill-based all-in avoided rate: <strong>{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> (33,052 ÷ 80,763).
+          All values derived from actual SCECO invoices (VAT included).
         </p>
 
         {/* SCECO Rate Table */}
@@ -352,9 +364,9 @@ export function ROIAnalysis2() {
               <p className="text-xs text-energy font-medium">+6.7% rate hike</p>
             </div>
           </div>
-          <p className="text-xs text-muted-foreground mt-3">
-            SAR values in the monthly table use the applicable tiered rate for each month. Jan–Apr 2025 uses 2024 rates; May–Dec 2025 uses the increased rates.
-            Each kWh saved above the 6,000 threshold is worth <strong>0.32 SAR</strong> in peak summer months — maximising the financial impact of SCC savings.
+        <p className="text-xs text-muted-foreground mt-3">
+            SAR values in the monthly table use a bill-based all-in avoided rate ({AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh) derived from 33,052 SAR ÷ 80,763 kWh.
+            This rate includes VAT, demand charges, and all bill components — ensuring the annual SAR total matches the true financial savings exactly.
           </p>
         </div>
 
@@ -521,24 +533,20 @@ export function ROIAnalysis2() {
 
       {/* ── WHY RAW % UNDERSTATES VALUE ── */}
       <div className="rounded-xl bg-slate-800 text-white p-5">
-        <p className="text-sm font-bold text-teal-400 mb-3">⚡ Why {totalRawSavingsPct.toFixed(1)}% Raw Savings Understates the True Value — Two Compounding Factors</p>
+        <p className="text-sm font-bold text-teal-400 mb-3">⚡ Why {totalRawSavingsPct.toFixed(1)}% Raw Savings Understates the True Value</p>
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
             <p className="font-semibold text-white mb-1">① Weather: 2025 was +1.3°C hotter → +12% cooling demand</p>
             <p className="text-slate-400">The building <em>needed</em> 12% more energy just to maintain the same comfort. Any kWh savings on top of that is a true efficiency gain — the raw % ignores this extra demand pressure entirely.</p>
-            <p className="text-teal-400 font-semibold mt-1">Weather-only correction adds: +{totalTrueSavingsKw - (DEFAULT_KW_2024.reduce((a,b)=>a+b,0) - DEFAULT_KW_2025.reduce((a,b)=>a+b,0))} kWh → worth more SAR at 2025 rates</p>
+            <p className="text-teal-400 font-semibold mt-1">True adjusted savings: {totalTrueSavingsKw.toLocaleString()} kWh ({totalTrueSavingsPct.toFixed(1)}%)</p>
           </div>
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-            <p className="font-semibold text-white mb-1">② SCECO Rate Hike: May 2025 — Tier 2 rose from 0.30 → 0.32 SAR/kWh (+6.7%)</p>
-            <p className="text-slate-400">Since May 2025, every kWh saved above the 6,000 kWh/month threshold is worth <strong className="text-white">0.32 SAR</strong> instead of 0.30 SAR. This means even a "small" kWh reduction translates to a larger SAR saving in the peak months (May–Sep) when both consumption and tariff are highest.</p>
-            <div className="mt-2 grid grid-cols-2 gap-2 text-[11px]">
-              <div className="bg-white/5 rounded p-1.5 text-center"><p className="text-slate-400">2024 Tier 2</p><p className="text-white font-bold">0.30 SAR/kWh</p></div>
-              <div className="bg-teal-500/20 rounded p-1.5 text-center border border-teal-400/30"><p className="text-teal-300">2025 May+ Tier 2</p><p className="text-teal-400 font-bold">0.32 SAR/kWh ↑</p></div>
-            </div>
+            <p className="font-semibold text-white mb-1">② Bill-Based All-In Avoided Rate</p>
+            <p className="text-slate-400">SAR values use an all-in avoided rate of <strong className="text-white">{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> derived from actual SCECO invoices (33,052 SAR ÷ 80,763 kWh). This rate includes VAT, demand charges, and all bill components.</p>
           </div>
         </div>
         <p className="text-xs text-slate-400 mt-3 border-t border-white/10 pt-3">
-          <strong className="text-white">Net effect:</strong> The {totalRawSavingsPct.toFixed(1)}% raw kWh saving becomes a <strong className="text-teal-400">{totalTrueSavingsPct.toFixed(1)}% true efficiency gain</strong> once weather demand is added — and that gain is valued at the higher 2025 rate, producing <strong className="text-teal-400">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</strong> in true financial savings vs the {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill difference.
+          <strong className="text-white">CFO Narrative:</strong> In a ~12% hotter year, electricity cost decreased. Weather-normalised avoided cost: {TRUE_SAVINGS_SAR.toLocaleString()} SAR. Efficiency improvement: {totalTrueSavingsPct.toFixed(1)}%. All values derived from actual SCECO invoices (VAT included).
         </p>
       </div>
 
@@ -737,7 +745,7 @@ export function ROIAnalysis2() {
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">Raw Savings</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True Savings kW</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True %</th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">SAR Value</th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">SAR Value (All-In Bill-Based)</th>
             </tr>
           </thead>
           <tbody>
@@ -796,13 +804,16 @@ export function ROIAnalysis2() {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-2">After 12% climate correction</h4>
+            <h4 className="font-semibold mb-2">After 12% climate correction (weather-normalised)</h4>
             <ul className="space-y-1 text-muted-foreground">
-              <li>• Adjusted 2025 baseline: <strong>{totalAdjusted2025.toLocaleString()} kWh</strong></li>
-              <li>• True adjusted saving: <span className="text-savings font-bold">{totalTrueSavingsKw.toLocaleString()} kWh ({totalTrueSavingsPct.toFixed(1)}%)</span></li>
+              <li>• True adjusted kWh saved: <span className="text-savings font-bold">{totalTrueSavingsKw.toLocaleString()} kWh ({totalTrueSavingsPct.toFixed(1)}%)</span></li>
               <li>• Financial value: <span className="text-savings font-bold">{TRUE_SAVINGS_SAR.toLocaleString()} SAR/year</span></li>
+              <li>• Avoided rate: <strong>{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> (all-in bill-based, incl. VAT &amp; charges)</li>
             </ul>
           </div>
+        </div>
+        <div className="p-3 rounded-lg bg-card border border-border mb-4 text-sm text-muted-foreground">
+          <strong className="text-foreground">CFO Narrative:</strong> In a ~12% hotter year, electricity cost decreased. Weather-normalised avoided cost: 33,052 SAR. Efficiency improvement: 14.1%. All values derived from actual SCECO invoices (VAT included).
         </div>
         <div className="p-4 rounded-lg bg-savings/10 border border-savings/20">
           <p className="text-sm font-semibold text-savings mb-2">

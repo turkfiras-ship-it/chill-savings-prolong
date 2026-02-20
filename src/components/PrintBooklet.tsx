@@ -180,7 +180,7 @@ export function PrintBooklet() {
 
           {/* G8 note */}
           <div className="p-2 rounded border border-amber-200 bg-amber-50/30 text-xs mb-3">
-            <strong className="text-amber-700">G8 Panel (No SCC Device):</strong> 7 units, 26 tons non-inverter — consumes <strong>86,171 kWh/year</strong> (13.1% of total). Non-inverter draws ~1.5× more per ton vs inverter. G8 effective bill share: 18.2%. SCC controls 7 panels (175 tons inverter) = 81.8% of bill.
+            <strong className="text-amber-700">G8 Panel (No SCC Device):</strong> 7 units, 26 tons non-inverter — consumes <strong>87,083 kWh/year</strong> (13.4% of total). Non-inverter draws ~1.5× more per ton vs inverter. G8 effective bill share: 18.2%. SCC controls 81.8% of building consumption.
           </div>
 
           <div className="p-3 bg-slate-800 text-white rounded-lg">
@@ -354,7 +354,7 @@ export function PrintBooklet() {
           
           <div className="mb-4 p-3 rounded-lg border border-amber-300/50 bg-amber-50/30">
             <p className="font-bold text-xs mb-1">G8 — Panel 8 (7 Units, 26 Tons Total — NOT covered by SCC)</p>
-            <p className="text-xs text-muted-foreground mb-2">G8 consumes <strong>86,171 kWh/year</strong> (13.1% of total building, 18.2% of weighted bill share). Non-inverter units draw ~1.5× more per ton than inverter. NOT optimized by SCC — dilutes bill-level savings.</p>
+            <p className="text-xs text-muted-foreground mb-2">G8 consumes <strong>87,083 kWh/year</strong> (13.4% of total building, 18.2% of weighted bill share). Non-inverter units draw ~1.5× more per ton than inverter. NOT optimized by SCC — dilutes bill-level savings.</p>
             <div className="grid grid-cols-2 gap-2 text-xs">
               {[
                 "Cassette MCCT36 (3 ton) — Basement WH",
