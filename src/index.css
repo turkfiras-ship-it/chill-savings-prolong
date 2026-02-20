@@ -180,6 +180,9 @@ a[href*="lovable.dev"][target="_blank"] {
   .print-booklet { position: absolute; left: 0; top: 0; width: 100%; }
   .exec-summary-print, .exec-summary-print * { visibility: visible !important; }
   .exec-summary-print { position: absolute; left: 0; top: 0; width: 100%; }
+  .bp-print-all, .bp-print-all * { visibility: visible !important; }
+  .bp-print-all { position: absolute; left: 0; top: 0; width: 100%; }
+  .bp-print-all .bp-slide { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
   .print-page { page-break-inside: avoid; }
   @page { margin: 0.5in; size: A4; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
