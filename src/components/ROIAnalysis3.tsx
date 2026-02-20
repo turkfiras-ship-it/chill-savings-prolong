@@ -16,7 +16,7 @@ const ACTUAL_BILL_2025 = 213_379;
 const WEATHER_FACTOR = 1.12;
 const EXPECTED_2025 = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR); // 246,431
 const TRUE_SAVINGS_SAR = EXPECTED_2025 - ACTUAL_BILL_2025; // 33,052
-const TRUE_SAVINGS_KWH = 80_763;
+const TRUE_SAVINGS_KWH = 80_762;
 const EFFICIENCY_PCT = 14.1;
 
 /* ── component ─────────────────────────────────────────────────────── */

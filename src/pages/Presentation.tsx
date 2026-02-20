@@ -16,7 +16,7 @@ const RECURRING_ANNUAL = ENERGY_SAVINGS_SAR + MAINTENANCE_DOWNTIME_SAR; // 55712
 const SYSTEM_COST = 175000;
 const DEFERRED_CAPITAL = 385000;
 const CAPITAL_RECOVERY_YRS = +(SYSTEM_COST / RECURRING_ANNUAL).toFixed(1); // 3.1
-const ANNUAL_KWH_SAVED = 80763;
+const ANNUAL_KWH_SAVED = 80762;
 const EFFICIENCY_PCT = 14.1;
 const AUGUST_2025_RAW = 71586;
 
@@ -64,7 +64,7 @@ function ExecutiveKPIs() {
           <KPICard label="5-Year Net Benefit" value="296,060" unit="SAR (recurring)" />
           <KPICard label="10-Year Modeled Value" value="942,120" unit="SAR" sub="Recurring + Deferred Capital" />
           <KPICard label="Efficiency Improvement" value="14.1" unit="%" positive />
-          <KPICard label="Energy Avoided" value="80,763" unit="kWh" positive />
+          <KPICard label="Energy Avoided" value="80,762" unit="kWh" positive />
         </div>
 
         <p className="text-xs text-muted-foreground mt-8 text-center">

@@ -12,7 +12,7 @@ import { Thermometer } from "lucide-react";
 
 const ACTUAL_BILL_2024 = 220028;
 const ACTUAL_BILL_2025 = 213379;
-const ANNUAL_TRUE_SAVINGS_KWH = 80763;
+const ANNUAL_TRUE_SAVINGS_KWH = 80762;
 
 const PRESET_ROWS = [0, 5, 8, 10, 12, 15, 18, 20];
 
@@ -149,7 +149,7 @@ export function WeatherSensitivity() {
 
       {/* Disclaimer */}
       <div className="rounded-xl bg-muted/30 border border-border p-4 text-xs text-muted-foreground">
-        <strong className="text-foreground">Scenario-Based Projection (Based on Rawdah Performance):</strong> This analysis uses the locked master figures as a base and varies only the weather adjustment parameter. It does not alter the confirmed 14.1% efficiency improvement or the 80,763 kWh annual savings figure.
+        <strong className="text-foreground">Scenario-Based Projection (Based on Rawdah Performance):</strong> This analysis uses the locked master figures as a base and varies only the weather adjustment parameter. It does not alter the confirmed 14.1% efficiency improvement or the 80,762 kWh annual savings figure.
       </div>
     </div>
   );
