@@ -24,12 +24,22 @@ export function ROIAnalysis() {
     monthlyOperationalSavings, totalAnnualSavingsWithReplacement,
   } = derived;
 
-  const pieData = [
-    { name: 'Energy Savings', value: data.energySav.annualSavingsRawdah, color: 'hsl(152, 60%, 40%)' },
+  // Direct Savings (used for payback calculation)
+  const directSavings = data.energySav.annualSavingsRawdah;
+  const energyPaybackYears = directSavings > 0 ? totalSystemCost / directSavings : 0;
+  const energyPaybackMonths = energyPaybackYears * 12;
+
+  const directPieData = [
+    { name: 'Energy Performance Savings', value: data.energySav.annualSavingsRawdah, color: 'hsl(152, 60%, 40%)' },
+  ];
+
+  const indirectPieData = [
     { name: 'Maintenance Savings', value: maintenanceTotal, color: 'hsl(220, 70%, 50%)' },
     { name: 'Downtime Avoidance', value: downtimeSavingsAnnual, color: 'hsl(280, 60%, 55%)' },
     { name: 'Lifespan Extension', value: replacementAnnualized, color: 'hsl(38, 92%, 50%)' },
   ];
+
+  const allPieData = [...directPieData, ...indirectPieData];
 
   const roiTimelineData = Array.from({ length: 11 }, (_, year) => {
     const replacementBonus = year >= 10 ? replacementAvg : (year >= 5 ? replacementFiveYearProrated : 0);
@@ -71,14 +81,14 @@ export function ROIAnalysis() {
             </p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
-            <p className="text-sm opacity-80">Annual Operational Savings</p>
-            <p className="text-2xl font-bold">{Math.round(annualOperationalSavings).toLocaleString()} SAR</p>
-            <p className="text-xs opacity-70">Recurring yearly savings</p>
+            <p className="text-sm opacity-80">Energy Performance Savings</p>
+            <p className="text-2xl font-bold">{Math.round(directSavings).toLocaleString()} SAR</p>
+            <p className="text-xs opacity-70">Direct — used for payback</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
             <p className="text-sm opacity-80">Payback Period</p>
-            <p className="text-2xl font-bold">{paybackYears.toFixed(1)} Years</p>
-            <p className="text-xs opacity-70">~{Math.round(paybackMonths)} months</p>
+            <p className="text-2xl font-bold">{energyPaybackYears.toFixed(1)} Years</p>
+            <p className="text-xs opacity-70">~{Math.round(energyPaybackMonths)} months (energy-only)</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4">
             <p className="text-sm opacity-80">5-Year ROI</p>
@@ -228,17 +238,17 @@ export function ROIAnalysis() {
         </div>
       </div>
 
-      {/* Savings Breakdown */}
+      {/* Savings Breakdown — Direct vs Indirect */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-xl bg-card p-6 card-elevated">
-          <h3 className="text-xl font-semibold mb-1">Annual Savings Breakdown</h3>
-          <p className="text-sm text-muted-foreground mb-4">Distribution by category (annualized)</p>
+          <h3 className="text-xl font-semibold mb-1">Savings Distribution</h3>
+          <p className="text-sm text-muted-foreground mb-4">Direct (Energy) vs Indirect (Operational)</p>
           <div className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value"
+                <Pie data={allPieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={3} dataKey="value"
                   label={({ name, percent }) => `${name.split(' ')[0]} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                  {allPieData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                 </Pie>
                 <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }}
                   formatter={(value: number) => [`${Math.round(value).toLocaleString()} SAR/year`, '']} />
@@ -249,7 +259,28 @@ export function ROIAnalysis() {
         <div className="rounded-xl bg-card p-6 card-elevated">
           <h3 className="text-xl font-semibold mb-4">Savings by Category</h3>
           <div className="space-y-4">
-            {pieData.map((item, idx) => (
+            {/* Direct */}
+            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Direct — Energy Performance Savings</p>
+            {directPieData.map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-savings/10 border border-savings/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="font-medium">{item.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-savings">{Math.round(item.value).toLocaleString()} SAR</p>
+                  <p className="text-xs text-muted-foreground">100% of payback basis</p>
+                </div>
+              </div>
+            ))}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-savings/10 border border-savings/30">
+              <span className="font-semibold text-savings">Payback Basis (Energy Only)</span>
+              <span className="font-bold text-savings text-lg">{Math.round(directSavings).toLocaleString()} SAR/yr</span>
+            </div>
+
+            {/* Indirect */}
+            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mt-2">Indirect — Operational Efficiency Benefits</p>
+            {indirectPieData.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
@@ -257,14 +288,12 @@ export function ROIAnalysis() {
                 </div>
                 <div className="text-right">
                   <p className="font-bold">{Math.round(item.value).toLocaleString()} SAR</p>
-                  <p className="text-xs text-muted-foreground">{((item.value / totalAnnualSavingsWithReplacement) * 100).toFixed(1)}% of total</p>
                 </div>
               </div>
             ))}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-savings/10 border border-savings/20 mt-4">
-              <span className="font-semibold text-savings">Total Annual (incl. annualized lifespan)</span>
-              <span className="font-bold text-savings text-lg">{Math.round(totalAnnualSavingsWithReplacement).toLocaleString()} SAR</span>
-            </div>
+            <p className="text-xs text-muted-foreground italic mt-2">
+              ⓘ Indirect operational benefits are not included in payback calculation.
+            </p>
           </div>
         </div>
       </div>
@@ -293,7 +322,7 @@ export function ROIAnalysis() {
             <span className="font-semibold text-savings">Investment Recovery</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            The system investment of <strong>{totalSystemCost.toLocaleString()} SAR</strong> will be fully recovered in approximately <strong>{paybackYears.toFixed(1)} years</strong>.
+            The system investment of <strong>{totalSystemCost.toLocaleString()} SAR</strong> will be fully recovered in approximately <strong>{energyPaybackYears.toFixed(1)} years</strong> based on Energy Performance Savings alone.
             By year 10, you'll also avoid AC replacement costs of <strong>{replacementAvg.toLocaleString()} SAR</strong>.
           </p>
         </div>
@@ -406,10 +435,10 @@ export function ROIAnalysis() {
         <div className="flex items-center gap-4 p-4 bg-white/10 rounded-lg">
           <CheckCircle className="h-8 w-8" />
           <div>
-            <p className="font-semibold">Investment Fully Recovered in {paybackYears.toFixed(1)} Years</p>
+            <p className="font-semibold">Investment Fully Recovered in {energyPaybackYears.toFixed(1)} Years (Energy-Only Basis)</p>
             <p className="text-sm opacity-90">
-              After payback, you gain <strong>{Math.round(annualOperationalSavings).toLocaleString()} SAR</strong> in pure profit every year,
-              plus <strong>{replacementAvg.toLocaleString()} SAR</strong> saved at the 10-year mark.
+              Based on Energy Performance Savings of <strong>{Math.round(directSavings).toLocaleString()} SAR/yr</strong>.
+              Indirect operational benefits of <strong>{Math.round(maintenanceTotal + downtimeSavingsAnnual).toLocaleString()} SAR/yr</strong> provide additional value but are excluded from payback calculation.
             </p>
           </div>
         </div>
