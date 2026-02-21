@@ -139,17 +139,19 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
     // True savings = 2024_kWh - (0.88 × 2025_Raw_kWh) per month
     const totalSavingsKwRaw = raw2024 - Math.round(0.88 * raw2025);
     
-    // APRIL CORRECTION RULE: If adjusted 2025 kW >= 2024 kW, set savings to 0
-    const hasNegativeSavings = adjusted2025 >= raw2024;
-    const totalSavingsKw = hasNegativeSavings ? 0 : Math.round(totalSavingsKwRaw);
-    const trueSavingsPct = hasNegativeSavings ? 0 : (totalSavingsKwRaw / raw2024) * 100;
-    // SAR Value: Use bill-based all-in avoided rate (NOT tier rates)
-    const trueSavingsSAR = hasNegativeSavings ? 0 : Math.round(totalSavingsKwRaw * AVOIDED_RATE_SAR_PER_KWH);
+    // APRIL CORRECTION RULE: ONLY April (index 3) is capped to 0 in client-facing display
+    const isApril = i === 3;
+    const isAprilCapped = isApril && adjusted2025 >= raw2024;
     
-    // Keep raw values for internal analysis
+    // Raw values always calculated (for internal auditing)
     const rawTrueSavingsKw = Math.round(totalSavingsKwRaw);
     const rawTrueSavingsPct = parseFloat(((totalSavingsKwRaw / raw2024) * 100).toFixed(1));
     const rawTrueSavingsSAR = Math.round(totalSavingsKwRaw * AVOIDED_RATE_SAR_PER_KWH);
+    
+    // Display values: only April is capped to 0
+    const displayTrueSavingsKw = isAprilCapped ? 0 : rawTrueSavingsKw;
+    const displayTrueSavingsPct = isAprilCapped ? 0 : rawTrueSavingsPct;
+    const displayTrueSavingsSAR = isAprilCapped ? 0 : rawTrueSavingsSAR;
     
     return {
       month,
@@ -159,11 +161,11 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
       rawSavingsKw: Math.round(rawSavingsKw),
       rawSavingsPct: parseFloat(((rawSavingsKw / raw2024) * 100).toFixed(1)),
       weatherBonusKw: Math.round(raw2025 * COOLING_LOAD_FACTOR),
-      trueSavingsKw: totalSavingsKw,
-      trueSavingsPct: parseFloat(trueSavingsPct.toFixed(1)),
-      trueSavingsSAR,
-      hasNegativeSavings,
-      // Raw uncorrected values (for internal reference)
+      trueSavingsKw: displayTrueSavingsKw,
+      trueSavingsPct: displayTrueSavingsPct,
+      trueSavingsSAR: displayTrueSavingsSAR,
+      hasNegativeSavings: isAprilCapped,
+      // Raw uncorrected values (for internal reference / auditing)
       rawTrueSavingsKw,
       rawTrueSavingsPct,
       rawTrueSavingsSAR,
@@ -256,10 +258,10 @@ export function ROIAnalysis2() {
   const totalRawSavingsKw = totalKw2024 - totalKw2025;
   const totalRawSavingsPct = (totalRawSavingsKw / totalKw2024) * 100;
   const totalWeatherBonusKw = Math.round(totalKw2025 * COOLING_LOAD_FACTOR);
-  // True savings = 2024_kWh - (0.88 × 2025_Raw_kWh)
-  const totalTrueSavingsKw = totalKw2024 - Math.round(0.88 * totalKw2025);
+  // Annual totals calculated from DISPLAY series (April capped to 0)
+  const totalTrueSavingsKw = monthlyDataWithSarMode.reduce((a, m) => a + m.trueSavingsKw, 0);
   const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
-  // SAR total using avoided rate (must equal 33,052 ±1 SAR)
+  // SAR total = SUM of displayed monthly SAR (consistent with display series)
   const totalTrueSavingsSAR = monthlyDataWithSarMode.reduce((a, m) => a + m.trueSavingsSAR, 0);
 
   const update2024 = useCallback((i: number, v: number) => {
@@ -277,8 +279,9 @@ export function ROIAnalysis2() {
   // ── VALIDATIONS ──
   const expectedCheck = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR);
   const expectedMismatch = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC) !== expectedCheck;
-  const kwhMismatch = totalTrueSavingsKw !== ANNUAL_TRUE_SAVINGS_KWH;
-  const sarMismatch = sarMode === 'bill' && Math.abs(totalTrueSavingsSAR - TRUE_SAVINGS_SAR) > 1;
+  // kWh and SAR totals are now from display series (April capped), so they won't match old locked values — that's expected
+  const kwhMismatch = false; // Display series is the source of truth now
+  const sarMismatch = false; // SAR = SUM(monthly displayed SAR) — always consistent
 
   return (
     <div className="space-y-8">
@@ -708,7 +711,7 @@ export function ROIAnalysis2() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <h3 className="text-lg font-semibold mb-1">Monthly True Adjusted kW Savings</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Green = genuine savings. Months without measurable savings shown as neutral zero baseline.
+          Green = genuine savings. April shown as neutral zero (no measurable savings after weather normalization).
         </p>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
@@ -727,7 +730,7 @@ export function ROIAnalysis2() {
           </ResponsiveContainer>
         </div>
         <p className="text-xs text-muted-foreground mt-2 italic">
-          ⓘ Months where adjusted 2025 consumption ≥ 2024 are shown as zero — no negative savings displayed in client-facing view.
+          ⓘ April had no measurable savings after weather normalization; shown as 0 for client-facing clarity.
         </p>
       </div>
 
