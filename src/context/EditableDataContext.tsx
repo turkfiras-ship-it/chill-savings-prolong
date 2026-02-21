@@ -87,7 +87,9 @@ function computeDerived(data: EditableDataState) {
 
   const annualOperationalSavings = energySav.annualSavingsRawdah + maintenanceTotal + downtimeSavingsAnnual;
 
-  const paybackYears = annualOperationalSavings > 0 ? totalSystemCost / annualOperationalSavings : 0;
+  // Payback calculated ONLY from Direct Energy Performance Savings
+  const energyOnlySavings = energySav.annualSavingsRawdah;
+  const paybackYears = energyOnlySavings > 0 ? totalSystemCost / energyOnlySavings : 0;
   const paybackMonths = paybackYears * 12;
 
   // Replacement savings

@@ -31,13 +31,15 @@ export function ROIAnalysis3() {
     const replacementAvg = derived.replacementAvg; // 385,000 one-time
     const replacementAnnualized = derived.replacementAnnualized;
 
-    const annualRecurring = energySAR + maintenanceTotal + downtimeTotal;
+    const indirectTotal = maintenanceTotal + downtimeTotal;
+    const annualRecurring = energySAR + indirectTotal;
     const annualWithReplacement = annualRecurring + replacementAnnualized;
 
     const systemCost = derived.totalSystemCost;
-    const paybackYears = annualRecurring > 0 ? systemCost / annualRecurring : 0;
+    // Payback calculated ONLY from Energy Performance Savings
+    const paybackYears = energySAR > 0 ? systemCost / energySAR : 0;
 
-    // Projections
+    // Projections (include all for total picture, but label clearly)
     const yr5Op = annualRecurring * 5;
     const yr5Replacement = replacementAvg * 0.5; // prorated
     const yr5Total = yr5Op + yr5Replacement;
@@ -53,6 +55,7 @@ export function ROIAnalysis3() {
       energySAR,
       maintenanceTotal,
       downtimeTotal,
+      indirectTotal,
       replacementAvg,
       replacementAnnualized,
       annualRecurring,
@@ -64,13 +67,16 @@ export function ROIAnalysis3() {
     };
   }, [derived]);
 
-  /* pie data */
-  const pieData = [
-    { name: "Energy Savings", value: summary.energySAR, color: "hsl(152, 60%, 40%)" },
+  /* pie data — separated into Direct and Indirect */
+  const directPieData = [
+    { name: "Energy Performance Savings", value: summary.energySAR, color: "hsl(152, 60%, 40%)" },
+  ];
+  const indirectPieData = [
     { name: "Maintenance", value: summary.maintenanceTotal, color: "hsl(220, 70%, 50%)" },
     { name: "Downtime Avoidance", value: summary.downtimeTotal, color: "hsl(280, 60%, 55%)" },
     { name: "Lifespan Extension", value: summary.replacementAnnualized, color: "hsl(38, 92%, 50%)" },
   ];
+  const allPieData = [...directPieData, ...indirectPieData];
 
   /* timeline data */
   const timelineData = Array.from({ length: 11 }, (_, yr) => {
@@ -100,8 +106,8 @@ export function ROIAnalysis3() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <HeroCard label="System Investment" value={`${summary.systemCost.toLocaleString()} SAR`} sub={`${data.systemCfg.numberOfUnits} units × ${data.systemCfg.costPerUnit.toLocaleString()} SAR`} />
-          <HeroCard label="Annual Recurring Savings" value={`${Math.round(summary.annualRecurring).toLocaleString()} SAR`} sub="Energy + Maint + Downtime" accent />
-          <HeroCard label="Combined Payback" value={`${summary.paybackYears.toFixed(1)} Years`} sub={`~${Math.round(summary.paybackYears * 12)} months`} />
+          <HeroCard label="Energy Performance Savings" value={`${Math.round(summary.energySAR).toLocaleString()} SAR`} sub="Direct — payback basis" accent />
+          <HeroCard label="Payback Period" value={`${summary.paybackYears.toFixed(1)} Years`} sub={`~${Math.round(summary.paybackYears * 12)} months (energy-only)`} />
           <HeroCard label="5-Year ROI" value={`${summary.yr5ROI.toFixed(0)}%`} sub={`Net: ${Math.round(summary.yr5Net).toLocaleString()} SAR`} accent />
         </div>
       </div>
@@ -113,23 +119,24 @@ export function ROIAnalysis3() {
           <h3 className="text-lg font-semibold">How We Calculate Total ROI</h3>
         </div>
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          <FlowStep label="Energy Savings" value={`${summary.energySAR.toLocaleString()} SAR`} color="text-savings" />
-          <Plus />
-          <FlowStep label="Maintenance" value={`${summary.maintenanceTotal.toLocaleString()} SAR`} color="text-chart-blue" />
-          <Plus />
-          <FlowStep label="Downtime" value={`${summary.downtimeTotal.toLocaleString()} SAR`} color="text-purple-500" />
-          <Equals />
-          <FlowStep label="Annual Recurring" value={`${Math.round(summary.annualRecurring).toLocaleString()} SAR`} color="text-savings" highlight />
-        </div>
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-          <FlowStep label="Annual Recurring" value={`${Math.round(summary.annualRecurring).toLocaleString()} SAR`} color="text-savings" />
+          <FlowStep label="Energy Performance Savings" value={`${summary.energySAR.toLocaleString()} SAR`} color="text-savings" highlight />
           <span className="text-muted-foreground font-medium">÷</span>
           <FlowStep label="System Cost" value={`${summary.systemCost.toLocaleString()} SAR`} color="text-foreground" />
           <Equals />
           <FlowStep label="Payback" value={`${summary.paybackYears.toFixed(1)} Years`} color="text-energy" highlight />
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {["VAT included", "Invoice-backed", "Weather-adjusted +12%", "No compounding", "No tariff projections"].map((t) => (
+        <div className="mt-3 p-3 bg-muted/30 rounded-lg border border-border">
+          <p className="text-xs text-muted-foreground font-medium mb-2">Indirect Operational Benefits (not included in payback):</p>
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <FlowStep label="Maintenance" value={`${summary.maintenanceTotal.toLocaleString()} SAR`} color="text-chart-blue" />
+            <Plus />
+            <FlowStep label="Downtime" value={`${summary.downtimeTotal.toLocaleString()} SAR`} color="text-purple-500" />
+            <Equals />
+            <FlowStep label="Indirect Total" value={`${Math.round(summary.indirectTotal).toLocaleString()} SAR`} color="text-muted-foreground" />
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {["VAT included", "Invoice-backed", "Weather-adjusted +12%", "No compounding", "No tariff projections", "Energy-only payback"].map((t) => (
             <span key={t} className="inline-flex items-center gap-1 text-xs bg-muted/50 border border-border rounded-full px-3 py-1">
               <CheckCircle className="h-3 w-3 text-savings" />
               {t}
@@ -142,14 +149,14 @@ export function ROIAnalysis3() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pie */}
         <div className="rounded-xl bg-card p-6 card-elevated">
-          <h3 className="text-lg font-semibold mb-1">Annual Savings Distribution</h3>
-          <p className="text-sm text-muted-foreground mb-4">Including annualized lifespan extension</p>
+          <h3 className="text-lg font-semibold mb-1">Savings Distribution</h3>
+          <p className="text-sm text-muted-foreground mb-4">Direct (Energy) vs Indirect (Operational)</p>
           <div className="h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="value"
+                <Pie data={allPieData} cx="50%" cy="50%" innerRadius={55} outerRadius={95} paddingAngle={3} dataKey="value"
                   label={({ name, percent }) => `${name.split(" ")[0]} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {pieData.map((e, i) => <Cell key={i} fill={e.color} />)}
+                  {allPieData.map((e, i) => <Cell key={i} fill={e.color} />)}
                 </Pie>
                 <Tooltip
                   contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }}
@@ -160,11 +167,26 @@ export function ROIAnalysis3() {
           </div>
         </div>
 
-        {/* Category list */}
+        {/* Category list — Direct vs Indirect */}
         <div className="rounded-xl bg-card p-6 card-elevated">
           <h3 className="text-lg font-semibold mb-4">Savings by Category</h3>
           <div className="space-y-3">
-            {pieData.map((item, idx) => (
+            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">Direct — Energy Performance Savings</p>
+            {directPieData.map((item, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-savings/10 border border-savings/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                  <span className="font-medium text-sm">{item.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold tabular-nums text-savings">{Math.round(item.value).toLocaleString()} SAR</p>
+                  <p className="text-xs text-muted-foreground">100% of payback basis</p>
+                </div>
+              </div>
+            ))}
+
+            <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mt-2">Indirect — Operational Efficiency Benefits</p>
+            {indirectPieData.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
                 <div className="flex items-center gap-3">
                   <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
@@ -172,14 +194,12 @@ export function ROIAnalysis3() {
                 </div>
                 <div className="text-right">
                   <p className="font-bold tabular-nums">{Math.round(item.value).toLocaleString()} SAR</p>
-                  <p className="text-xs text-muted-foreground">{((item.value / summary.annualWithReplacement) * 100).toFixed(1)}%</p>
                 </div>
               </div>
             ))}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-savings/10 border border-savings/20">
-              <span className="font-semibold text-savings text-sm">Total Annual (incl. annualized lifespan)</span>
-              <span className="font-bold text-savings text-lg">{Math.round(summary.annualWithReplacement).toLocaleString()} SAR</span>
-            </div>
+            <p className="text-xs text-muted-foreground italic">
+              ⓘ Indirect operational benefits are not included in payback calculation.
+            </p>
           </div>
         </div>
       </div>
@@ -226,7 +246,7 @@ export function ROIAnalysis3() {
 
       {/* ── PROJECTION CARDS ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricCard icon={<Clock className="h-5 w-5" />} label="Combined Payback" value={`${summary.paybackYears.toFixed(1)} Years`} sub={`~${Math.round(summary.paybackYears * 12)} months`} accent="energy" />
+        <MetricCard icon={<Clock className="h-5 w-5" />} label="Energy-Only Payback" value={`${summary.paybackYears.toFixed(1)} Years`} sub={`~${Math.round(summary.paybackYears * 12)} months (direct savings only)`} accent="energy" />
         <MetricCard icon={<TrendingUp className="h-5 w-5" />} label="5-Year Total Savings" value={`${Math.round(summary.yr5Total).toLocaleString()} SAR`} sub={`ROI: ${summary.yr5ROI.toFixed(0)}% | Net: ${Math.round(summary.yr5Net).toLocaleString()} SAR`} accent="savings" />
         <MetricCard icon={<DollarSign className="h-5 w-5" />} label="10-Year Total Savings" value={`${Math.round(summary.yr10Total).toLocaleString()} SAR`} sub={`ROI: ${summary.yr10ROI.toFixed(0)}% | Net: ${Math.round(summary.yr10Net).toLocaleString()} SAR`} accent="savings" />
       </div>
@@ -260,8 +280,8 @@ export function ROIAnalysis3() {
       <div className="rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 p-6 text-white">
         <h3 className="text-lg font-bold mb-3">Executive Summary</h3>
         <div className="space-y-2 text-sm text-white/90">
-          <SummaryLine text={`System investment of ${summary.systemCost.toLocaleString()} SAR generates ${Math.round(summary.annualRecurring).toLocaleString()} SAR in recurring annual savings.`} />
-          <SummaryLine text={`Full payback achieved in ${summary.paybackYears.toFixed(1)} years (~${Math.round(summary.paybackYears * 12)} months).`} />
+          <SummaryLine text={`System investment of ${summary.systemCost.toLocaleString()} SAR recovers in ${summary.paybackYears.toFixed(1)} years from Energy Performance Savings alone (${Math.round(summary.energySAR).toLocaleString()} SAR/yr).`} />
+          <SummaryLine text={`Indirect operational benefits (maintenance + downtime) contribute an additional ${Math.round(summary.indirectTotal).toLocaleString()} SAR/yr but are excluded from payback for conservative reporting.`} />
           <SummaryLine text={`5-year net profit: ${Math.round(summary.yr5Net).toLocaleString()} SAR (${summary.yr5ROI.toFixed(0)}% ROI).`} />
           <SummaryLine text={`10-year net profit: ${Math.round(summary.yr10Net).toLocaleString()} SAR (${summary.yr10ROI.toFixed(0)}% ROI), including ${summary.replacementAvg.toLocaleString()} SAR avoided AC replacement.`} />
           <SummaryLine text={`All energy values validated against SCECO invoices. Weather-adjusted methodology (+12%) applied.`} />

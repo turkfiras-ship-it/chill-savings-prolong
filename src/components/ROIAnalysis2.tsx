@@ -137,10 +137,20 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
     const adjusted2025 = Math.round(raw2025 * (1 + COOLING_LOAD_FACTOR));
     const rawSavingsKw = raw2024 - raw2025;
     // True savings = 2024_kWh - (0.88 × 2025_Raw_kWh) per month
-    const totalSavingsKw = raw2024 - Math.round(0.88 * raw2025);
-    const trueSavingsPct = (totalSavingsKw / raw2024) * 100;
+    const totalSavingsKwRaw = raw2024 - Math.round(0.88 * raw2025);
+    
+    // APRIL CORRECTION RULE: If adjusted 2025 kW >= 2024 kW, set savings to 0
+    const hasNegativeSavings = adjusted2025 >= raw2024;
+    const totalSavingsKw = hasNegativeSavings ? 0 : Math.round(totalSavingsKwRaw);
+    const trueSavingsPct = hasNegativeSavings ? 0 : (totalSavingsKwRaw / raw2024) * 100;
     // SAR Value: Use bill-based all-in avoided rate (NOT tier rates)
-    const trueSavingsSAR = Math.round(totalSavingsKw * AVOIDED_RATE_SAR_PER_KWH);
+    const trueSavingsSAR = hasNegativeSavings ? 0 : Math.round(totalSavingsKwRaw * AVOIDED_RATE_SAR_PER_KWH);
+    
+    // Keep raw values for internal analysis
+    const rawTrueSavingsKw = Math.round(totalSavingsKwRaw);
+    const rawTrueSavingsPct = parseFloat(((totalSavingsKwRaw / raw2024) * 100).toFixed(1));
+    const rawTrueSavingsSAR = Math.round(totalSavingsKwRaw * AVOIDED_RATE_SAR_PER_KWH);
+    
     return {
       month,
       raw2024,
@@ -149,9 +159,14 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
       rawSavingsKw: Math.round(rawSavingsKw),
       rawSavingsPct: parseFloat(((rawSavingsKw / raw2024) * 100).toFixed(1)),
       weatherBonusKw: Math.round(raw2025 * COOLING_LOAD_FACTOR),
-      trueSavingsKw: Math.round(totalSavingsKw),
+      trueSavingsKw: totalSavingsKw,
       trueSavingsPct: parseFloat(trueSavingsPct.toFixed(1)),
       trueSavingsSAR,
+      hasNegativeSavings,
+      // Raw uncorrected values (for internal reference)
+      rawTrueSavingsKw,
+      rawTrueSavingsPct,
+      rawTrueSavingsSAR,
     };
   });
 }
@@ -693,24 +708,27 @@ export function ROIAnalysis2() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <h3 className="text-lg font-semibold mb-1">Monthly True Adjusted kW Savings</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Green = genuine savings (2024 kW − adjusted 2025 kW). Red = months where 2025 consumed more even after weather correction.
+          Green = genuine savings. Months without measurable savings shown as neutral zero baseline.
         </p>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => v.toLocaleString()} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => v.toLocaleString()} domain={[0, 'auto']} />
               <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={2} />
               <Tooltip content={renderSavingsTooltip} />
               <Bar dataKey="trueSavingsKw" name="True Adjusted Savings (kWh)" radius={[3, 3, 0, 0]}>
                 {monthlyData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.trueSavingsKw >= 0 ? 'hsl(var(--savings))' : 'hsl(0,72%,51%)'} />
+                  <Cell key={`cell-${index}`} fill={entry.trueSavingsKw > 0 ? 'hsl(var(--savings))' : 'hsl(var(--muted-foreground))'} opacity={entry.trueSavingsKw > 0 ? 1 : 0.3} />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
+        <p className="text-xs text-muted-foreground mt-2 italic">
+          ⓘ Months where adjusted 2025 consumption ≥ 2024 are shown as zero — no negative savings displayed in client-facing view.
+        </p>
       </div>
 
       {/* ── EDITABLE MONTHLY TABLE ── */}
