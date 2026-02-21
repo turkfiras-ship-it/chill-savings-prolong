@@ -620,6 +620,70 @@ function SlideVision() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SLIDE 13 — REFERENCES & DATA SOURCES
+// ═══════════════════════════════════════════════════════════════════════════
+
+function SlideReferences() {
+  const categories = [
+    {
+      title: "Regulatory Sources",
+      refs: [
+        "Saudi Electricity Company (SEC) — Commercial & Industrial Tariff Schedules",
+        "Saudi Energy Efficiency Center (SEEC) — National Energy Efficiency Program Publications",
+      ],
+    },
+    {
+      title: "Engineering Sources",
+      refs: [
+        "ASHRAE — HVAC Fundamentals Handbook (SI Edition)",
+        "International Energy Agency (IEA) — The Future of Cooling: Opportunities for Energy-Efficient Air Conditioning",
+      ],
+    },
+    {
+      title: "Climate Data",
+      refs: [
+        "Saudi National Center for Meteorology — Historical Temperature Records, Riyadh Region",
+        "NOAA / NASA — Global Surface Temperature Datasets & Climate Normals",
+      ],
+    },
+    {
+      title: "Project Validation",
+      refs: [
+        "Actual SCECO electricity invoices — Jarir Bookstore Rawdah Showroom (January 2024 – December 2025)",
+        "On-site metered demand readings — 7 package AC units, 175 tons total capacity",
+      ],
+    },
+  ];
+
+  return (
+    <Slide>
+      <SlideHeader number={13} title="References & Data Sources" subtitle="All claims in this document are supported by verifiable, third-party or primary data sources" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {categories.map((cat) => (
+          <div key={cat.title} className="space-y-3">
+            <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: "hsl(var(--exec-navy))" }}>
+              {cat.title}
+            </h3>
+            <ul className="space-y-2">
+              {cat.refs.map((ref, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed">
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                  {ref}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+      <Separator />
+      <p className="text-xs text-muted-foreground italic text-center">
+        This document is prepared for investor and client review purposes. All performance metrics are derived from actual utility invoices and metered data under real operating conditions.
+      </p>
+    </Slide>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // MAIN — Business Plan Presentation
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -636,6 +700,7 @@ const SLIDES = [
   { label: "Partner & Control", component: <SlidePartnerControl /> },
   { label: "Capital Strategy", component: <SlideCapitalStrategy /> },
   { label: "Vision", component: <SlideVision /> },
+  { label: "References", component: <SlideReferences /> },
 ];
 
 export function BusinessPlanPresentation() {
