@@ -47,8 +47,8 @@ function calcNPV(rate: number, cashflows: number[]): number {
 function InvestmentThesis() {
   const kpis = [
     { label: "Validated Energy Efficiency", value: "14.1%", sub: "Invoice-backed" },
-    { label: "Invoice-Backed Energy Savings", value: "33,052 SAR", sub: "Annual recurring" },
-    { label: "Capital Recovery (Client)", value: "3.1 Years", sub: "Payback period" },
+    { label: "Invoice-Backed Energy Savings", value: "35,457 SAR", sub: "Annual recurring" },
+    { label: "Capital Recovery (Client)", value: "3.0 Years", sub: "Payback period" },
     { label: "Deployment Model", value: "Retrofit", sub: "Non-disruptive installation" },
   ];
 

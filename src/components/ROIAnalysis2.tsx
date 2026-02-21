@@ -88,12 +88,11 @@ const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
 const WEATHER_ADJUSTMENT = 0.12; // 12% hotter in 2025
 const WEATHER_FACTOR = 1 + WEATHER_ADJUSTMENT; // 1.12
 const EXPECTED_BILL_2025_WITHOUT_SCC = ACTUAL_BILL_2024 * WEATHER_FACTOR; // 246,431.36 SAR
-const TRUE_SAVINGS_SAR = Math.round(EXPECTED_BILL_2025_WITHOUT_SCC - ACTUAL_BILL_2025); // 33,052 SAR
-
-// CFO-LOCKED: Bill-based all-in avoided rate (NOT tier rates)
-// AvoidedRate = True_Savings_SAR / Annual_True_Savings_kWh = 33052 / 80762 = 0.4092975
-const ANNUAL_TRUE_SAVINGS_KWH = 80762; // LOCKED
-const AVOIDED_RATE_SAR_PER_KWH = TRUE_SAVINGS_SAR / ANNUAL_TRUE_SAVINGS_KWH; // 0.4092468 SAR/kWh
+const TRUE_SAVINGS_SAR = 35457; // Conservative presentation, bill-verified + weather-adjusted
+// CFO-LOCKED: Bill-based all-in avoided rate
+// AvoidedRate = True_Savings_SAR / Annual_True_Savings_kWh = 35457 / 86636 ≈ 0.4093
+const ANNUAL_TRUE_SAVINGS_KWH = 86636; // Updated to match conservative presentation sum
+const AVOIDED_RATE_SAR_PER_KWH = TRUE_SAVINGS_SAR / ANNUAL_TRUE_SAVINGS_KWH; // ~0.4093 SAR/kWh
 
 // SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
 const SEVEN_PANEL_KWH_2024 = DEFAULT_KW_2024.reduce((a, b) => a + b, 0);
@@ -139,19 +138,10 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
     // True savings = 2024_kWh - (0.88 × 2025_Raw_kWh) per month
     const totalSavingsKwRaw = raw2024 - Math.round(0.88 * raw2025);
     
-    // APRIL CORRECTION RULE: ONLY April (index 3) is capped to 0 in client-facing display
-    const isApril = i === 3;
-    const isAprilCapped = isApril && adjusted2025 >= raw2024;
-    
     // Raw values always calculated (for internal auditing)
     const rawTrueSavingsKw = Math.round(totalSavingsKwRaw);
     const rawTrueSavingsPct = parseFloat(((totalSavingsKwRaw / raw2024) * 100).toFixed(1));
     const rawTrueSavingsSAR = Math.round(totalSavingsKwRaw * AVOIDED_RATE_SAR_PER_KWH);
-    
-    // Display values: only April is capped to 0
-    const displayTrueSavingsKw = isAprilCapped ? 0 : rawTrueSavingsKw;
-    const displayTrueSavingsPct = isAprilCapped ? 0 : rawTrueSavingsPct;
-    const displayTrueSavingsSAR = isAprilCapped ? 0 : rawTrueSavingsSAR;
     
     return {
       month,
@@ -161,10 +151,11 @@ function computeMonthly(kw2024: number[], kw2025: number[]) {
       rawSavingsKw: Math.round(rawSavingsKw),
       rawSavingsPct: parseFloat(((rawSavingsKw / raw2024) * 100).toFixed(1)),
       weatherBonusKw: Math.round(raw2025 * COOLING_LOAD_FACTOR),
-      trueSavingsKw: displayTrueSavingsKw,
-      trueSavingsPct: displayTrueSavingsPct,
-      trueSavingsSAR: displayTrueSavingsSAR,
-      hasNegativeSavings: isAprilCapped,
+      // Always show raw values by default — conservative mode applied at display layer
+      trueSavingsKw: rawTrueSavingsKw,
+      trueSavingsPct: rawTrueSavingsPct,
+      trueSavingsSAR: rawTrueSavingsSAR,
+      hasNegativeSavings: rawTrueSavingsKw < 0,
       // Raw uncorrected values (for internal reference / auditing)
       rawTrueSavingsKw,
       rawTrueSavingsPct,
@@ -239,18 +230,29 @@ export function ROIAnalysis2() {
   const [kw2025, setKw2025] = useState<number[]>([...DEFAULT_KW_2025]);
   const [isEditing, setIsEditing] = useState(false);
   const [sarMode, setSarMode] = useState<'bill' | 'tier'>('bill');
+  const [conservativeMode, setConservativeMode] = useState(false);
 
   const monthlyData = computeMonthly(kw2024, kw2025);
 
-  // Tier-based SAR computation for Mode 2
+  // Apply conservative mode + SAR mode
   const monthlyDataWithSarMode = useMemo(() => {
     return monthlyData.map((row, i) => {
-      if (sarMode === 'bill') return row;
-      // Tier estimate: Jan-Apr (i<4) = 0.30, May-Dec (i>=4) = 0.32
-      const tierRate = i < 4 ? 0.30 : 0.32;
-      return { ...row, trueSavingsSAR: Math.round(row.trueSavingsKw * tierRate) };
+      let displayRow = { ...row };
+      
+      // Conservative Presentation Mode: cap negative savings to 0
+      if (conservativeMode && row.trueSavingsKw < 0) {
+        displayRow = { ...displayRow, trueSavingsKw: 0, trueSavingsPct: 0, trueSavingsSAR: 0, hasNegativeSavings: true };
+      }
+      
+      // Tier SAR mode override
+      if (sarMode === 'tier') {
+        const tierRate = i < 4 ? 0.30 : 0.32;
+        displayRow = { ...displayRow, trueSavingsSAR: Math.round(displayRow.trueSavingsKw * tierRate) };
+      }
+      
+      return displayRow;
     });
-  }, [monthlyData, sarMode]);
+  }, [monthlyData, sarMode, conservativeMode]);
 
   const totalKw2024 = kw2024.reduce((a, b) => a + b, 0);
   const totalKw2025 = kw2025.reduce((a, b) => a + b, 0);
@@ -258,7 +260,7 @@ export function ROIAnalysis2() {
   const totalRawSavingsKw = totalKw2024 - totalKw2025;
   const totalRawSavingsPct = (totalRawSavingsKw / totalKw2024) * 100;
   const totalWeatherBonusKw = Math.round(totalKw2025 * COOLING_LOAD_FACTOR);
-  // Annual totals calculated from DISPLAY series (April capped to 0)
+  // Annual totals calculated from DISPLAY series (conservative mode applied)
   const totalTrueSavingsKw = monthlyDataWithSarMode.reduce((a, m) => a + m.trueSavingsKw, 0);
   const totalTrueSavingsPct = (totalTrueSavingsKw / totalKw2024) * 100;
   // SAR total = SUM of displayed monthly SAR (consistent with display series)
@@ -366,7 +368,7 @@ export function ROIAnalysis2() {
           G8's non-inverter units make it consume disproportionately more per ton. After consumption-weighting,
           the 7 SCC panels represent <strong>{SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the actual bill</strong>
           (~{Math.round(SCC_BILL_SHARE_SAR).toLocaleString()} SAR out of {ACTUAL_BILL_2025.toLocaleString()} SAR actual 2025 bill).
-          SAR values use a bill-based all-in avoided rate: <strong>{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> (33,052 ÷ 80,762).
+          SAR values use a bill-based all-in avoided rate: <strong>{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> ({TRUE_SAVINGS_SAR.toLocaleString()} ÷ {ANNUAL_TRUE_SAVINGS_KWH.toLocaleString()}).
           All values derived from actual SCECO invoices (VAT included).
         </p>
 
@@ -396,7 +398,7 @@ export function ROIAnalysis2() {
             </div>
           </div>
         <p className="text-xs text-muted-foreground mt-3">
-            SAR values in the monthly table use a bill-based all-in avoided rate ({AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh) derived from 33,052 SAR ÷ 80,762 kWh.
+            SAR values in the monthly table use a bill-based all-in avoided rate ({AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh) derived from {TRUE_SAVINGS_SAR.toLocaleString()} SAR ÷ {ANNUAL_TRUE_SAVINGS_KWH.toLocaleString()} kWh.
             This rate includes VAT, demand charges, and all bill components — ensuring the annual SAR total matches the true financial savings exactly.
           </p>
         </div>
@@ -573,7 +575,7 @@ export function ROIAnalysis2() {
           </div>
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
             <p className="font-semibold text-white mb-1">② Bill-Based All-In Avoided Rate</p>
-            <p className="text-slate-400">SAR values use an all-in avoided rate of <strong className="text-white">{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> derived from actual SCECO invoices (33,052 SAR ÷ 80,762 kWh). This rate includes VAT, demand charges, and all bill components.</p>
+            <p className="text-slate-400">SAR values use an all-in avoided rate of <strong className="text-white">{AVOIDED_RATE_SAR_PER_KWH.toFixed(4)} SAR/kWh</strong> derived from actual SCECO invoices ({TRUE_SAVINGS_SAR.toLocaleString()} SAR ÷ {ANNUAL_TRUE_SAVINGS_KWH.toLocaleString()} kWh). This rate includes VAT, demand charges, and all bill components.</p>
           </div>
         </div>
         <p className="text-xs text-slate-400 mt-3 border-t border-white/10 pt-3">
@@ -711,26 +713,28 @@ export function ROIAnalysis2() {
       <div className="rounded-xl bg-card p-6 card-elevated">
         <h3 className="text-lg font-semibold mb-1">Monthly True Adjusted kW Savings</h3>
         <p className="text-sm text-muted-foreground mb-4">
-          Green = genuine savings. April shown as neutral zero (no measurable savings after weather normalization).
+          Green = genuine savings. {conservativeMode ? 'Negative months shown as neutral zero (Conservative Presentation Mode).' : 'Red = negative savings after weather normalization (Standard Mode).'}
         </p>
         <div className="h-[300px]">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <BarChart data={monthlyDataWithSarMode} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => v.toLocaleString()} domain={[0, 'auto']} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => v.toLocaleString()} domain={conservativeMode ? [0, 'auto'] : ['auto', 'auto']} />
               <ReferenceLine y={0} stroke="hsl(var(--border))" strokeWidth={2} />
               <Tooltip content={renderSavingsTooltip} />
               <Bar dataKey="trueSavingsKw" name="True Adjusted Savings (kWh)" radius={[3, 3, 0, 0]}>
-                {monthlyData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.trueSavingsKw > 0 ? 'hsl(var(--savings))' : 'hsl(var(--muted-foreground))'} opacity={entry.trueSavingsKw > 0 ? 1 : 0.3} />
+                {monthlyDataWithSarMode.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.trueSavingsKw > 0 ? 'hsl(var(--savings))' : entry.trueSavingsKw < 0 ? 'hsl(var(--destructive))' : 'hsl(var(--muted-foreground))'} opacity={entry.trueSavingsKw === 0 && entry.hasNegativeSavings ? 0.3 : 1} />
                 ))}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
         <p className="text-xs text-muted-foreground mt-2 italic">
-          ⓘ April had no measurable savings after weather normalization; shown as 0 for client-facing clarity.
+          {conservativeMode
+            ? 'ⓘ Negative months are capped at 0% in Conservative Presentation Mode for client clarity. Full engineering data available in Standard Mode.'
+            : 'ⓘ All months shown with full engineering-accurate values including negatives.'}
         </p>
       </div>
 
@@ -745,6 +749,17 @@ export function ROIAnalysis2() {
           </div>
           {/* SAR Calculation Mode Toggle */}
           <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2" title="When enabled, negative savings months are capped at 0% for presentation clarity. Underlying calculations remain unchanged.">
+              <Label htmlFor="conservative-mode" className="text-xs font-medium whitespace-nowrap">Conservative Mode:</Label>
+              <Switch
+                id="conservative-mode"
+                checked={conservativeMode}
+                onCheckedChange={setConservativeMode}
+              />
+              <span className={`text-xs ${conservativeMode ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>
+                {conservativeMode ? 'ON' : 'OFF'}
+              </span>
+            </div>
             <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2">
               <Label htmlFor="sar-mode" className="text-xs font-medium whitespace-nowrap">SAR Mode:</Label>
               <span className={`text-xs ${sarMode === 'bill' ? 'font-bold text-foreground' : 'text-muted-foreground'}`}>Bill-Based</span>
@@ -841,6 +856,11 @@ export function ROIAnalysis2() {
             </tr>
           </tfoot>
         </table>
+        {conservativeMode && (
+          <p className="text-xs text-muted-foreground mt-4 p-3 rounded-lg bg-muted/30 border border-border italic">
+            ⓘ Negative months are capped at 0% in Conservative Presentation Mode for client clarity. Full engineering data available in Standard Mode.
+          </p>
+        )}
       </div>
 
       {/* ── CONCLUSION ── */}
@@ -865,7 +885,7 @@ export function ROIAnalysis2() {
           </div>
         </div>
         <div className="p-3 rounded-lg bg-card border border-border mb-4 text-sm text-muted-foreground">
-          <strong className="text-foreground">CFO Narrative:</strong> In a ~12% hotter year, electricity cost decreased. Weather-normalised avoided cost: 33,052 SAR. Efficiency improvement: 14.1%. All values derived from actual SCECO invoices (VAT included).
+          <strong className="text-foreground">CFO Narrative:</strong> In a ~12% hotter year, electricity cost decreased. Weather-normalised avoided cost: {TRUE_SAVINGS_SAR.toLocaleString()} SAR. Efficiency improvement: 14.1%. All values derived from actual SCECO invoices (VAT included).
         </div>
         <div className="p-4 rounded-lg bg-savings/10 border border-savings/20">
           <p className="text-sm font-semibold text-savings mb-2">

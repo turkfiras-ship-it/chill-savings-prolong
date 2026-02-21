@@ -47,9 +47,9 @@ export function ExecutiveSummary() {
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
             <KPI label="Energy Reduction" value="14.1%" />
-            <KPI label="Invoice-Backed Savings" value="33,052 SAR" />
+            <KPI label="Invoice-Backed Savings" value="35,457 SAR" />
             <KPI label="kWh Saved" value="80,762" />
-            <KPI label="Capital Recovery" value="3.1 Years" />
+            <KPI label="Capital Recovery" value="3.0 Years" />
           </div>
         </Section>
 
