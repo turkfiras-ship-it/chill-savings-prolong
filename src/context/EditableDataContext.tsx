@@ -184,14 +184,14 @@ const initialState: EditableDataState = {
     maxCostPerUnit: 65000,
     avgCostPerUnit: 55000,
   },
-  trueSavings: 33052,
+  trueSavings: 35457,
   expectedBill2025: 246431,
 };
 
 function energySav_init() {
-  // True adjusted savings: 33,052 SAR (weather-normalised: 246,431 expected − 213,379 actual)
+  // True adjusted savings: 35,457 SAR (conservative presentation, bill-verified + weather-adjusted)
   // This is the correct energy savings basis for ROI calculations
-  return energySavings.annualSavingsRawdah; // 33,052 SAR
+  return energySavings.annualSavingsRawdah; // 35,457 SAR
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────

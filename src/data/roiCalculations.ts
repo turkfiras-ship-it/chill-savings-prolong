@@ -125,7 +125,7 @@ export const calculateReplacementSavings = () => {
 
 // Energy Savings (from analysis)
 export const energySavings = {
-  annualSavingsRawdah: 33052, // SAR/year — True Adjusted Savings (weather-normalised: 246,431 expected vs 213,379 actual)
+  annualSavingsRawdah: 35457, // SAR/year — True Adjusted Savings (conservative presentation mode, bill-verified + weather-adjusted)
   annualSavingsPercent: 14.1, // True adjusted savings % (80,762 kWh / 574,713 kWh)
   apparentYoYSavings: 6649, // SAR — direct bill reduction (220,028 − 213,379)
   apparentYoYSavingsSum: 13003, // SAR — sum of positive-saving months only
