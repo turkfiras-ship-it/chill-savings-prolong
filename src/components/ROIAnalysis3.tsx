@@ -10,14 +10,16 @@ import {
 import { useEditableData } from "@/context/EditableDataContext";
 import { cn } from "@/lib/utils";
 
-/* ── CFO-locked constants (from ROI 2) ────────────────────────────── */
-const ACTUAL_BILL_2024 = 220_028;
-const ACTUAL_BILL_2025 = 213_379;
-const WEATHER_FACTOR = 1.12;
-const EXPECTED_2025 = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR); // 246,431
-const TRUE_SAVINGS_SAR = 35457; // Conservative presentation, bill-verified + weather-adjusted
-const TRUE_SAVINGS_KWH = 80_762;
-const EFFICIENCY_PCT = 14.1;
+/* ── CFO-locked constants (from LockedPerformanceModel) ────────────── */
+import { LockedFinancials, ClimateConstants, WeatherSource } from "@/data/lockedPerformanceModel";
+
+const ACTUAL_BILL_2024 = LockedFinancials.actualBill2024;
+const ACTUAL_BILL_2025 = LockedFinancials.actualBill2025;
+const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor;
+const EXPECTED_2025 = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR);
+const TRUE_SAVINGS_SAR = LockedFinancials.directEnergySavingsSAR;
+const TRUE_SAVINGS_KWH = LockedFinancials.weatherAdjustedEnergyAvoided;
+const EFFICIENCY_PCT = LockedFinancials.efficiencyImprovement;
 
 /* ── component ─────────────────────────────────────────────────────── */
 
@@ -284,8 +286,9 @@ export function ROIAnalysis3() {
           <SummaryLine text={`Indirect operational benefits (maintenance + downtime) contribute an additional ${Math.round(summary.indirectTotal).toLocaleString()} SAR/yr but are excluded from payback for conservative reporting.`} />
           <SummaryLine text={`5-year net profit: ${Math.round(summary.yr5Net).toLocaleString()} SAR (${summary.yr5ROI.toFixed(0)}% ROI).`} />
           <SummaryLine text={`10-year net profit: ${Math.round(summary.yr10Net).toLocaleString()} SAR (${summary.yr10ROI.toFixed(0)}% ROI), including ${summary.replacementAvg.toLocaleString()} SAR avoided AC replacement.`} />
-          <SummaryLine text={`All energy values validated against SCECO invoices. Weather-adjusted methodology (+12%) applied.`} />
+          <SummaryLine text={`All energy values validated against SCECO invoices. Weather-adjusted methodology (+${ClimateConstants.adoptedNormalizationPct}%) applied.`} />
         </div>
+        <p className="text-xs text-white/50 mt-3 italic">{WeatherSource.citation}</p>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 // ROI and Operational Cost Savings Data for Rawdah Showroom
-
+// Imports locked values from LockedPerformanceModel — Single Source of Truth
+import { LockedFinancials, ClimateConstants } from "@/data/lockedPerformanceModel";
 // System Configuration
 export const systemConfig = {
   numberOfUnits: 7,
@@ -123,11 +124,11 @@ export const calculateReplacementSavings = () => {
   };
 };
 
-// Energy Savings (from analysis)
+// Energy Savings (from LockedPerformanceModel)
 export const energySavings = {
-  annualSavingsRawdah: 35457, // SAR/year — True Adjusted Savings (conservative presentation mode, bill-verified + weather-adjusted)
-  annualSavingsPercent: 14.1, // True adjusted savings % (80,762 kWh / 574,713 kWh)
-  apparentYoYSavings: 6649, // SAR — direct bill reduction (220,028 − 213,379)
+  annualSavingsRawdah: LockedFinancials.directEnergySavingsSAR, // 35,457 SAR/year
+  annualSavingsPercent: LockedFinancials.efficiencyImprovement, // 14.1%
+  apparentYoYSavings: LockedFinancials.apparentYoYSavingsSAR, // 6,649 SAR
   apparentYoYSavingsSum: 13003, // SAR — sum of positive-saving months only
   rawdahVsRubenSavings: 17671.82, // SAR/year — Rawdah vs Ruben comparison (Without G8)
   rawdahVsRubenPercent: 11.11, // Average savings vs Ruben

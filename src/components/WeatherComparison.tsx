@@ -252,6 +252,15 @@ export function WeatherComparison() {
         </div>
         <p className="text-sm text-muted-foreground">{weatherSummary.insight}</p>
       </div>
+
+      {/* WeatherSpark Citation */}
+      <div className="text-xs text-muted-foreground italic border-t border-border pt-3 mt-2">
+        Weather normalization based on historical Riyadh climate data sourced from{' '}
+        <a href="https://weatherspark.com/h/y/104018/2025/Historical-Weather-during-2025-in-Riyadh-Saudi-Arabia" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
+          WeatherSpark
+        </a>{' '}
+        (King Khalid International Airport observations).
+      </div>
     </div>
   );
 }

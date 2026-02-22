@@ -342,14 +342,20 @@ export function TechnicalWhitePaper() {
               <li>Saudi National Center for Meteorology. <span className="italic">Historical Climate Data: Riyadh Region Monthly Averages.</span> 2024–2025.</li>
               <li>National Oceanic and Atmospheric Administration (NOAA). <span className="italic">Global Surface Temperature Dataset.</span> 2025.</li>
               <li>Saudi Electricity Company (SCECO). <span className="italic">Utility Invoices: Account [Redacted], Jarir Bookstore Rawdah Branch.</span> January 2024 – December 2025.</li>
+              <li>WeatherSpark. <span className="italic">Historical Weather during 2025 in Riyadh, Saudi Arabia.</span> King Khalid International Airport (OERK) observations. <a href="https://weatherspark.com/h/y/104018/2025/Historical-Weather-during-2025-in-Riyadh-Saudi-Arabia" target="_blank" rel="noopener noreferrer" className="underline">weatherspark.com</a>.</li>
             </ol>
           </div>
 
           {/* Footer */}
           <Separator />
-          <div className="flex justify-between items-center text-xs text-muted-foreground">
-            <span>Thermo Dynamics Engineering — Technical White Paper</span>
-            <span>© {new Date().getFullYear()} — All rights reserved</span>
+          <div className="space-y-1">
+            <div className="flex justify-between items-center text-xs text-muted-foreground">
+              <span>Thermo Dynamics Engineering — Technical White Paper</span>
+              <span>© {new Date().getFullYear()} — All rights reserved</span>
+            </div>
+            <p className="text-[10px] text-muted-foreground italic">
+              Weather normalization based on historical Riyadh climate data sourced from WeatherSpark (King Khalid International Airport observations).
+            </p>
           </div>
         </div>
       </div>
