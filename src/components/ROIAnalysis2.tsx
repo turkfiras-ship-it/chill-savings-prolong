@@ -82,17 +82,15 @@ function blendedRate(kwh: number, monthIndex: number, year: 2024 | 2025): number
 const ACTUAL_BILL_2025 = 213379;   // SAR — actual 2025 annual bill
 const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
 
-// GLOBAL DEFINITIONS — Single Source of Truth
-// Expected_2025_NoSCC = Actual_2024_Bill × Weather_Factor (1.12)
-// = 220,028 × 1.12 = 246,431.36 SAR
-const WEATHER_ADJUSTMENT = 0.12; // 12% hotter in 2025
-const WEATHER_FACTOR = 1 + WEATHER_ADJUSTMENT; // 1.12
+// GLOBAL DEFINITIONS — from LockedPerformanceModel (Single Source of Truth)
+import { LockedFinancials, ClimateConstants, WeatherSource } from "@/data/lockedPerformanceModel";
+
+const WEATHER_ADJUSTMENT = ClimateConstants.adoptedNormalizationPct / 100; // 0.12
+const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor; // 1.12
 const EXPECTED_BILL_2025_WITHOUT_SCC = ACTUAL_BILL_2024 * WEATHER_FACTOR; // 246,431.36 SAR
-const TRUE_SAVINGS_SAR = 35457; // Conservative presentation, bill-verified + weather-adjusted
-// CFO-LOCKED: Bill-based all-in avoided rate
-// AvoidedRate = True_Savings_SAR / Annual_True_Savings_kWh = 35457 / 86636 ≈ 0.4093
-const ANNUAL_TRUE_SAVINGS_KWH = 86636; // Updated to match conservative presentation sum
-const AVOIDED_RATE_SAR_PER_KWH = TRUE_SAVINGS_SAR / ANNUAL_TRUE_SAVINGS_KWH; // ~0.4093 SAR/kWh
+const TRUE_SAVINGS_SAR = LockedFinancials.directEnergySavingsSAR; // 35,457
+const ANNUAL_TRUE_SAVINGS_KWH = LockedFinancials.conservativePresentationKwh; // 86,636
+const AVOIDED_RATE_SAR_PER_KWH = LockedFinancials.avoidedRateSarPerKwh; // ~0.4093 SAR/kWh
 
 // SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
 const SEVEN_PANEL_KWH_2024 = DEFAULT_KW_2024.reduce((a, b) => a + b, 0);
@@ -230,7 +228,7 @@ export function ROIAnalysis2() {
   const [kw2025, setKw2025] = useState<number[]>([...DEFAULT_KW_2025]);
   const [isEditing, setIsEditing] = useState(false);
   const [sarMode, setSarMode] = useState<'bill' | 'tier'>('bill');
-  const [conservativeMode, setConservativeMode] = useState(false);
+  const [conservativeMode, setConservativeMode] = useState(true); // Default ON per LockedPerformanceModel
 
   const monthlyData = computeMonthly(kw2024, kw2025);
 

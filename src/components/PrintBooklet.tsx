@@ -728,6 +728,9 @@ export function PrintBooklet() {
           <div className="p-3 bg-slate-800 text-white rounded-lg mt-3">
             <p className="text-xs"><strong className="text-teal-400">Final Conclusion:</strong> {managementConclusion.headline}. Investment fully recovered in {roi.paybackPeriodYears.toFixed(1)} years, with {Math.round(savings.annualOperationalSavings).toLocaleString()} SAR pure profit every year thereafter, plus {replacement.avgTotal.toLocaleString()} SAR avoided at year 10.</p>
           </div>
+          <p className="text-[9px] text-muted-foreground italic mt-3 border-t border-border pt-2">
+            Weather normalization based on historical Riyadh climate data sourced from WeatherSpark (King Khalid International Airport observations).
+          </p>
         </div>
     </div>
   );

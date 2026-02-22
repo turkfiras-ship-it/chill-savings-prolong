@@ -126,9 +126,14 @@ export function ExecutiveSummary() {
 
         {/* Footer */}
         <Separator />
-        <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
-          <span>Thermo Dynamics Engineering — Confidential</span>
-          <span>Prepared {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+        <div className="space-y-2 pt-1">
+          <div className="flex justify-between items-center text-xs text-muted-foreground">
+            <span>Thermo Dynamics Engineering — Confidential</span>
+            <span>Prepared {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+          </div>
+          <p className="text-[10px] text-muted-foreground italic">
+            Weather normalization based on historical Riyadh climate data sourced from WeatherSpark (King Khalid International Airport observations).
+          </p>
         </div>
       </div>
     </div>

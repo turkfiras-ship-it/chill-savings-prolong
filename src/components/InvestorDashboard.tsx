@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { FounderCompensation } from "@/components/FounderCompensation";
 import { ExecutiveSummary } from "@/components/ExecutiveSummary";
+import { WeatherSource } from "@/data/lockedPerformanceModel";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 

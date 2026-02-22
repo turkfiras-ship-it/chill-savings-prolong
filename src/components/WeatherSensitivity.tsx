@@ -10,10 +10,11 @@ import {
 } from "@/components/ui/table";
 import { Thermometer } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { LockedFinancials, WeatherSource } from "@/data/lockedPerformanceModel";
 
-const ACTUAL_BILL_2024 = 220028;
-const ACTUAL_BILL_2025 = 213379;
-const ANNUAL_TRUE_SAVINGS_KWH = 80762;
+const ACTUAL_BILL_2024 = LockedFinancials.actualBill2024;
+const ACTUAL_BILL_2025 = LockedFinancials.actualBill2025;
+const ANNUAL_TRUE_SAVINGS_KWH = LockedFinancials.weatherAdjustedEnergyAvoided;
 
 const PRESET_ROWS = [0, 5, 8, 10, 12, 15, 18, 20];
 
@@ -158,7 +159,12 @@ export function WeatherSensitivity() {
 
       {/* Disclaimer */}
       <div className="rounded-xl bg-muted/30 border border-border p-4 text-xs text-muted-foreground">
-        <strong className="text-foreground">Scenario-Based Projection (Based on Rawdah Performance):</strong> This analysis uses the locked master figures as a base and varies only the weather adjustment parameter. It does not alter the confirmed 14.1% efficiency improvement or the 80,762 kWh annual savings figure.
+        <strong className="text-foreground">Scenario-Based Projection (Based on Rawdah Performance):</strong> This analysis uses the locked master figures as a base and varies only the weather adjustment parameter. It does not alter the confirmed {LockedFinancials.efficiencyImprovement}% efficiency improvement or the {ANNUAL_TRUE_SAVINGS_KWH.toLocaleString()} kWh annual savings figure.
+      </div>
+
+      {/* WeatherSpark Citation */}
+      <div className="text-xs text-muted-foreground italic border-t border-border pt-3">
+        {WeatherSource.citation}
       </div>
     </div>
   );
