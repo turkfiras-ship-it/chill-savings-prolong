@@ -2,188 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
-    --foreground: 220 30% 15%;
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 30% 15%;
+    --card: 222 40% 9%;
+    --card-foreground: 210 40% 96%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 15%;
+    --popover: 222 40% 9%;
+    --popover-foreground: 210 40% 96%;
 
-    --primary: 152 60% 40%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 152 60% 48%;
+    --primary-foreground: 222 47% 6%;
 
-    --secondary: 200 15% 95%;
-    --secondary-foreground: 220 30% 25%;
+    --secondary: 215 20% 16%;
+    --secondary-foreground: 210 40% 90%;
 
-    --muted: 210 15% 92%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 215 20% 14%;
+    --muted-foreground: 215 15% 55%;
 
-    --accent: 200 60% 45%;
-    --accent-foreground: 220 30% 15%;
+    --accent: 192 70% 50%;
+    --accent-foreground: 222 47% 6%;
 
     --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 214.3 25% 88%;
-    --input: 214.3 25% 88%;
-    --ring: 152 60% 40%;
-
-    --radius: 0.75rem;
-
-    /* Custom energy/savings colors */
-    --savings: 152 60% 40%;
-    --savings-light: 152 50% 92%;
-    --energy: 200 60% 45%;
-    --energy-light: 200 50% 95%;
-    --chart-blue: 210 80% 55%;
-    --chart-teal: 175 70% 45%;
-    --chart-amber: 200 60% 45%;
-    --chart-red: 0 72% 51%;
-
-    /* Executive presentation tokens */
-    --exec-navy: 220 30% 15%;
-    --exec-navy-light: 220 20% 25%;
-    --exec-green: 152 45% 42%;
-    --exec-green-light: 152 40% 95%;
-    --exec-surface: 210 20% 98%;
-    --exec-divider: 220 15% 90%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 220 25% 10%;
-    --foreground: 210 40% 98%;
-
-    --card: 220 25% 14%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 220 25% 14%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 152 60% 50%;
-    --primary-foreground: 220 30% 10%;
-
-    --secondary: 220 20% 20%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 220 20% 18%;
-    --muted-foreground: 215 15% 60%;
-
-    --accent: 200 60% 50%;
-    --accent-foreground: 220 30% 10%;
-
-    --destructive: 0 62.8% 45%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 20% 22%;
-    --input: 220 20% 22%;
-    --ring: 152 60% 50%;
+    --border: 215 20% 16%;
+    --input: 215 20% 16%;
+    --ring: 152 60% 48%;
 
-    --savings: 152 60% 50%;
-    --savings-light: 152 30% 20%;
-    --energy: 200 60% 50%;
-    --energy-light: 200 30% 20%;
-    --chart-blue: 210 80% 60%;
-    --chart-teal: 175 70% 50%;
-    --chart-amber: 200 60% 50%;
-    --chart-red: 0 72% 55%;
+    --radius: 0.5rem;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --savings: 152 60% 48%;
+    --savings-light: 152 30% 15%;
+    --energy: 192 70% 50%;
+    --energy-light: 192 30% 15%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222 47% 6%;
+
+    --chart-green: 152 60% 48%;
+    --chart-blue: 210 80% 55%;
+    --chart-teal: 175 70% 45%;
+    --chart-amber: 38 92% 50%;
+    --chart-red: 0 72% 51%;
+    --chart-cyan: 192 70% 50%;
+    --chart-purple: 270 60% 55%;
+
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 210 20% 70%;
+    --sidebar-primary: 152 60% 48%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 215 20% 12%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 215 20% 12%;
+    --sidebar-ring: 152 60% 48%;
   }
 }
 
 @layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
   .gradient-savings {
-    background: linear-gradient(135deg, hsl(152 60% 40%) 0%, hsl(175 70% 45%) 100%);
+    background: linear-gradient(135deg, hsl(152 60% 48%) 0%, hsl(175 70% 45%) 100%);
   }
-  
   .gradient-energy {
-    background: linear-gradient(135deg, hsl(200 60% 45%) 0%, hsl(180 50% 40%) 100%);
+    background: linear-gradient(135deg, hsl(192 70% 50%) 0%, hsl(210 80% 55%) 100%);
   }
-  
+  .gradient-warning {
+    background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(25 95% 53%) 100%);
+  }
   .gradient-hero {
-    background: linear-gradient(135deg, hsl(220 25% 12%) 0%, hsl(220 30% 8%) 100%);
+    background: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(222 47% 4%) 100%);
   }
-  
   .text-gradient-savings {
-    background: linear-gradient(135deg, hsl(152 60% 40%) 0%, hsl(175 70% 45%) 100%);
+    background: linear-gradient(135deg, hsl(152 60% 48%) 0%, hsl(175 70% 45%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-
-  .card-elevated {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+  .text-gradient-energy {
+    background: linear-gradient(135deg, hsl(192 70% 50%) 0%, hsl(210 80% 55%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
-
-  .card-hover {
-    transition: all 0.3s ease;
+  .card-glow-green {
+    box-shadow: 0 0 20px -5px hsl(152 60% 48% / 0.15);
   }
-
-  .card-hover:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 20px 35px -10px rgba(0, 0, 0, 0.12);
+  .card-glow-blue {
+    box-shadow: 0 0 20px -5px hsl(192 70% 50% / 0.15);
+  }
+  .pulse-dot {
+    animation: pulse-dot 2s infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground font-sans antialiased; }
 }
 
-/* Hide Lovable badge */
-a[href*="lovable.dev"][target="_blank"] {
-  display: none !important;
-}
-#lovable-badge {
-  display: none !important;
-}
-
-@media print {
-  body * { visibility: hidden; }
-  .print-booklet, .print-booklet * { visibility: visible !important; }
-  .print-booklet { position: absolute; left: 0; top: 0; width: 100%; }
-  .exec-summary-print, .exec-summary-print * { visibility: visible !important; }
-  .exec-summary-print { position: absolute; left: 0; top: 0; width: 100%; }
-  .bp-print-all, .bp-print-all * { visibility: visible !important; }
-  .bp-print-all { position: absolute; left: 0; top: 0; width: 100%; }
-  .bp-print-all .bp-slide { border: none !important; box-shadow: none !important; border-radius: 0 !important; }
-  .print-page { page-break-inside: avoid; }
-  @page { margin: 0.5in; size: A4; }
-  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-}
+a[href*="lovable.dev"][target="_blank"] { display: none !important; }
+#lovable-badge { display: none !important; }
