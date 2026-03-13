@@ -38,7 +38,7 @@ export default function SitesPage() {
       {view === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(s => (
-            <Card key={s.id} className="bg-card border-border hover:border-primary/30 transition-colors cursor-pointer">
+            <Card key={s.id} className="bg-card border-border hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/sites/${s.id}`)}>
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
