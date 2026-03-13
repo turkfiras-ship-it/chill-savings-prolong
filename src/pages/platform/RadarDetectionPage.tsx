@@ -785,7 +785,7 @@ export default function RadarDetectionPage() {
                   <CardDescription>Sweeping {activeSites} active sites for anomalies</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <AnomalySweepRadar onBlipClick={handleBlipClick} />
+                  <AnomalySweepRadar onBlipClick={handleBlipClick} onSweepUpdate={handleSweepUpdate} />
                 </CardContent>
               </Card>
               <Card className="lg:col-span-2">
