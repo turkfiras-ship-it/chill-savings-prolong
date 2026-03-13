@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MapPin, Search, Grid3X3, List, Zap } from "lucide-react";
+import { MapPin, Search, Grid3X3, List, Zap, Map } from "lucide-react";
+import { SiteMapView } from "@/components/platform/SiteMapView";
 
 export default function SitesPage() {
   const navigate = useNavigate();
