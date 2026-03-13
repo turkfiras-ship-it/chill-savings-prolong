@@ -798,7 +798,7 @@ export default function RadarDetectionPage() {
                   <CardDescription>Risk proximity from center (critical) to edge (low)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ThreatRiskRadar />
+                  <ThreatRiskRadar onBlipClick={handleBlipClick} />
                 </CardContent>
               </Card>
               <Card className="lg:col-span-2">
