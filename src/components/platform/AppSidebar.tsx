@@ -1,7 +1,8 @@
 import {
   LayoutDashboard, Activity, MapPin, Cpu, Box, FolderKanban,
   Lightbulb, Bell, FileText, Receipt, TrendingUp, Users,
-  Plug, Settings, Zap, CloudSun, Brain, Sparkles, Gauge, Landmark
+  Plug, Settings, Zap, CloudSun, Brain, Sparkles, Gauge, Landmark,
+  Globe, Shield, Star, Flame, DollarSign
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
