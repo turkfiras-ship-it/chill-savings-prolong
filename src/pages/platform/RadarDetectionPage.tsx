@@ -195,7 +195,7 @@ interface AnomalyBlip {
   type: string;
 }
 
-function AnomalySweepRadar() {
+function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) => void }) {
   const [sweepAngle, setSweepAngle] = useState(0);
   const [revealedBlips, setRevealedBlips] = useState<Set<string>>(new Set());
   const canvasRef = useRef<HTMLCanvasElement>(null);
