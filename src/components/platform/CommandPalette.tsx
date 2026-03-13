@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Activity, MapPin, Cpu, Box, FolderKanban,
   Lightbulb, Bell, FileText, Receipt, TrendingUp, Users,
-  Plug, Settings, CloudSun, Search, Brain
+  Plug, Settings, CloudSun, Search, Brain, Sparkles
 } from "lucide-react";
 import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput,
