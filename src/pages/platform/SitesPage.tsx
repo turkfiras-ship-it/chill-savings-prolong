@@ -6,11 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { MapPin, Search, Grid3X3, List, Zap } from "lucide-react";
+import { MapPin, Search, Grid3X3, List, Zap, Map } from "lucide-react";
+import { SiteMapView } from "@/components/platform/SiteMapView";
 
 export default function SitesPage() {
   const navigate = useNavigate();
-  const [view, setView] = useState<'grid' | 'table'>('grid');
+  const [view, setView] = useState<'grid' | 'table' | 'map'>('map');
   const [search, setSearch] = useState('');
   const filtered = sites.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.city.toLowerCase().includes(search.toLowerCase()));
 
@@ -29,13 +30,16 @@ export default function SitesPage() {
             <Input placeholder="Search sites..." className="h-8 w-48 pl-8 text-xs bg-secondary border-0" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="flex gap-0.5 bg-secondary rounded-md p-0.5">
+            <Button size="sm" variant={view === 'map' ? 'default' : 'ghost'} className="h-7 w-7 p-0" onClick={() => setView('map')}><Map className="h-3.5 w-3.5" /></Button>
             <Button size="sm" variant={view === 'grid' ? 'default' : 'ghost'} className="h-7 w-7 p-0" onClick={() => setView('grid')}><Grid3X3 className="h-3.5 w-3.5" /></Button>
             <Button size="sm" variant={view === 'table' ? 'default' : 'ghost'} className="h-7 w-7 p-0" onClick={() => setView('table')}><List className="h-3.5 w-3.5" /></Button>
           </div>
         </div>
       </div>
 
-      {view === 'grid' ? (
+      {view === 'map' ? (
+        <SiteMapView />
+      ) : view === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(s => (
             <Card key={s.id} className="bg-card border-border hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/sites/${s.id}`)}>
