@@ -38,6 +38,7 @@ import EnergyStrategyPage from "@/pages/platform/EnergyStrategyPage";
 import CarbonIntelligencePage from "@/pages/platform/CarbonIntelligencePage";
 import EnergyCopilotPage from "@/pages/platform/EnergyCopilotPage";
 import CoolingGenomePage from "@/pages/platform/CoolingGenomePage";
+import RadarDetectionPage from "@/pages/platform/RadarDetectionPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
