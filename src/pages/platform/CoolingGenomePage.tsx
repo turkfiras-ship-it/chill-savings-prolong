@@ -496,19 +496,13 @@ function TypingText({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
 
-  useMemo(() => {
+  useEffect(() => {
     setDisplayed("");
     setDone(false);
-  }, [text]);
-
-  // Use useEffect for the typing interval
-  const textRef = useMemo(() => ({ text }), [text]);
-
-  useState(() => {
     let i = 0;
     const interval = setInterval(() => {
-      if (i < textRef.text.length) {
-        setDisplayed(textRef.text.slice(0, i + 1));
+      if (i < text.length) {
+        setDisplayed(text.slice(0, i + 1));
         i++;
       } else {
         setDone(true);
@@ -516,7 +510,7 @@ function TypingText({ text }: { text: string }) {
       }
     }, 18);
     return () => clearInterval(interval);
-  });
+  }, [text]);
 
   return (
     <p className="text-sm text-muted-foreground leading-relaxed">
