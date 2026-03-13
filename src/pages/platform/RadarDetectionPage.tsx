@@ -616,13 +616,17 @@ function ThreatRiskRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) =
         return (
           <motion.div
             key={i + "-label"}
-            className="absolute pointer-events-none"
+            className="absolute cursor-pointer"
             style={{ left: `${pctX}%`, top: `${pctY}%`, transform: "translate(-50%, -180%)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 + i * 0.08 }}
+            onClick={() => {
+              const severity = t.ring === 0 ? "critical" : t.ring === 1 ? "warning" : "normal";
+              onBlipClick?.({ id: `threat-${i}`, label: t.label, severity, type: t.type, source: "threat", ring: t.ring });
+            }}
           >
-            <span className="text-[8px] font-mono text-muted-foreground whitespace-nowrap bg-background/90 px-1 rounded border border-border/20">
+            <span className="text-[8px] font-mono text-muted-foreground whitespace-nowrap bg-background/90 px-1 rounded border border-border/20 hover:bg-primary/20 hover:text-primary transition-colors">
               {t.label}
             </span>
           </motion.div>
