@@ -82,12 +82,12 @@ export interface EquipmentRisk {
 export const equipmentRisks: EquipmentRisk[] = (() => {
   const rand = seeded(55);
   const items = [
-    { id: "EQ-001", name: "Compressor #3", type: "Compressor", site: "Jarir — Rawdah", failureRisk: 68, daysToFailure: 21, lastMaintenance: "2025-11-15", runHours: 4820 },
-    { id: "EQ-002", name: "Condenser Unit A", type: "Condenser", site: "Al Othaim — King Fahd", failureRisk: 54, daysToFailure: 45, lastMaintenance: "2025-10-02", runHours: 5200 },
-    { id: "EQ-003", name: "Evaporator Coil #2", type: "Evaporator", site: "Panda — Khalidiyah", failureRisk: 82, daysToFailure: 12, lastMaintenance: "2025-09-20", runHours: 6100 },
-    { id: "EQ-004", name: "Refrigerant Loop R1", type: "Refrigerant", site: "Saudi German Hospital", failureRisk: 35, daysToFailure: 90, lastMaintenance: "2026-01-10", runHours: 3200 },
-    { id: "EQ-005", name: "Compressor #1", type: "Compressor", site: "Hilton — Jeddah", failureRisk: 72, daysToFailure: 18, lastMaintenance: "2025-12-01", runHours: 5500 },
-    { id: "EQ-006", name: "Condenser Fan Motor", type: "Condenser", site: "SABIC — Admin Tower", failureRisk: 45, daysToFailure: 60, lastMaintenance: "2025-11-28", runHours: 4100 },
+    { id: "EQ-001", name: "Compressor #3", type: "Compressor" as const, site: "Jarir — Rawdah", failureRisk: 68, daysToFailure: 21, lastMaintenance: "2025-11-15", runHours: 4820 },
+    { id: "EQ-002", name: "Condenser Unit A", type: "Condenser" as const, site: "Al Othaim — King Fahd", failureRisk: 54, daysToFailure: 45, lastMaintenance: "2025-10-02", runHours: 5200 },
+    { id: "EQ-003", name: "Evaporator Coil #2", type: "Evaporator" as const, site: "Panda — Khalidiyah", failureRisk: 82, daysToFailure: 12, lastMaintenance: "2025-09-20", runHours: 6100 },
+    { id: "EQ-004", name: "Refrigerant Loop R1", type: "Refrigerant" as const, site: "Saudi German Hospital", failureRisk: 35, daysToFailure: 90, lastMaintenance: "2026-01-10", runHours: 3200 },
+    { id: "EQ-005", name: "Compressor #1", type: "Compressor" as const, site: "Hilton — Jeddah", failureRisk: 72, daysToFailure: 18, lastMaintenance: "2025-12-01", runHours: 5500 },
+    { id: "EQ-006", name: "Condenser Fan Motor", type: "Condenser" as const, site: "SABIC — Admin Tower", failureRisk: 45, daysToFailure: 60, lastMaintenance: "2025-11-28", runHours: 4100 },
   ].map(eq => ({
     ...eq,
     degradationTrend: Array.from({ length: 30 }, (_, i) => ({
