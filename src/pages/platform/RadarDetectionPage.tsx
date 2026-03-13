@@ -105,7 +105,7 @@ function AnomalySweepRadar() {
 
     // Sweep cone
     const sweepRad = ((sweepAngle - 90) * Math.PI) / 180;
-    const gradient = ctx.createConicalGradient?.(sweepRad, cx, cy);
+    // Sweep cone gradient
     // Fallback: draw as arc fill
     ctx.beginPath();
     ctx.moveTo(cx, cy);
