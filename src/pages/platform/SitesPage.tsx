@@ -30,6 +30,7 @@ export default function SitesPage() {
             <Input placeholder="Search sites..." className="h-8 w-48 pl-8 text-xs bg-secondary border-0" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           <div className="flex gap-0.5 bg-secondary rounded-md p-0.5">
+            <Button size="sm" variant={view === 'map' ? 'default' : 'ghost'} className="h-7 w-7 p-0" onClick={() => setView('map')}><Map className="h-3.5 w-3.5" /></Button>
             <Button size="sm" variant={view === 'grid' ? 'default' : 'ghost'} className="h-7 w-7 p-0" onClick={() => setView('grid')}><Grid3X3 className="h-3.5 w-3.5" /></Button>
             <Button size="sm" variant={view === 'table' ? 'default' : 'ghost'} className="h-7 w-7 p-0" onClick={() => setView('table')}><List className="h-3.5 w-3.5" /></Button>
           </div>
