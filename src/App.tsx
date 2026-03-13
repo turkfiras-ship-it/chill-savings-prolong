@@ -37,6 +37,7 @@ import CoolingForecastPage from "@/pages/platform/CoolingForecastPage";
 import EnergyStrategyPage from "@/pages/platform/EnergyStrategyPage";
 import CarbonIntelligencePage from "@/pages/platform/CarbonIntelligencePage";
 import EnergyCopilotPage from "@/pages/platform/EnergyCopilotPage";
+import CoolingGenomePage from "@/pages/platform/CoolingGenomePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
