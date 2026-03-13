@@ -29,6 +29,8 @@ const navItems = [
   { title: "Solutions", url: "/solutions", icon: Lightbulb },
   { title: "AI Anomalies", url: "/anomaly-detection", icon: Brain },
   { title: "Innovation Lab", url: "/innovation", icon: Sparkles },
+  { title: "Cooling Stress™", url: "/cooling-stress", icon: Gauge },
+  { title: "Portfolio Value", url: "/portfolio-value", icon: Landmark },
   { title: "Alerts", url: "/alerts", icon: Bell, badge: alerts.filter(a => !a.acknowledged).length },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Billing", url: "/billing", icon: Receipt },
