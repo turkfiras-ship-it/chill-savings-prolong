@@ -1,17 +1,188 @@
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { sites } from "@/data/mockData";
 import { PageTransition } from "@/components/platform/PageTransition";
-import { Radar, Shield, AlertTriangle, Crosshair, Radio, Zap, Thermometer, Activity } from "lucide-react";
+import { Radar, Shield, AlertTriangle, Crosshair, Radio, Zap, Thermometer, Activity, Clock, MapPin, Wrench, CheckCircle, XCircle, ArrowUpRight } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar as RechartsRadar, ResponsiveContainer, Tooltip } from "recharts";
 
 // ── Seeded random ────────────────────────────────────────
 function seeded(seed: number) {
   let s = seed;
   return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+}
+
+// ── Shared types ─────────────────────────────────────────
+interface SelectedBlip {
+  id: string;
+  label: string;
+  severity: string;
+  type: string;
+  source: "anomaly" | "threat";
+  ring?: number;
+}
+
+// ── BLIP DETAIL PANEL ────────────────────────────────────
+function BlipDetailPanel({ blip, open, onClose }: { blip: SelectedBlip | null; open: boolean; onClose: () => void }) {
+  const rand = useMemo(() => seeded(blip ? blip.label.length * 7 + 31 : 1), [blip]);
+
+  const history = useMemo(() => {
+    if (!blip) return [];
+    const r = rand;
+    const events = ["Energy spike detected", "Compressor cycling anomaly", "Temperature deviation +2.3°C", "Efficiency dropped below threshold", "Sensor recalibrated", "Load rebalanced automatically", "Manual inspection completed", "Filter replaced"];
+    return Array.from({ length: 5 }, (_, i) => ({
+      time: `${Math.floor(r() * 24)}:${String(Math.floor(r() * 60)).padStart(2, "0")}`,
+      daysAgo: Math.floor(r() * 14),
+      event: events[Math.floor(r() * events.length)],
+      resolved: r() > 0.4,
+    }));
+  }, [blip]);
+
+  const actions = useMemo(() => {
+    if (!blip) return [];
+    const r = seeded(blip.label.length * 13 + 7);
+    const allActions = [
+      { action: "Schedule on-site inspection", priority: "high", eta: "24h" },
+      { action: "Enable pre-cooling protocol", priority: "medium", eta: "2h" },
+      { action: "Replace condenser filters", priority: "high", eta: "48h" },
+      { action: "Recalibrate temperature sensors", priority: "low", eta: "72h" },
+      { action: "Shift load to backup units", priority: "medium", eta: "1h" },
+      { action: "Update firmware on controller", priority: "low", eta: "1 week" },
+      { action: "Run diagnostic sweep", priority: "medium", eta: "4h" },
+    ];
+    return allActions.sort(() => r() - 0.5).slice(0, 3 + Math.floor(r() * 2));
+  }, [blip]);
+
+  const siteInfo = useMemo(() => {
+    if (!blip) return null;
+    const r = seeded(blip.label.length * 3 + 19);
+    return {
+      location: "Riyadh, Saudi Arabia",
+      units: Math.floor(3 + r() * 8),
+      uptime: (95 + r() * 4.9).toFixed(1),
+      efficiency: Math.floor(60 + r() * 35),
+      lastInspection: `${Math.floor(1 + r() * 30)} days ago`,
+      runHours: Math.floor(2000 + r() * 6000),
+    };
+  }, [blip]);
+
+  const severityColor = (s: string) =>
+    s === "critical" ? "text-destructive" : s === "warning" ? "text-warning" : "text-primary";
+  const severityBg = (s: string) =>
+    s === "critical" ? "bg-destructive/15 text-destructive" : s === "warning" ? "bg-warning/15 text-warning" : "bg-primary/15 text-primary";
+  const priorityBg = (p: string) =>
+    p === "high" ? "bg-destructive/15 text-destructive" : p === "medium" ? "bg-warning/15 text-warning" : "bg-muted text-muted-foreground";
+
+  if (!blip) return null;
+
+  return (
+    <Sheet open={open} onOpenChange={v => !v && onClose()}>
+      <SheetContent side="right" className="w-[380px] sm:w-[440px] p-0 border-border/30">
+        <ScrollArea className="h-full">
+          <div className="p-6 space-y-6">
+            {/* Header */}
+            <SheetHeader className="space-y-3">
+              <div className="flex items-center gap-2">
+                <div className={`h-3 w-3 rounded-full ${blip.severity === "critical" ? "bg-destructive" : blip.severity === "warning" ? "bg-warning" : "bg-primary"} animate-pulse`} />
+                <Badge className={`text-[10px] ${severityBg(blip.severity)} border-0`}>
+                  {blip.severity.toUpperCase()}
+                </Badge>
+                <Badge variant="outline" className="text-[10px]">{blip.type}</Badge>
+              </div>
+              <SheetTitle className="text-lg">{blip.label}</SheetTitle>
+              <SheetDescription>
+                {blip.source === "anomaly" ? "Anomaly sweep detection" : `Threat ring: ${["Critical", "High", "Moderate", "Low"][blip.ring ?? 3]}`}
+              </SheetDescription>
+            </SheetHeader>
+
+            {/* Site Info */}
+            {siteInfo && (
+              <div className="space-y-3">
+                <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-primary" /> Site Information
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: "Location", value: siteInfo.location },
+                    { label: "Units", value: siteInfo.units },
+                    { label: "Uptime", value: `${siteInfo.uptime}%` },
+                    { label: "Efficiency", value: `${siteInfo.efficiency}%` },
+                    { label: "Last Inspection", value: siteInfo.lastInspection },
+                    { label: "Run Hours", value: siteInfo.runHours.toLocaleString() },
+                  ].map(item => (
+                    <div key={item.label} className="p-2.5 rounded-lg bg-secondary/40 border border-border/20">
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{item.label}</p>
+                      <p className="text-xs font-semibold text-foreground mt-0.5">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Anomaly History */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5 text-warning" /> Anomaly History
+              </h3>
+              <div className="space-y-2">
+                {history.map((h, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                    className="flex items-start gap-2.5 p-2.5 rounded-lg bg-secondary/30 border border-border/20"
+                  >
+                    {h.resolved ? (
+                      <CheckCircle className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
+                    ) : (
+                      <XCircle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-foreground">{h.event}</p>
+                      <p className="text-[9px] text-muted-foreground mt-0.5">{h.daysAgo === 0 ? "Today" : `${h.daysAgo}d ago`} at {h.time}</p>
+                    </div>
+                    <Badge variant="outline" className={`text-[8px] shrink-0 ${h.resolved ? "border-primary/30 text-primary" : "border-destructive/30 text-destructive"}`}>
+                      {h.resolved ? "Resolved" : "Open"}
+                    </Badge>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Recommended Actions */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                <Wrench className="h-3.5 w-3.5 text-primary" /> Recommended Actions
+              </h3>
+              <div className="space-y-2">
+                {actions.map((a, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + i * 0.06 }}
+                    className="flex items-center gap-2.5 p-3 rounded-lg bg-secondary/30 border border-border/20 hover:bg-secondary/50 transition-colors cursor-pointer group"
+                  >
+                    <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-medium text-foreground">{a.action}</p>
+                      <p className="text-[9px] text-muted-foreground">ETA: {a.eta}</p>
+                    </div>
+                    <Badge className={`text-[8px] border-0 ${priorityBg(a.priority)}`}>{a.priority}</Badge>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  );
 }
 
 // ── ANOMALY SWEEP RADAR ──────────────────────────────────
@@ -24,7 +195,7 @@ interface AnomalyBlip {
   type: string;
 }
 
-function AnomalySweepRadar() {
+function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) => void }) {
   const [sweepAngle, setSweepAngle] = useState(0);
   const [revealedBlips, setRevealedBlips] = useState<Set<string>>(new Set());
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -147,7 +318,7 @@ function AnomalySweepRadar() {
           const y = cy + maxR * b.distance * Math.sin(rad);
           const revealed = revealedBlips.has(b.id);
           return (
-            <g key={b.id}>
+            <g key={b.id} className="cursor-pointer" onClick={() => revealed && onBlipClick?.({ id: b.id, label: b.label, severity: b.severity, type: b.type, source: "anomaly" })}>
               <motion.circle
                 cx={x} cy={y}
                 r={revealed ? 5 : 0}
@@ -156,6 +327,8 @@ function AnomalySweepRadar() {
                 animate={{ r: revealed ? 5 : 0, opacity: revealed ? 1 : 0 }}
                 transition={{ duration: 0.4 }}
               />
+              {/* Larger invisible hit area */}
+              {revealed && <circle cx={x} cy={y} r={14} fill="transparent" />}
               {revealed && (
                 <motion.circle
                   cx={x} cy={y} r={12}
@@ -165,6 +338,7 @@ function AnomalySweepRadar() {
                   initial={{ r: 5, opacity: 0.8 }}
                   animate={{ r: 12, opacity: 0 }}
                   transition={{ duration: 1.5, repeat: Infinity }}
+                  className="pointer-events-none"
                 />
               )}
             </g>
@@ -180,13 +354,14 @@ function AnomalySweepRadar() {
           return (
             <motion.div
               key={b.id + "-label"}
-              className="absolute pointer-events-none"
+              className="absolute cursor-pointer"
               style={{ left: `${pct_x}%`, top: `${pct_y}%`, transform: "translate(-50%, -150%)" }}
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
+              onClick={() => onBlipClick?.({ id: b.id, label: b.label, severity: b.severity, type: b.type, source: "anomaly" })}
             >
-              <span className="text-[9px] font-mono text-muted-foreground whitespace-nowrap bg-background/80 px-1 rounded">
+              <span className="text-[9px] font-mono text-muted-foreground whitespace-nowrap bg-background/80 px-1 rounded hover:bg-primary/20 hover:text-primary transition-colors">
                 {b.label}
               </span>
             </motion.div>
@@ -338,7 +513,7 @@ interface ThreatEntry {
   type: "equipment" | "energy" | "weather" | "operational";
 }
 
-function ThreatRiskRadar() {
+function ThreatRiskRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) => void }) {
   const threats = useMemo<ThreatEntry[]>(() => {
     const rand = seeded(123);
     const items: ThreatEntry[] = [
@@ -403,8 +578,10 @@ function ThreatRiskRadar() {
           const rad = ((t.angle - 90) * Math.PI) / 180;
           const x = cx + r * Math.cos(rad);
           const y = cy + r * Math.sin(rad);
+          const severity = t.ring === 0 ? "critical" : t.ring === 1 ? "warning" : "normal";
           return (
-            <g key={i}>
+            <g key={i} className="cursor-pointer" onClick={() => onBlipClick?.({ id: `threat-${i}`, label: t.label, severity, type: t.type, source: "threat", ring: t.ring })}>
+              <circle cx={x} cy={y} r={14} fill="transparent" />
               <motion.circle
                 cx={x} cy={y} r={6}
                 fill={typeColors[t.type]}
@@ -422,6 +599,7 @@ function ThreatRiskRadar() {
                   initial={{ r: 6, opacity: 0.6 }}
                   animate={{ r: 14, opacity: 0 }}
                   transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+                  className="pointer-events-none"
                 />
               )}
             </g>
@@ -438,13 +616,17 @@ function ThreatRiskRadar() {
         return (
           <motion.div
             key={i + "-label"}
-            className="absolute pointer-events-none"
+            className="absolute cursor-pointer"
             style={{ left: `${pctX}%`, top: `${pctY}%`, transform: "translate(-50%, -180%)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 + i * 0.08 }}
+            onClick={() => {
+              const severity = t.ring === 0 ? "critical" : t.ring === 1 ? "warning" : "normal";
+              onBlipClick?.({ id: `threat-${i}`, label: t.label, severity, type: t.type, source: "threat", ring: t.ring });
+            }}
           >
-            <span className="text-[8px] font-mono text-muted-foreground whitespace-nowrap bg-background/90 px-1 rounded border border-border/20">
+            <span className="text-[8px] font-mono text-muted-foreground whitespace-nowrap bg-background/90 px-1 rounded border border-border/20 hover:bg-primary/20 hover:text-primary transition-colors">
               {t.label}
             </span>
           </motion.div>
@@ -492,6 +674,14 @@ function ThreatSummary() {
 
 // ── MAIN PAGE ────────────────────────────────────────────
 export default function RadarDetectionPage() {
+  const [selectedBlip, setSelectedBlip] = useState<SelectedBlip | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+
+  const handleBlipClick = useCallback((blip: SelectedBlip) => {
+    setSelectedBlip(blip);
+    setPanelOpen(true);
+  }, []);
+
   const activeSites = sites.filter(s => s.status === "active").length;
   const stats = [
     { label: "Active Scans", value: activeSites, icon: Radio, color: "primary" },
@@ -556,7 +746,7 @@ export default function RadarDetectionPage() {
                   <CardDescription>Sweeping {activeSites} active sites for anomalies</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <AnomalySweepRadar />
+                  <AnomalySweepRadar onBlipClick={handleBlipClick} />
                 </CardContent>
               </Card>
               <Card className="lg:col-span-2">
@@ -608,7 +798,7 @@ export default function RadarDetectionPage() {
                   <CardDescription>Risk proximity from center (critical) to edge (low)</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ThreatRiskRadar />
+                  <ThreatRiskRadar onBlipClick={handleBlipClick} />
                 </CardContent>
               </Card>
               <Card className="lg:col-span-2">
@@ -624,6 +814,8 @@ export default function RadarDetectionPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <BlipDetailPanel blip={selectedBlip} open={panelOpen} onClose={() => setPanelOpen(false)} />
     </PageTransition>
   );
 }
