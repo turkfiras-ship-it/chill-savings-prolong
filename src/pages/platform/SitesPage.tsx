@@ -37,7 +37,9 @@ export default function SitesPage() {
         </div>
       </div>
 
-      {view === 'grid' ? (
+      {view === 'map' ? (
+        <SiteMapView />
+      ) : view === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(s => (
             <Card key={s.id} className="bg-card border-border hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/sites/${s.id}`)}>
