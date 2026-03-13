@@ -56,7 +56,6 @@ function FitBounds({ positions }: { positions: [number, number][] }) {
   const map = useMap();
   useEffect(() => {
     if (positions.length > 0) {
-      const L = require('leaflet');
       const bounds = L.latLngBounds(positions);
       map.fitBounds(bounds, { padding: [50, 50], maxZoom: 8 });
     }
