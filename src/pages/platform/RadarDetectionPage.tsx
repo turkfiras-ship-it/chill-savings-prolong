@@ -354,13 +354,14 @@ function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip)
           return (
             <motion.div
               key={b.id + "-label"}
-              className="absolute pointer-events-none"
+              className="absolute cursor-pointer"
               style={{ left: `${pct_x}%`, top: `${pct_y}%`, transform: "translate(-50%, -150%)" }}
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
+              onClick={() => onBlipClick?.({ id: b.id, label: b.label, severity: b.severity, type: b.type, source: "anomaly" })}
             >
-              <span className="text-[9px] font-mono text-muted-foreground whitespace-nowrap bg-background/80 px-1 rounded">
+              <span className="text-[9px] font-mono text-muted-foreground whitespace-nowrap bg-background/80 px-1 rounded hover:bg-primary/20 hover:text-primary transition-colors">
                 {b.label}
               </span>
             </motion.div>
