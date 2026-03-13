@@ -674,6 +674,14 @@ function ThreatSummary() {
 
 // ── MAIN PAGE ────────────────────────────────────────────
 export default function RadarDetectionPage() {
+  const [selectedBlip, setSelectedBlip] = useState<SelectedBlip | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+
+  const handleBlipClick = useCallback((blip: SelectedBlip) => {
+    setSelectedBlip(blip);
+    setPanelOpen(true);
+  }, []);
+
   const activeSites = sites.filter(s => s.status === "active").length;
   const stats = [
     { label: "Active Scans", value: activeSites, icon: Radio, color: "primary" },
