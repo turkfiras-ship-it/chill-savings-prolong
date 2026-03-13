@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Activity, MapPin, Cpu, Box, FolderKanban,
   Lightbulb, Bell, FileText, Receipt, TrendingUp, Users,
-  Plug, Settings, ChevronLeft, Zap
+  Plug, Settings, ChevronLeft, Zap, CloudSun
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { alerts } from "@/data/mockData";
+import { WeatherWidget } from "./WeatherWidget";
 
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Monitoring", url: "/monitoring", icon: Activity },
+  { title: "Weather Intel", url: "/weather", icon: CloudSun },
   { title: "Sites", url: "/sites", icon: MapPin },
   { title: "Devices", url: "/devices", icon: Cpu },
   { title: "Assets", url: "/assets", icon: Box },
