@@ -578,8 +578,10 @@ function ThreatRiskRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) =
           const rad = ((t.angle - 90) * Math.PI) / 180;
           const x = cx + r * Math.cos(rad);
           const y = cy + r * Math.sin(rad);
+          const severity = t.ring === 0 ? "critical" : t.ring === 1 ? "warning" : "normal";
           return (
-            <g key={i}>
+            <g key={i} className="cursor-pointer" onClick={() => onBlipClick?.({ id: `threat-${i}`, label: t.label, severity, type: t.type, source: "threat", ring: t.ring })}>
+              <circle cx={x} cy={y} r={14} fill="transparent" />
               <motion.circle
                 cx={x} cy={y} r={6}
                 fill={typeColors[t.type]}
@@ -597,6 +599,7 @@ function ThreatRiskRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) =
                   initial={{ r: 6, opacity: 0.6 }}
                   animate={{ r: 14, opacity: 0 }}
                   transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+                  className="pointer-events-none"
                 />
               )}
             </g>
