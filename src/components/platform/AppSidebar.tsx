@@ -77,7 +77,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-4">
+      <SidebarFooter className="p-3 space-y-3">
+        {!collapsed && <WeatherWidget />}
         {!collapsed && (
           <div className="rounded-md bg-secondary/50 p-3">
             <p className="text-[10px] text-muted-foreground">Thermo Dynamics Engineering</p>
