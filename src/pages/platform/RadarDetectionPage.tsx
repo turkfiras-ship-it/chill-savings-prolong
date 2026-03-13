@@ -318,7 +318,7 @@ function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip)
           const y = cy + maxR * b.distance * Math.sin(rad);
           const revealed = revealedBlips.has(b.id);
           return (
-            <g key={b.id}>
+            <g key={b.id} className="cursor-pointer" onClick={() => revealed && onBlipClick?.({ id: b.id, label: b.label, severity: b.severity, type: b.type, source: "anomaly" })}>
               <motion.circle
                 cx={x} cy={y}
                 r={revealed ? 5 : 0}
@@ -327,6 +327,8 @@ function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip)
                 animate={{ r: revealed ? 5 : 0, opacity: revealed ? 1 : 0 }}
                 transition={{ duration: 0.4 }}
               />
+              {/* Larger invisible hit area */}
+              {revealed && <circle cx={x} cy={y} r={14} fill="transparent" />}
               {revealed && (
                 <motion.circle
                   cx={x} cy={y} r={12}
@@ -336,6 +338,7 @@ function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip)
                   initial={{ r: 5, opacity: 0.8 }}
                   animate={{ r: 12, opacity: 0 }}
                   transition={{ duration: 1.5, repeat: Infinity }}
+                  className="pointer-events-none"
                 />
               )}
             </g>
