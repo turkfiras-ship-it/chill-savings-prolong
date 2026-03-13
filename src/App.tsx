@@ -19,6 +19,7 @@ import UsersPage from "@/pages/platform/UsersPage";
 import IntegrationsPage from "@/pages/platform/IntegrationsPage";
 import SettingsPage from "@/pages/platform/SettingsPage";
 import SiteDetailPage from "@/pages/platform/SiteDetailPage";
+import WeatherPage from "@/pages/platform/WeatherPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
