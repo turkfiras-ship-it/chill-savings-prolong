@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Activity, MapPin, Cpu, Box, FolderKanban,
   Lightbulb, Bell, FileText, Receipt, TrendingUp, Users,
-  Plug, Settings, Zap, CloudSun, Brain
+  Plug, Settings, Zap, CloudSun, Brain, Sparkles
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
