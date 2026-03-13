@@ -814,6 +814,8 @@ export default function RadarDetectionPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <BlipDetailPanel blip={selectedBlip} open={panelOpen} onClose={() => setPanelOpen(false)} />
     </PageTransition>
   );
 }
