@@ -47,6 +47,7 @@ const navGroups = [
       { title: "Cooling Forecast", url: "/cooling-forecast", icon: Forecast },
       { title: "Cooling Genome™", url: "/cooling-genome", icon: Dna },
       { title: "Carbon Intel", url: "/carbon-intelligence", icon: Leaf },
+      { title: "Radar Detection", url: "/radar-detection", icon: Radar },
     ],
   },
   {
