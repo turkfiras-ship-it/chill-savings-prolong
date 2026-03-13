@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { sites, assets, alerts } from "@/data/mockData";
 import type { Site } from "@/data/mockData";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 
@@ -24,31 +23,204 @@ function getSiteHealthScore(site: Site): number {
 }
 
 function getHeartbeatParams(score: number) {
-  if (score >= 80) return { bpm: 60, color: 'hsl(152, 60%, 48%)', status: 'Healthy', amplitude: 1 };
-  if (score >= 60) return { bpm: 85, color: 'hsl(38, 92%, 50%)', status: 'Stressed', amplitude: 1.3 };
-  if (score >= 40) return { bpm: 110, color: 'hsl(25, 95%, 53%)', status: 'Warning', amplitude: 1.6 };
-  return { bpm: 140, color: 'hsl(0, 72%, 51%)', status: 'Critical', amplitude: 2 };
+  if (score >= 80) return { bpm: 60, color: 'hsl(152, 60%, 48%)', status: 'Healthy' };
+  if (score >= 60) return { bpm: 85, color: 'hsl(38, 92%, 50%)', status: 'Stressed' };
+  if (score >= 40) return { bpm: 110, color: 'hsl(25, 95%, 53%)', status: 'Warning' };
+  return { bpm: 140, color: 'hsl(0, 72%, 51%)', status: 'Critical' };
 }
 
-// Generate ECG-like SVG path
-function generateEcgPath(phase: number, amplitude: number): string {
-  const w = 300, h = 60, mid = h / 2;
-  const points: string[] = [];
-  for (let x = 0; x < w; x += 1) {
-    const t = ((x + phase) % w) / w;
-    let y = mid;
-    // P wave
-    if (t > 0.1 && t < 0.18) y = mid - Math.sin((t - 0.1) / 0.08 * Math.PI) * 6 * amplitude;
-    // QRS complex
-    else if (t > 0.22 && t < 0.24) y = mid + 8 * amplitude;
-    else if (t > 0.24 && t < 0.28) y = mid - 25 * amplitude;
-    else if (t > 0.28 && t < 0.30) y = mid + 10 * amplitude;
-    // T wave
-    else if (t > 0.35 && t < 0.45) y = mid - Math.sin((t - 0.35) / 0.1 * Math.PI) * 8 * amplitude;
-
-    points.push(`${x === 0 ? 'M' : 'L'}${x},${Math.max(2, Math.min(h - 2, y))}`);
+// Real ECG waveform template (one cardiac cycle, normalized 0-1 time, amplitude -1 to 1)
+function ecgSample(t: number): number {
+  // Flat baseline
+  if (t < 0.08) return 0;
+  // P wave (small upward bump)
+  if (t < 0.18) {
+    const p = (t - 0.08) / 0.10;
+    return Math.sin(p * Math.PI) * 0.12;
   }
-  return points.join(' ');
+  // PR segment (flat)
+  if (t < 0.24) return 0;
+  // Q dip
+  if (t < 0.27) {
+    const q = (t - 0.24) / 0.03;
+    return -Math.sin(q * Math.PI) * 0.15;
+  }
+  // R spike (sharp tall peak)
+  if (t < 0.32) {
+    const r = (t - 0.27) / 0.05;
+    return Math.sin(r * Math.PI) * 1.0;
+  }
+  // S dip
+  if (t < 0.36) {
+    const s = (t - 0.32) / 0.04;
+    return -Math.sin(s * Math.PI) * 0.25;
+  }
+  // ST segment (flat)
+  if (t < 0.44) return 0;
+  // T wave (broad upward bump)
+  if (t < 0.58) {
+    const tw = (t - 0.44) / 0.14;
+    return Math.sin(tw * Math.PI) * 0.22;
+  }
+  // Flat until next beat
+  return 0;
+}
+
+// Sweeping ECG canvas — draws left to right like a real cardiac monitor
+function EcgCanvas({ bpm, color, siteId }: { bpm: number; color: string; siteId: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animRef = useRef<number>(0);
+  const cursorRef = useRef(0);
+  const bufferRef = useRef<Float32Array | null>(null);
+
+  const draw = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const W = canvas.width;
+    const H = canvas.height;
+    const mid = H / 2;
+    const amp = H * 0.38;
+
+    // Initialize buffer
+    if (!bufferRef.current || bufferRef.current.length !== W) {
+      bufferRef.current = new Float32Array(W);
+    }
+    const buf = bufferRef.current;
+
+    // Speed: pixels per frame at 60fps. One cardiac cycle = 60/bpm seconds
+    const cyclePixels = W * 0.45; // one heartbeat spans ~45% of width
+    const cycleDuration = 60 / bpm; // seconds per beat
+    const pixelsPerSecond = cyclePixels / cycleDuration;
+    const pixelsPerFrame = pixelsPerSecond / 60;
+
+    // Write new samples
+    const newPixels = Math.max(1, Math.round(pixelsPerFrame));
+    for (let i = 0; i < newPixels; i++) {
+      const x = Math.floor(cursorRef.current) % W;
+      const cycleT = (cursorRef.current % cyclePixels) / cyclePixels;
+      buf[x] = ecgSample(cycleT);
+      cursorRef.current = (cursorRef.current + 1) % (W * 1000); // large wrap
+    }
+
+    // Clear
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw subtle grid
+    ctx.strokeStyle = 'rgba(100, 120, 140, 0.07)';
+    ctx.lineWidth = 0.5;
+    for (let gy = 0; gy < H; gy += H / 4) {
+      ctx.beginPath();
+      ctx.moveTo(0, gy);
+      ctx.lineTo(W, gy);
+      ctx.stroke();
+    }
+    for (let gx = 0; gx < W; gx += W / 8) {
+      ctx.beginPath();
+      ctx.moveTo(gx, 0);
+      ctx.lineTo(gx, H);
+      ctx.stroke();
+    }
+
+    const cursor = Math.floor(cursorRef.current) % W;
+
+    // Draw the ECG trace
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+
+    // Draw trail (behind cursor) with fade
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < W; i++) {
+      const x = (cursor - W + i + W * 2) % W;
+      const screenX = i;
+      const y = mid - buf[x] * amp;
+
+      // Fade: old samples are more transparent
+      const age = W - i;
+      if (age > W * 0.95) continue; // gap near cursor (eraser effect)
+
+      if (!started) {
+        ctx.moveTo(screenX, y);
+        started = true;
+      } else {
+        ctx.lineTo(screenX, y);
+      }
+    }
+
+    // Create gradient along the trail
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    const cursorPct = cursor / W;
+    // The newest part (cursor) is brightest, fading behind
+    grad.addColorStop(0, color.replace(')', ', 0.05)').replace('hsl', 'hsla'));
+    grad.addColorStop(Math.max(0, cursorPct - 0.02), color.replace(')', ', 0.9)').replace('hsl', 'hsla'));
+    grad.addColorStop(cursorPct, color);
+    // After cursor = gap
+    if (cursorPct < 0.98) {
+      grad.addColorStop(Math.min(1, cursorPct + 0.02), 'rgba(0,0,0,0)');
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+    }
+
+    ctx.strokeStyle = grad;
+    ctx.stroke();
+
+    // Glow effect on the bright part
+    ctx.save();
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    // Only draw the recent ~15% for glow
+    const glowLen = Math.floor(W * 0.15);
+    for (let i = 0; i < glowLen; i++) {
+      const x = (cursor - glowLen + i + W) % W;
+      const screenX = (cursor - glowLen + i + W) % W;
+      const y = mid - buf[x] * amp;
+      if (i === 0) ctx.moveTo(screenX, y);
+      else ctx.lineTo(screenX, y);
+    }
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.restore();
+
+    // Cursor dot (bright pulsing dot at write position)
+    const dotY = mid - buf[cursor] * amp;
+    ctx.beginPath();
+    ctx.arc(cursor, dotY, 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(cursor, dotY, 6, 0, Math.PI * 2);
+    ctx.fillStyle = color.replace(')', ', 0.2)').replace('hsl', 'hsla');
+    ctx.fill();
+
+    animRef.current = requestAnimationFrame(draw);
+  }, [bpm, color]);
+
+  useEffect(() => {
+    // Set canvas resolution
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * 1.5); // slightly higher than 1x for crispness
+      canvas.height = Math.floor(rect.height * 1.5);
+    }
+    cursorRef.current = 0;
+    bufferRef.current = null;
+    animRef.current = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [draw]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="w-full h-14 rounded"
+      style={{ imageRendering: 'auto' }}
+    />
+  );
 }
 
 interface PulseCardProps {
@@ -57,17 +229,8 @@ interface PulseCardProps {
 }
 
 function PulseCard({ site, onClick }: PulseCardProps) {
-  const [phase, setPhase] = useState(Math.random() * 300);
   const score = useMemo(() => getSiteHealthScore(site), [site]);
   const params = getHeartbeatParams(score);
-
-  useEffect(() => {
-    const speed = params.bpm / 30;
-    const interval = setInterval(() => setPhase(p => (p + speed) % 300), 50);
-    return () => clearInterval(interval);
-  }, [params.bpm]);
-
-  const path = generateEcgPath(phase, params.amplitude);
   const siteAssets = assets.filter(a => a.siteId === site.id);
   const activeAssets = siteAssets.filter(a => a.status === 'optimized' || a.status === 'monitoring').length;
 
@@ -78,7 +241,7 @@ function PulseCard({ site, onClick }: PulseCardProps) {
     >
       {/* Background pulse glow */}
       <div
-        className="absolute inset-0 opacity-[0.04] transition-opacity group-hover:opacity-[0.08]"
+        className="absolute inset-0 opacity-[0.03] transition-opacity group-hover:opacity-[0.06]"
         style={{
           background: `radial-gradient(ellipse at center, ${params.color}, transparent 70%)`,
         }}
@@ -93,8 +256,8 @@ function PulseCard({ site, onClick }: PulseCardProps) {
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <Badge
-              className="text-[9px] h-5"
-              style={{ backgroundColor: `${params.color}20`, color: params.color }}
+              className="text-[9px] h-5 border-0"
+              style={{ backgroundColor: `${params.color}18`, color: params.color }}
             >
               {params.status}
             </Badge>
@@ -105,44 +268,16 @@ function PulseCard({ site, onClick }: PulseCardProps) {
           </div>
         </div>
 
-        {/* ECG Line */}
-        <div className="my-2">
-          <svg viewBox="0 0 300 60" className="w-full h-12" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id={`ecg-${site.id}`} x1="0" x2="1" y1="0" y2="0">
-                <stop offset="0%" stopColor={params.color} stopOpacity="0" />
-                <stop offset="30%" stopColor={params.color} stopOpacity="1" />
-                <stop offset="70%" stopColor={params.color} stopOpacity="1" />
-                <stop offset="100%" stopColor={params.color} stopOpacity="0" />
-              </linearGradient>
-              <filter id={`glow-${site.id}`}>
-                <feGaussianBlur stdDeviation="2" result="blur" />
-                <feMerge>
-                  <feMergeNode in="blur" />
-                  <feMergeNode in="SourceGraphic" />
-                </feMerge>
-              </filter>
-            </defs>
-            {/* Grid lines */}
-            {[15, 30, 45].map(y => (
-              <line key={y} x1="0" y1={y} x2="300" y2={y} stroke="hsl(215, 20%, 14%)" strokeWidth="0.5" />
-            ))}
-            {/* ECG trace */}
-            <path
-              d={path}
-              fill="none"
-              stroke={`url(#ecg-${site.id})`}
-              strokeWidth="2"
-              filter={`url(#glow-${site.id})`}
-            />
-          </svg>
+        {/* Real ECG Canvas */}
+        <div className="my-2 rounded overflow-hidden bg-secondary/20">
+          <EcgCanvas bpm={params.bpm} color={params.color} siteId={site.id} />
         </div>
 
         {/* Stats bar */}
         <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-          <span>{params.bpm} BPM</span>
-          <span>{activeAssets}/{siteAssets.length} systems active</span>
-          <span className="font-mono">{(site.demand_kw)} kW load</span>
+          <span className="font-mono tabular-nums">{params.bpm} <span className="text-[8px]">BPM</span></span>
+          <span>{activeAssets}/{siteAssets.length} systems</span>
+          <span className="font-mono tabular-nums">{site.demand_kw} <span className="text-[8px]">kW</span></span>
           <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity" />
         </div>
       </div>
