@@ -22,6 +22,8 @@ import SiteDetailPage from "@/pages/platform/SiteDetailPage";
 import WeatherPage from "@/pages/platform/WeatherPage";
 import AnomalyDetectionPage from "@/pages/platform/AnomalyDetectionPage";
 import InnovationPage from "@/pages/platform/InnovationPage";
+import CoolingStressPage from "@/pages/platform/CoolingStressPage";
+import PortfolioValuePage from "@/pages/platform/PortfolioValuePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
