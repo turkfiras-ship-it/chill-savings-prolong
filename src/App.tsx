@@ -74,6 +74,14 @@ const App = () => (
             <Route path="/energy-reputation" element={<EnergyReputationPage />} />
             <Route path="/heatwave-command" element={<HeatwaveCommandPage />} />
             <Route path="/energy-value-engine" element={<EnergyValueEnginePage />} />
+            <Route path="/ai-optimization" element={<AIOptimizationPage />} />
+            <Route path="/portfolio-ai" element={<PortfolioAIPage />} />
+            <Route path="/contract-lab" element={<ContractLabPage />} />
+            <Route path="/predictive-maintenance" element={<PredictiveMaintenancePage />} />
+            <Route path="/cooling-forecast" element={<CoolingForecastPage />} />
+            <Route path="/energy-strategy" element={<EnergyStrategyPage />} />
+            <Route path="/carbon-intelligence" element={<CarbonIntelligencePage />} />
+            <Route path="/energy-copilot" element={<EnergyCopilotPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
