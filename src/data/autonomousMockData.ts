@@ -81,7 +81,7 @@ export interface EquipmentRisk {
 
 export const equipmentRisks: EquipmentRisk[] = (() => {
   const rand = seeded(55);
-  const items: EquipmentRisk[] = [
+  const items = [
     { id: "EQ-001", name: "Compressor #3", type: "Compressor", site: "Jarir — Rawdah", failureRisk: 68, daysToFailure: 21, lastMaintenance: "2025-11-15", runHours: 4820 },
     { id: "EQ-002", name: "Condenser Unit A", type: "Condenser", site: "Al Othaim — King Fahd", failureRisk: 54, daysToFailure: 45, lastMaintenance: "2025-10-02", runHours: 5200 },
     { id: "EQ-003", name: "Evaporator Coil #2", type: "Evaporator", site: "Panda — Khalidiyah", failureRisk: 82, daysToFailure: 12, lastMaintenance: "2025-09-20", runHours: 6100 },
