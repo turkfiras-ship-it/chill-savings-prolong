@@ -1,7 +1,8 @@
 import {
   LayoutDashboard, Activity, MapPin, Cpu, Box, FolderKanban,
   Lightbulb, Bell, FileText, Receipt, TrendingUp, Users,
-  Plug, Settings, Zap, CloudSun, Brain, Sparkles, Gauge, Landmark
+  Plug, Settings, Zap, CloudSun, Brain, Sparkles, Gauge, Landmark,
+  Globe, Shield, Star, Flame, DollarSign
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -31,6 +32,11 @@ const navItems = [
   { title: "Innovation Lab", url: "/innovation", icon: Sparkles },
   { title: "Cooling Stress™", url: "/cooling-stress", icon: Gauge },
   { title: "Portfolio Value", url: "/portfolio-value", icon: Landmark },
+  { title: "Cooling Network", url: "/cooling-intelligence", icon: Globe },
+  { title: "Energy Prosecutor", url: "/energy-prosecutor", icon: Shield },
+  { title: "Energy Reputation", url: "/energy-reputation", icon: Star },
+  { title: "Heatwave Command", url: "/heatwave-command", icon: Flame },
+  { title: "Value Engine", url: "/energy-value-engine", icon: DollarSign },
   { title: "Alerts", url: "/alerts", icon: Bell, badge: alerts.filter(a => !a.acknowledged).length },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Billing", url: "/billing", icon: Receipt },
