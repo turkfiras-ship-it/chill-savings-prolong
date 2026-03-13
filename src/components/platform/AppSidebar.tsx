@@ -4,7 +4,7 @@ import {
   Plug, Settings, Zap, CloudSun, Brain, Sparkles, Gauge, Landmark,
   Globe, Shield, Star, Flame, DollarSign, Cpu as CpuAI, Target,
   FileText as Contract, Wrench, CloudSun as Forecast, BarChart3,
-  Leaf, Bot, Dna, ChevronDown
+  Leaf, Bot, Dna, ChevronDown, Radar
 } from "lucide-react";
 import dcEvolveLogo from "@/assets/dc-evolve-logo.png";
 import { NavLink } from "@/components/NavLink";
@@ -47,6 +47,7 @@ const navGroups = [
       { title: "Cooling Forecast", url: "/cooling-forecast", icon: Forecast },
       { title: "Cooling Genome™", url: "/cooling-genome", icon: Dna },
       { title: "Carbon Intel", url: "/carbon-intelligence", icon: Leaf },
+      { title: "Radar Detection", url: "/radar-detection", icon: Radar },
     ],
   },
   {

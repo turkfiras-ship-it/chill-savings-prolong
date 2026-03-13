@@ -38,6 +38,7 @@ import EnergyStrategyPage from "@/pages/platform/EnergyStrategyPage";
 import CarbonIntelligencePage from "@/pages/platform/CarbonIntelligencePage";
 import EnergyCopilotPage from "@/pages/platform/EnergyCopilotPage";
 import CoolingGenomePage from "@/pages/platform/CoolingGenomePage";
+import RadarDetectionPage from "@/pages/platform/RadarDetectionPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,6 +85,7 @@ const App = () => (
             <Route path="/carbon-intelligence" element={<CarbonIntelligencePage />} />
             <Route path="/energy-copilot" element={<EnergyCopilotPage />} />
             <Route path="/cooling-genome" element={<CoolingGenomePage />} />
+            <Route path="/radar-detection" element={<RadarDetectionPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
