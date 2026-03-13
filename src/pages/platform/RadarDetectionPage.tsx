@@ -513,7 +513,7 @@ interface ThreatEntry {
   type: "equipment" | "energy" | "weather" | "operational";
 }
 
-function ThreatRiskRadar() {
+function ThreatRiskRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) => void }) {
   const threats = useMemo<ThreatEntry[]>(() => {
     const rand = seeded(123);
     const items: ThreatEntry[] = [
