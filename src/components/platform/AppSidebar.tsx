@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Activity, MapPin, Cpu, Box, FolderKanban,
   Lightbulb, Bell, FileText, Receipt, TrendingUp, Users,
-  Plug, Settings, Zap, CloudSun
+  Plug, Settings, Zap, CloudSun, Brain
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { alerts } from "@/data/mockData";
 import { WeatherWidget } from "./WeatherWidget";
+import { useGlobalWeather } from "@/context/WeatherContext";
+import { getWeatherInfo, estimateHvacEfficiencyImpact } from "@/lib/weatherService";
 
 const navItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -25,6 +27,7 @@ const navItems = [
   { title: "Assets", url: "/assets", icon: Box },
   { title: "Projects", url: "/projects", icon: FolderKanban },
   { title: "Solutions", url: "/solutions", icon: Lightbulb },
+  { title: "AI Anomalies", url: "/anomaly-detection", icon: Brain },
   { title: "Alerts", url: "/alerts", icon: Bell, badge: alerts.filter(a => !a.acknowledged).length },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Billing", url: "/billing", icon: Receipt },
@@ -39,6 +42,20 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const location = useLocation();
   const [weatherOpen, setWeatherOpen] = useState(false);
+  const { weather } = useGlobalWeather();
+
+  const currentTemp = weather?.current ? Math.round(weather.current.temperature) : null;
+  const weatherInfo = weather?.current ? getWeatherInfo(weather.current.weatherCode) : null;
+  const hvacRisk = weather?.current
+    ? estimateHvacEfficiencyImpact(weather.current.temperature, weather.current.humidity).riskLevel
+    : null;
+
+  const riskDotColor: Record<string, string> = {
+    low: 'bg-primary',
+    moderate: 'bg-warning',
+    high: 'bg-orange-400',
+    extreme: 'bg-destructive',
+  };
 
   return (
     <>
@@ -86,11 +103,28 @@ export function AppSidebar() {
           <Button
             variant="outline"
             size={collapsed ? "icon" : "default"}
-            className="w-full border-border/50 hover:bg-sidebar-accent"
+            className="w-full border-border/50 hover:bg-sidebar-accent relative"
             onClick={() => setWeatherOpen(true)}
           >
             <CloudSun className="h-4 w-4 shrink-0" />
-            {!collapsed && <span className="ml-2 text-sm">Live Weather</span>}
+            {!collapsed && (
+              <div className="ml-2 flex items-center gap-2 flex-1 text-left">
+                <span className="text-sm">
+                  {currentTemp !== null ? `${currentTemp}°C` : 'Weather'}
+                </span>
+                {weatherInfo && (
+                  <span className="text-xs opacity-70">{weatherInfo.icon}</span>
+                )}
+              </div>
+            )}
+            {hvacRisk && (
+              <span className={`absolute top-1 right-1 h-2 w-2 rounded-full ${riskDotColor[hvacRisk]} pulse-dot`} />
+            )}
+            {collapsed && currentTemp !== null && (
+              <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-foreground bg-card px-1 rounded">
+                {currentTemp}°
+              </span>
+            )}
           </Button>
           {!collapsed && (
             <div className="rounded-md bg-secondary/50 p-3">
