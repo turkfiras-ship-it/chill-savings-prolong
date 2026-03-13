@@ -4,7 +4,7 @@ import {
   Plug, Settings, Zap, CloudSun, Brain, Sparkles, Gauge, Landmark,
   Globe, Shield, Star, Flame, DollarSign, Cpu as CpuAI, Target,
   FileText as Contract, Wrench, CloudSun as Forecast, BarChart3,
-  Leaf, Bot
+  Leaf, Bot, Dna
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -47,6 +47,7 @@ const navItems = [
   { title: "Energy Strategy", url: "/energy-strategy", icon: BarChart3 },
   { title: "Carbon Intel", url: "/carbon-intelligence", icon: Leaf },
   { title: "Energy Copilot", url: "/energy-copilot", icon: Bot },
+  { title: "Cooling Genome™", url: "/cooling-genome", icon: Dna },
   { title: "Alerts", url: "/alerts", icon: Bell, badge: alerts.filter(a => !a.acknowledged).length },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Billing", url: "/billing", icon: Receipt },
