@@ -6,8 +6,8 @@ import { WeatherProvider } from "@/context/WeatherContext";
 
 export function PlatformLayout() {
   return (
-    <WeatherProvider>
-      <SidebarProvider>
+    <SidebarProvider>
+      <WeatherProvider>
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <div className="flex-1 flex flex-col min-w-0">
@@ -17,7 +17,7 @@ export function PlatformLayout() {
             </main>
           </div>
         </div>
-      </SidebarProvider>
-    </WeatherProvider>
+      </WeatherProvider>
+    </SidebarProvider>
   );
 }
