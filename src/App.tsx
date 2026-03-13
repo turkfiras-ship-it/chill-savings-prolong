@@ -18,6 +18,7 @@ import SavingsPage from "@/pages/platform/SavingsPage";
 import UsersPage from "@/pages/platform/UsersPage";
 import IntegrationsPage from "@/pages/platform/IntegrationsPage";
 import SettingsPage from "@/pages/platform/SettingsPage";
+import SiteDetailPage from "@/pages/platform/SiteDetailPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/" element={<DashboardPage />} />
             <Route path="/monitoring" element={<MonitoringPage />} />
             <Route path="/sites" element={<SitesPage />} />
+            <Route path="/sites/:id" element={<SiteDetailPage />} />
             <Route path="/devices" element={<DevicesPage />} />
             <Route path="/assets" element={<AssetsPage />} />
             <Route path="/projects" element={<ProjectsPage />} />

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { sites } from "@/data/mockData";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { MapPin, Search, Grid3X3, List, Zap } from "lucide-react";
 
 export default function SitesPage() {
+  const navigate = useNavigate();
   const [view, setView] = useState<'grid' | 'table'>('grid');
   const [search, setSearch] = useState('');
   const filtered = sites.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.city.toLowerCase().includes(search.toLowerCase()));
@@ -36,7 +38,7 @@ export default function SitesPage() {
       {view === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map(s => (
-            <Card key={s.id} className="bg-card border-border hover:border-primary/30 transition-colors cursor-pointer">
+            <Card key={s.id} className="bg-card border-border hover:border-primary/30 transition-colors cursor-pointer" onClick={() => navigate(`/sites/${s.id}`)}>
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
@@ -89,7 +91,7 @@ export default function SitesPage() {
             </TableHeader>
             <TableBody>
               {filtered.map(s => (
-                <TableRow key={s.id} className="cursor-pointer hover:bg-secondary/50">
+                <TableRow key={s.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/sites/${s.id}`)}>
                   <TableCell className="text-xs font-medium">{s.name}</TableCell>
                   <TableCell className="text-xs">{s.city}</TableCell>
                   <TableCell className="text-xs">{s.customer}</TableCell>
