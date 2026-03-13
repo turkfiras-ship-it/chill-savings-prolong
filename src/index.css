@@ -103,6 +103,20 @@
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
   }
+
+  .pulse-ring {
+    animation: pulse-ring 2s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { opacity: 0.6; stroke-width: 2; }
+    100% { opacity: 0; stroke-width: 0.5; }
+  }
+
+  .glass-card {
+    background: hsl(var(--card) / 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
 }
 
 @layer base {
