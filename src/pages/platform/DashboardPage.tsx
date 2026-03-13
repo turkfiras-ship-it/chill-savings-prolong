@@ -1,9 +1,10 @@
 import { Zap, MapPin, Cpu, TrendingUp, DollarSign, Leaf, Bell, FolderKanban, Box, Activity } from "lucide-react";
-import { KpiCard } from "@/components/platform/KpiCard";
+import { AnimatedKpiCard } from "@/components/platform/AnimatedKpiCard";
 import { portfolioKPIs, monthlyTrends, sites, alerts, projects } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { CoolingForecast } from "@/components/platform/CoolingForecast";
 
 export default function DashboardPage() {
   const kpis = portfolioKPIs;
@@ -18,21 +19,24 @@ export default function DashboardPage() {
         <p className="text-sm text-muted-foreground mt-1">Portfolio overview — {kpis.activeSites} active sites monitored</p>
       </div>
 
+      {/* Animated KPI row 1 */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        <KpiCard title="Total Consumption" value={`${(kpis.totalConsumption / 1e6).toFixed(1)}M kWh`} icon={Zap} variant="energy" trend={{ value: "4.2% vs last year", positive: false }} />
-        <KpiCard title="Total Cost" value={`${(kpis.totalCost / 1e6).toFixed(2)}M SAR`} icon={DollarSign} subtitle="Annual portfolio cost" />
-        <KpiCard title="Total Savings" value={`${(kpis.totalSavings / 1000).toFixed(0)}K SAR`} icon={TrendingUp} variant="savings" trend={{ value: "12.3% improvement", positive: true }} />
-        <KpiCard title="Active Sites" value={`${kpis.activeSites} / ${kpis.totalSites}`} icon={MapPin} subtitle={`${kpis.totalSites - kpis.activeSites} pending`} />
-        <KpiCard title="Active Alerts" value={String(kpis.activeAlerts)} icon={Bell} variant={kpis.criticalAlerts > 0 ? 'danger' : 'warning'} subtitle={`${kpis.criticalAlerts} critical`} />
+        <AnimatedKpiCard title="Total Consumption" value={Number((kpis.totalConsumption / 1e6).toFixed(1))} suffix="M kWh" decimals={1} icon={Zap} variant="energy" trend={{ value: "4.2% vs last year", positive: false }} delay={0} />
+        <AnimatedKpiCard title="Total Cost" value={Number((kpis.totalCost / 1e6).toFixed(2))} suffix="M SAR" decimals={2} icon={DollarSign} subtitle="Annual portfolio cost" delay={100} />
+        <AnimatedKpiCard title="Total Savings" value={Number((kpis.totalSavings / 1000).toFixed(0))} suffix="K SAR" icon={TrendingUp} variant="savings" trend={{ value: "12.3% improvement", positive: true }} delay={200} />
+        <AnimatedKpiCard title="Active Sites" value={kpis.activeSites} suffix={` / ${kpis.totalSites}`} icon={MapPin} subtitle={`${kpis.totalSites - kpis.activeSites} pending`} delay={300} />
+        <AnimatedKpiCard title="Active Alerts" value={kpis.activeAlerts} icon={Bell} variant={kpis.criticalAlerts > 0 ? 'danger' : 'warning'} subtitle={`${kpis.criticalAlerts} critical`} delay={400} />
       </div>
 
+      {/* Animated KPI row 2 */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard title="Connected Devices" value={`${kpis.onlineDevices} / ${kpis.totalDevices}`} icon={Cpu} />
-        <KpiCard title="Assets Optimized" value={`${kpis.optimizedAssets} / ${kpis.totalAssets}`} icon={Box} variant="savings" />
-        <KpiCard title="Carbon Reduced" value={`${kpis.carbonReduction} tCO₂`} icon={Leaf} variant="energy" />
-        <KpiCard title="Open Projects" value={String(kpis.openProjects)} icon={FolderKanban} />
+        <AnimatedKpiCard title="Connected Devices" value={kpis.onlineDevices} suffix={` / ${kpis.totalDevices}`} icon={Cpu} delay={500} />
+        <AnimatedKpiCard title="Assets Optimized" value={kpis.optimizedAssets} suffix={` / ${kpis.totalAssets}`} icon={Box} variant="savings" delay={600} />
+        <AnimatedKpiCard title="Carbon Reduced" value={kpis.carbonReduction} suffix=" tCO₂" decimals={2} icon={Leaf} variant="energy" delay={700} />
+        <AnimatedKpiCard title="Open Projects" value={kpis.openProjects} icon={FolderKanban} delay={800} />
       </div>
 
+      {/* Charts + Cooling Forecast */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="bg-card border-border">
           <CardHeader className="pb-2">
@@ -62,23 +66,27 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Cost Trend</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={monthlyTrends}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 20%, 16%)" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}K`} />
-                <Tooltip contentStyle={{ background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="cost" fill="hsl(210, 80%, 55%)" radius={[4, 4, 0, 0]} name="Cost (SAR)" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        {/* Predictive Cooling Forecast */}
+        <CoolingForecast />
       </div>
+
+      {/* Cost trend */}
+      <Card className="bg-card border-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium">Monthly Cost Trend</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={monthlyTrends}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 20%, 16%)" />
+              <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1000).toFixed(0)}K`} />
+              <Tooltip contentStyle={{ background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 }} />
+              <Bar dataKey="cost" fill="hsl(210, 80%, 55%)" radius={[4, 4, 0, 0]} name="Cost (SAR)" />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <Card className="bg-card border-border">
