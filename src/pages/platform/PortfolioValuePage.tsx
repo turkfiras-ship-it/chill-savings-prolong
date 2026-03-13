@@ -85,8 +85,8 @@ export default function PortfolioValuePage() {
 
   const sectorColors = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--warning))", "hsl(var(--chart-purple))", "hsl(var(--chart-blue))", "hsl(var(--chart-teal))"];
 
-  const countTotal = useCountUp(totalTenYearSavings, 2000);
-  const countEsco = useCountUp(totalEscoValue, 2000);
+  const countTotal = useCountUp({ end: totalTenYearSavings, duration: 2000 });
+  const countEsco = useCountUp({ end: totalEscoValue, duration: 2000 });
 
   return (
     <PageTransition>
