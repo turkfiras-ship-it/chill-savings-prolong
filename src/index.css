@@ -2,63 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 96%;
+    /* ── Palantir / Tesla Command Center Palette ── */
+    --background: 220 30% 5%;
+    --foreground: 210 20% 92%;
 
-    --card: 222 40% 9%;
-    --card-foreground: 210 40% 96%;
+    --card: 220 25% 8%;
+    --card-foreground: 210 20% 92%;
 
-    --popover: 222 40% 9%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 220 25% 8%;
+    --popover-foreground: 210 20% 92%;
 
-    --primary: 152 60% 48%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 210 100% 62%;
+    --primary-foreground: 220 30% 5%;
 
-    --secondary: 215 20% 16%;
-    --secondary-foreground: 210 40% 90%;
+    --secondary: 220 18% 13%;
+    --secondary-foreground: 210 20% 85%;
 
-    --muted: 215 20% 14%;
-    --muted-foreground: 215 15% 55%;
+    --muted: 220 15% 11%;
+    --muted-foreground: 215 12% 48%;
 
-    --accent: 192 70% 50%;
-    --accent-foreground: 222 47% 6%;
+    --accent: 155 80% 55%;
+    --accent-foreground: 220 30% 5%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 210 20% 98%;
 
-    --border: 215 20% 16%;
-    --input: 215 20% 16%;
-    --ring: 152 60% 48%;
+    --border: 220 15% 13%;
+    --input: 220 15% 13%;
+    --ring: 210 100% 62%;
 
     --radius: 0.5rem;
 
-    --savings: 152 60% 48%;
-    --savings-light: 152 30% 15%;
-    --energy: 192 70% 50%;
-    --energy-light: 192 30% 15%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 6%;
+    --savings: 155 80% 55%;
+    --savings-light: 155 30% 12%;
+    --energy: 210 100% 62%;
+    --energy-light: 210 30% 12%;
+    --warning: 32 95% 55%;
+    --warning-foreground: 220 30% 5%;
 
-    --chart-green: 152 60% 48%;
-    --chart-blue: 210 80% 55%;
-    --chart-teal: 175 70% 45%;
-    --chart-amber: 38 92% 50%;
-    --chart-red: 0 72% 51%;
-    --chart-cyan: 192 70% 50%;
-    --chart-purple: 270 60% 55%;
+    --chart-green: 155 80% 55%;
+    --chart-blue: 210 100% 62%;
+    --chart-teal: 180 70% 48%;
+    --chart-amber: 32 95% 55%;
+    --chart-red: 0 72% 55%;
+    --chart-cyan: 195 85% 55%;
+    --chart-purple: 265 60% 60%;
 
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 210 20% 70%;
-    --sidebar-primary: 152 60% 48%;
-    --sidebar-primary-foreground: 222 47% 6%;
-    --sidebar-accent: 215 20% 12%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 215 20% 12%;
-    --sidebar-ring: 152 60% 48%;
+    --sidebar-background: 220 30% 4%;
+    --sidebar-foreground: 215 12% 50%;
+    --sidebar-primary: 210 100% 62%;
+    --sidebar-primary-foreground: 220 30% 5%;
+    --sidebar-accent: 220 18% 10%;
+    --sidebar-accent-foreground: 210 20% 92%;
+    --sidebar-border: 220 15% 10%;
+    --sidebar-ring: 210 100% 62%;
+
+    /* ── Command Center Extended ── */
+    --cmd-glow: 210 100% 62%;
+    --cmd-surface: 220 22% 7%;
+    --cmd-surface-elevated: 220 20% 10%;
+    --cmd-divider: 220 15% 12%;
   }
 }
 
@@ -67,41 +74,50 @@
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
   .gradient-savings {
-    background: linear-gradient(135deg, hsl(152 60% 48%) 0%, hsl(175 70% 45%) 100%);
+    background: linear-gradient(135deg, hsl(155 80% 55%) 0%, hsl(180 70% 48%) 100%);
   }
   .gradient-energy {
-    background: linear-gradient(135deg, hsl(192 70% 50%) 0%, hsl(210 80% 55%) 100%);
+    background: linear-gradient(135deg, hsl(210 100% 62%) 0%, hsl(195 85% 55%) 100%);
   }
   .gradient-warning {
-    background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(25 95% 53%) 100%);
+    background: linear-gradient(135deg, hsl(32 95% 55%) 0%, hsl(20 95% 55%) 100%);
   }
   .gradient-hero {
-    background: linear-gradient(135deg, hsl(222 47% 8%) 0%, hsl(222 47% 4%) 100%);
+    background: linear-gradient(180deg, hsl(220 30% 6%) 0%, hsl(220 30% 3%) 100%);
   }
   .text-gradient-savings {
-    background: linear-gradient(135deg, hsl(152 60% 48%) 0%, hsl(175 70% 45%) 100%);
+    background: linear-gradient(135deg, hsl(155 80% 55%) 0%, hsl(180 70% 48%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-gradient-energy {
-    background: linear-gradient(135deg, hsl(192 70% 50%) 0%, hsl(210 80% 55%) 100%);
+    background: linear-gradient(135deg, hsl(210 100% 62%) 0%, hsl(195 85% 55%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* ── Command Center Glows ── */
   .card-glow-green {
-    box-shadow: 0 0 20px -5px hsl(152 60% 48% / 0.15);
+    box-shadow: 0 0 30px -8px hsl(155 80% 55% / 0.12);
   }
   .card-glow-blue {
-    box-shadow: 0 0 20px -5px hsl(192 70% 50% / 0.15);
+    box-shadow: 0 0 30px -8px hsl(210 100% 62% / 0.12);
   }
+  .cmd-glow {
+    box-shadow: 0 0 40px -10px hsl(210 100% 62% / 0.15), 0 0 2px 0 hsl(210 100% 62% / 0.08);
+  }
+  .cmd-border {
+    border-color: hsl(210 100% 62% / 0.15);
+  }
+
   .pulse-dot {
     animation: pulse-dot 2s infinite;
   }
   @keyframes pulse-dot {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    50% { opacity: 0.3; }
   }
 
   .pulse-ring {
@@ -113,15 +129,53 @@
   }
 
   .glass-card {
-    background: hsl(var(--card) / 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: hsl(var(--card) / 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* ── Sidebar hover glow ── */
+  .sidebar-glow:hover {
+    box-shadow: inset 2px 0 0 0 hsl(var(--cmd-glow));
+  }
+
+  /* ── Engineering-grade chart overrides ── */
+  .recharts-cartesian-grid-horizontal line,
+  .recharts-cartesian-grid-vertical line {
+    stroke: hsl(220 15% 12%);
+    stroke-width: 0.5;
+  }
+
+  /* ── Cinematic number display ── */
+  .cmd-metric {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* ── Scanline overlay (subtle) ── */
+  .scanline-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(210 100% 62% / 0.008) 2px,
+      hsl(210 100% 62% / 0.008) 4px
+    );
+    pointer-events: none;
   }
 }
 
 @layer base {
   * { @apply border-border; }
   body { @apply bg-background text-foreground font-sans antialiased; }
+  
+  /* ── Engineering Typography Scale ── */
+  h1 { @apply text-3xl md:text-4xl font-extrabold tracking-tight; }
+  h2 { @apply text-xl md:text-2xl font-bold tracking-tight; }
+  h3 { @apply text-lg font-semibold; }
 }
 
 a[href*="lovable.dev"][target="_blank"] { display: none !important; }
