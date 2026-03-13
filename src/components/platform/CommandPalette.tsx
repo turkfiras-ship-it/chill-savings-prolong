@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Activity, MapPin, Cpu, Box, FolderKanban,
   Lightbulb, Bell, FileText, Receipt, TrendingUp, Users,
-  Plug, Settings, CloudSun, Search, Brain
+  Plug, Settings, CloudSun, Search, Brain, Sparkles
 } from "lucide-react";
 import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput,
@@ -28,6 +28,7 @@ const navRoutes = [
   { name: "Integrations", path: "/integrations", icon: Plug, keywords: "api connect eyedro" },
   { name: "Settings", path: "/settings", icon: Settings, keywords: "config preferences" },
   { name: "AI Anomaly Detection", path: "/anomaly-detection", icon: Brain, keywords: "ai anomaly detection intelligence" },
+  { name: "Innovation Lab", path: "/innovation", icon: Sparkles, keywords: "pulse comfort forensics confidence load shift innovation" },
 ];
 
 export function CommandPalette() {

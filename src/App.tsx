@@ -21,6 +21,7 @@ import SettingsPage from "@/pages/platform/SettingsPage";
 import SiteDetailPage from "@/pages/platform/SiteDetailPage";
 import WeatherPage from "@/pages/platform/WeatherPage";
 import AnomalyDetectionPage from "@/pages/platform/AnomalyDetectionPage";
+import InnovationPage from "@/pages/platform/InnovationPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/users" element={<UsersPage />} />
             <Route path="/integrations" element={<IntegrationsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/innovation" element={<InnovationPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
