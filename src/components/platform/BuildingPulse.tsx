@@ -23,10 +23,10 @@ function getSiteHealthScore(site: Site): number {
 }
 
 function getHeartbeatParams(score: number) {
-  if (score >= 80) return { bpm: 60, color: 'hsl(152, 60%, 48%)', status: 'Healthy' };
-  if (score >= 60) return { bpm: 85, color: 'hsl(38, 92%, 50%)', status: 'Stressed' };
-  if (score >= 40) return { bpm: 110, color: 'hsl(25, 95%, 53%)', status: 'Warning' };
-  return { bpm: 140, color: 'hsl(0, 72%, 51%)', status: 'Critical' };
+  if (score >= 80) return { bpm: 30, color: 'hsl(152, 60%, 48%)', status: 'Healthy' };
+  if (score >= 60) return { bpm: 40, color: 'hsl(38, 92%, 50%)', status: 'Stressed' };
+  if (score >= 40) return { bpm: 50, color: 'hsl(25, 95%, 53%)', status: 'Warning' };
+  return { bpm: 65, color: 'hsl(0, 72%, 51%)', status: 'Critical' };
 }
 
 // Real ECG waveform template (one cardiac cycle, normalized 0-1 time, amplitude -1 to 1)
