@@ -11,7 +11,7 @@ import { SiteMapView } from "@/components/platform/SiteMapView";
 
 export default function SitesPage() {
   const navigate = useNavigate();
-  const [view, setView] = useState<'grid' | 'table'>('grid');
+  const [view, setView] = useState<'grid' | 'table' | 'map'>('map');
   const [search, setSearch] = useState('');
   const filtered = sites.filter(s => s.name.toLowerCase().includes(search.toLowerCase()) || s.city.toLowerCase().includes(search.toLowerCase()));
 
