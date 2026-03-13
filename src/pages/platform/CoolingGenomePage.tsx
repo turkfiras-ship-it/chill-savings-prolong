@@ -22,7 +22,7 @@ import {
 function GenomeKpi({ label, value, suffix = "", icon: Icon, color }: {
   label: string; value: number; suffix?: string; icon: React.ElementType; color: string;
 }) {
-  const display = useCountUp(value, 1200);
+  const display = useCountUp({ end: value, duration: 1200 });
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
       <Card className="border-border/50 bg-card/80 backdrop-blur">

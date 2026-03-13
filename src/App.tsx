@@ -83,6 +83,7 @@ const App = () => (
             <Route path="/energy-strategy" element={<EnergyStrategyPage />} />
             <Route path="/carbon-intelligence" element={<CarbonIntelligencePage />} />
             <Route path="/energy-copilot" element={<EnergyCopilotPage />} />
+            <Route path="/cooling-genome" element={<CoolingGenomePage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

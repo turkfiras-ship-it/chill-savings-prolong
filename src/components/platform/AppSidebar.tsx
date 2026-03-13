@@ -47,6 +47,7 @@ const navItems = [
   { title: "Energy Strategy", url: "/energy-strategy", icon: BarChart3 },
   { title: "Carbon Intel", url: "/carbon-intelligence", icon: Leaf },
   { title: "Energy Copilot", url: "/energy-copilot", icon: Bot },
+  { title: "Cooling Genome™", url: "/cooling-genome", icon: Dna },
   { title: "Alerts", url: "/alerts", icon: Bell, badge: alerts.filter(a => !a.acknowledged).length },
   { title: "Reports", url: "/reports", icon: FileText },
   { title: "Billing", url: "/billing", icon: Receipt },
