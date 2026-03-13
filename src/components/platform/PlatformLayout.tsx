@@ -3,11 +3,13 @@ import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";
 import { Outlet } from "react-router-dom";
 import { WeatherProvider } from "@/context/WeatherContext";
+import { AlertNotifications } from "./AlertNotifications";
 
 export function PlatformLayout() {
   return (
     <SidebarProvider>
       <WeatherProvider>
+        <AlertNotifications />
         <div className="min-h-screen flex w-full">
           <AppSidebar />
           <div className="flex-1 flex flex-col min-w-0">
