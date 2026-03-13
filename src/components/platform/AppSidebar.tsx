@@ -6,6 +6,7 @@ import {
   FileText as Contract, Wrench, CloudSun as Forecast, BarChart3,
   Leaf, Bot, Dna, ChevronDown
 } from "lucide-react";
+import dcEvolveLogo from "@/assets/dc-evolve-logo.png";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useState } from "react";
