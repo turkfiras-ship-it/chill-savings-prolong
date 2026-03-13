@@ -29,6 +29,14 @@ import EnergyProsecutorPage from "@/pages/platform/EnergyProsecutorPage";
 import EnergyReputationPage from "@/pages/platform/EnergyReputationPage";
 import HeatwaveCommandPage from "@/pages/platform/HeatwaveCommandPage";
 import EnergyValueEnginePage from "@/pages/platform/EnergyValueEnginePage";
+import AIOptimizationPage from "@/pages/platform/AIOptimizationPage";
+import PortfolioAIPage from "@/pages/platform/PortfolioAIPage";
+import ContractLabPage from "@/pages/platform/ContractLabPage";
+import PredictiveMaintenancePage from "@/pages/platform/PredictiveMaintenancePage";
+import CoolingForecastPage from "@/pages/platform/CoolingForecastPage";
+import EnergyStrategyPage from "@/pages/platform/EnergyStrategyPage";
+import CarbonIntelligencePage from "@/pages/platform/CarbonIntelligencePage";
+import EnergyCopilotPage from "@/pages/platform/EnergyCopilotPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
