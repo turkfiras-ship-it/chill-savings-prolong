@@ -91,7 +91,7 @@ export default function SitesPage() {
             </TableHeader>
             <TableBody>
               {filtered.map(s => (
-                <TableRow key={s.id} className="cursor-pointer hover:bg-secondary/50">
+                <TableRow key={s.id} className="cursor-pointer hover:bg-secondary/50" onClick={() => navigate(`/sites/${s.id}`)}>
                   <TableCell className="text-xs font-medium">{s.name}</TableCell>
                   <TableCell className="text-xs">{s.city}</TableCell>
                   <TableCell className="text-xs">{s.customer}</TableCell>
