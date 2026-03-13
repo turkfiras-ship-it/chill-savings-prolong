@@ -34,6 +34,7 @@ const App = () => (
           <Route element={<PlatformLayout />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/monitoring" element={<MonitoringPage />} />
+            <Route path="/weather" element={<WeatherPage />} />
             <Route path="/sites" element={<SitesPage />} />
             <Route path="/sites/:id" element={<SiteDetailPage />} />
             <Route path="/devices" element={<DevicesPage />} />
