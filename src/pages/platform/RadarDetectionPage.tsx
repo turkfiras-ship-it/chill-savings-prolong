@@ -1,11 +1,13 @@
-import { useMemo, useEffect, useRef, useState } from "react";
+import { useMemo, useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { sites } from "@/data/mockData";
 import { PageTransition } from "@/components/platform/PageTransition";
-import { Radar, Shield, AlertTriangle, Crosshair, Radio, Zap, Thermometer, Activity } from "lucide-react";
+import { Radar, Shield, AlertTriangle, Crosshair, Radio, Zap, Thermometer, Activity, Clock, MapPin, Wrench, CheckCircle, XCircle, ArrowUpRight } from "lucide-react";
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar as RechartsRadar, ResponsiveContainer, Tooltip } from "recharts";
 
 // ── Seeded random ────────────────────────────────────────
