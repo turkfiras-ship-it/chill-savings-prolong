@@ -231,6 +231,17 @@ function AnomalySweepRadar({ onBlipClick, onSweepUpdate }: { onBlipClick?: (blip
           const diff = ((angle - b.angle) % 360 + 360) % 360;
           if (diff < 8 && diff >= 0) next.add(b.id);
         });
+        // Fire sweep update callback
+        if (next.size !== prev.size || Math.abs(angle % 360) < 1) {
+          const revealed = blips.filter(b => next.has(b.id));
+          onSweepUpdate?.({
+            total: next.size,
+            normal: revealed.filter(b => b.severity === "normal").length,
+            warning: revealed.filter(b => b.severity === "warning").length,
+            critical: revealed.filter(b => b.severity === "critical").length,
+            sweepPct: Math.round((angle / 360) * 100),
+          });
+        }
         return next;
       });
 
