@@ -24,6 +24,11 @@ import AnomalyDetectionPage from "@/pages/platform/AnomalyDetectionPage";
 import InnovationPage from "@/pages/platform/InnovationPage";
 import CoolingStressPage from "@/pages/platform/CoolingStressPage";
 import PortfolioValuePage from "@/pages/platform/PortfolioValuePage";
+import CoolingIntelligencePage from "@/pages/platform/CoolingIntelligencePage";
+import EnergyProsecutorPage from "@/pages/platform/EnergyProsecutorPage";
+import EnergyReputationPage from "@/pages/platform/EnergyReputationPage";
+import HeatwaveCommandPage from "@/pages/platform/HeatwaveCommandPage";
+import EnergyValueEnginePage from "@/pages/platform/EnergyValueEnginePage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
