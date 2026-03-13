@@ -195,7 +195,7 @@ interface AnomalyBlip {
   type: string;
 }
 
-function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip) => void }) {
+function AnomalySweepRadar({ onBlipClick, onSweepUpdate }: { onBlipClick?: (blip: SelectedBlip) => void; onSweepUpdate?: (data: { total: number; normal: number; warning: number; critical: number; sweepPct: number }) => void }) {
   const [sweepAngle, setSweepAngle] = useState(0);
   const [revealedBlips, setRevealedBlips] = useState<Set<string>>(new Set());
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -231,6 +231,17 @@ function AnomalySweepRadar({ onBlipClick }: { onBlipClick?: (blip: SelectedBlip)
           const diff = ((angle - b.angle) % 360 + 360) % 360;
           if (diff < 8 && diff >= 0) next.add(b.id);
         });
+        // Fire sweep update callback
+        if (next.size !== prev.size || Math.abs(angle % 360) < 1) {
+          const revealed = blips.filter(b => next.has(b.id));
+          onSweepUpdate?.({
+            total: next.size,
+            normal: revealed.filter(b => b.severity === "normal").length,
+            warning: revealed.filter(b => b.severity === "warning").length,
+            critical: revealed.filter(b => b.severity === "critical").length,
+            sweepPct: Math.round((angle / 360) * 100),
+          });
+        }
         return next;
       });
 
@@ -682,13 +693,13 @@ export default function RadarDetectionPage() {
     setPanelOpen(true);
   }, []);
 
+  const [sweepStats, setSweepStats] = useState({ total: 0, normal: 0, warning: 0, critical: 0, sweepPct: 0 });
+
+  const handleSweepUpdate = useCallback((data: typeof sweepStats) => {
+    setSweepStats(data);
+  }, []);
+
   const activeSites = sites.filter(s => s.status === "active").length;
-  const stats = [
-    { label: "Active Scans", value: activeSites, icon: Radio, color: "primary" },
-    { label: "Anomalies Detected", value: 14, icon: AlertTriangle, color: "warning" },
-    { label: "Critical Threats", value: 3, icon: Shield, color: "destructive" },
-    { label: "Avg Efficiency", value: "78%", icon: Crosshair, color: "primary" },
-  ];
 
   return (
     <PageTransition>
@@ -704,17 +715,40 @@ export default function RadarDetectionPage() {
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((s, i) => (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-              <Card className="border-border/30">
-                <CardContent className="pt-4 pb-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <s.icon className={`h-4 w-4 text-${s.color}`} />
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
+        {/* Live Sweep Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          {[
+            { label: "Sweep Progress", value: `${sweepStats.sweepPct}%`, icon: Radio, color: "primary", sub: `${activeSites} sites scanned` },
+            { label: "Blips Discovered", value: sweepStats.total, icon: Crosshair, color: "primary", sub: `of ${activeSites} targets` },
+            { label: "Normal", value: sweepStats.normal, icon: CheckCircle, color: "primary", sub: "Within threshold" },
+            { label: "Warnings", value: sweepStats.warning, icon: AlertTriangle, color: "warning", sub: "Needs attention" },
+            { label: "Critical", value: sweepStats.critical, icon: XCircle, color: "destructive", sub: "Immediate action" },
+          ].map((s, i) => (
+            <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+              <Card className="border-border/30 overflow-hidden relative">
+                {/* Severity fill bar */}
+                {s.label !== "Sweep Progress" && (
+                  <motion.div
+                    className={`absolute bottom-0 left-0 h-0.5 bg-${s.color}`}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${activeSites > 0 ? ((typeof s.value === "number" ? s.value : 0) / activeSites) * 100 : 0}%` }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                  />
+                )}
+                {s.label === "Sweep Progress" && (
+                  <motion.div
+                    className="absolute bottom-0 left-0 h-0.5 bg-primary"
+                    animate={{ width: `${sweepStats.sweepPct}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                )}
+                <CardContent className="pt-3 pb-2.5 px-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <s.icon className={`h-3.5 w-3.5 text-${s.color}`} />
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider">{s.label}</p>
                   </div>
-                  <p className={`text-2xl font-mono font-bold text-${s.color}`}>{s.value}</p>
+                  <p className={`text-xl font-mono font-bold text-${s.color} tabular-nums`}>{s.value}</p>
+                  <p className="text-[9px] text-muted-foreground/60 mt-0.5">{s.sub}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -726,6 +760,11 @@ export default function RadarDetectionPage() {
           <TabsList className="bg-secondary/50 border border-border/30">
             <TabsTrigger value="anomaly" className="gap-1.5 text-xs">
               <Radio className="h-3.5 w-3.5" /> Anomaly Sweep
+              {sweepStats.critical > 0 && (
+                <span className="ml-1 h-4 min-w-4 px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center animate-pulse">
+                  {sweepStats.critical}
+                </span>
+              )}
             </TabsTrigger>
             <TabsTrigger value="efficiency" className="gap-1.5 text-xs">
               <Crosshair className="h-3.5 w-3.5" /> Efficiency Radar
@@ -746,7 +785,7 @@ export default function RadarDetectionPage() {
                   <CardDescription>Sweeping {activeSites} active sites for anomalies</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <AnomalySweepRadar onBlipClick={handleBlipClick} />
+                  <AnomalySweepRadar onBlipClick={handleBlipClick} onSweepUpdate={handleSweepUpdate} />
                 </CardContent>
               </Card>
               <Card className="lg:col-span-2">
