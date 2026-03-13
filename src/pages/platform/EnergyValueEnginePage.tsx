@@ -85,7 +85,7 @@ export default function EnergyValueEnginePage() {
         <tr><th>Site</th><th>Annual Value (SAR)</th><th>% of Portfolio</th></tr>
         ${valueEngineData.siteContributions.map(s => `<tr><td>${s.site}</td><td>${s.value.toLocaleString()}</td><td>${s.pct}%</td></tr>`).join("")}
       </table>
-      <div class="footer">ESCO Command Center — Confidential Investor Document</div>
+      <div class="footer"><div class="footer">DC Evolve — Confidential Investor Document</div></div>
       </body></html>
     `);
     w.document.close();

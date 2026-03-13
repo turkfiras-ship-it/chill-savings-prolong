@@ -184,7 +184,7 @@ export function AppSidebar() {
             </div>
             {!collapsed && (
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-foreground tracking-wider uppercase">ESCO Command</span>
+                <span className="text-xs font-bold text-foreground tracking-wider uppercase">DC Evolve</span>
                 <span className="text-[9px] text-muted-foreground tracking-wide">MISSION CONTROL</span>
               </div>
             )}
