@@ -496,11 +496,19 @@ function TypingText({ text }: { text: string }) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
 
+  useMemo(() => {
+    setDisplayed("");
+    setDone(false);
+  }, [text]);
+
+  // Use useEffect for the typing interval
+  const textRef = useMemo(() => ({ text }), [text]);
+
   useState(() => {
     let i = 0;
     const interval = setInterval(() => {
-      if (i < text.length) {
-        setDisplayed(text.slice(0, i + 1));
+      if (i < textRef.text.length) {
+        setDisplayed(textRef.text.slice(0, i + 1));
         i++;
       } else {
         setDone(true);
