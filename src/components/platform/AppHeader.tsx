@@ -1,4 +1,5 @@
 import { Bell, Search, User, SidebarIcon, Monitor, Briefcase } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSidebar } from "@/components/ui/sidebar";
@@ -8,6 +9,7 @@ import { useViewMode } from "@/context/ViewModeContext";
 
 export function AppHeader() {
   const { toggleSidebar } = useSidebar();
+  const navigate = useNavigate();
   const unackAlerts = alerts.filter(a => !a.acknowledged).length;
   const { viewMode, setViewMode } = useViewMode();
 
@@ -59,7 +61,7 @@ export function AppHeader() {
             <div className="h-1.5 w-1.5 rounded-full bg-accent pulse-dot" />
             <span className="text-[10px] text-muted-foreground/60 font-mono uppercase tracking-wider">Live</span>
           </div>
-          <Button variant="ghost" size="icon" className="h-7 w-7 relative text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="h-7 w-7 relative text-muted-foreground hover:text-foreground" onClick={() => navigate("/alerts")}>
             <Bell className="h-3.5 w-3.5" />
             {unackAlerts > 0 && (
               <span className="absolute -top-0.5 -right-0.5 h-3.5 min-w-[14px] rounded-full bg-destructive text-[8px] text-destructive-foreground flex items-center justify-center px-1">
@@ -67,7 +69,7 @@ export function AppHeader() {
               </span>
             )}
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground">
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => navigate("/settings")}>
             <User className="h-3.5 w-3.5" />
           </Button>
         </div>

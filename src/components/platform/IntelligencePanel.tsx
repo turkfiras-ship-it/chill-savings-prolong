@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, AlertTriangle, TrendingUp, Zap, X, ChevronRight, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -93,9 +94,18 @@ const typeIcons: Record<string, React.ElementType> = {
   alert: Activity,
 };
 
+const insightRoutes: Record<string, string> = {
+  "INS-001": "/anomaly-detection",
+  "INS-002": "/cooling-forecast",
+  "INS-003": "/ai-optimization",
+  "INS-004": "/anomaly-detection",
+  "INS-005": "/predictive-maintenance",
+};
+
 export function IntelligencePanel() {
   const [insights] = useState<Insight[]>(generateInsights);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
 
   const visible = insights.filter(i => !dismissed.has(i.id));
 
@@ -151,7 +161,10 @@ export function IntelligencePanel() {
 
                 <div className="mt-1.5 flex items-center justify-between">
                   <span className="text-[9px] text-muted-foreground/40">{insight.timestamp}</span>
-                  <button className="text-[9px] text-primary/60 hover:text-primary flex items-center gap-0.5 transition-colors">
+                  <button
+                    onClick={() => navigate(insightRoutes[insight.id] || "/anomaly-detection")}
+                    className="text-[9px] text-primary/60 hover:text-primary flex items-center gap-0.5 transition-colors"
+                  >
                     Details <ChevronRight className="h-2.5 w-2.5" />
                   </button>
                 </div>
