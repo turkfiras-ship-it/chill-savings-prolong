@@ -161,7 +161,10 @@ export function IntelligencePanel() {
 
                 <div className="mt-1.5 flex items-center justify-between">
                   <span className="text-[9px] text-muted-foreground/40">{insight.timestamp}</span>
-                  <button className="text-[9px] text-primary/60 hover:text-primary flex items-center gap-0.5 transition-colors">
+                  <button
+                    onClick={() => navigate(insightRoutes[insight.id] || "/anomaly-detection")}
+                    className="text-[9px] text-primary/60 hover:text-primary flex items-center gap-0.5 transition-colors"
+                  >
                     Details <ChevronRight className="h-2.5 w-2.5" />
                   </button>
                 </div>
