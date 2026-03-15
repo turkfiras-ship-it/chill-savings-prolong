@@ -94,9 +94,18 @@ const typeIcons: Record<string, React.ElementType> = {
   alert: Activity,
 };
 
+const insightRoutes: Record<string, string> = {
+  "INS-001": "/anomaly-detection",
+  "INS-002": "/cooling-forecast",
+  "INS-003": "/ai-optimization",
+  "INS-004": "/anomaly-detection",
+  "INS-005": "/predictive-maintenance",
+};
+
 export function IntelligencePanel() {
   const [insights] = useState<Insight[]>(generateInsights);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const navigate = useNavigate();
 
   const visible = insights.filter(i => !dismissed.has(i.id));
 
