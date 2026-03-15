@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Brain, AlertTriangle, TrendingUp, Zap, X, ChevronRight, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
