@@ -1,4 +1,5 @@
 import { Bell, Search, User, SidebarIcon, Monitor, Briefcase } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSidebar } from "@/components/ui/sidebar";
