@@ -9,6 +9,7 @@ import { useViewMode } from "@/context/ViewModeContext";
 
 export function AppHeader() {
   const { toggleSidebar } = useSidebar();
+  const navigate = useNavigate();
   const unackAlerts = alerts.filter(a => !a.acknowledged).length;
   const { viewMode, setViewMode } = useViewMode();
 
