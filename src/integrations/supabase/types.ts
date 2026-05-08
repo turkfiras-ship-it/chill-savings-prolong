@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      eyedro_readings: {
+        Row: {
+          created_at: string
+          current_a: number | null
+          device_serial: string | null
+          energy_kwh: number | null
+          id: string
+          payload: Json | null
+          power_kw: number | null
+          ts: string
+          voltage: number | null
+        }
+        Insert: {
+          created_at?: string
+          current_a?: number | null
+          device_serial?: string | null
+          energy_kwh?: number | null
+          id?: string
+          payload?: Json | null
+          power_kw?: number | null
+          ts?: string
+          voltage?: number | null
+        }
+        Update: {
+          created_at?: string
+          current_a?: number | null
+          device_serial?: string | null
+          energy_kwh?: number | null
+          id?: string
+          payload?: Json | null
+          power_kw?: number | null
+          ts?: string
+          voltage?: number | null
+        }
+        Relationships: []
+      }
       page_layouts: {
         Row: {
           created_at: string
