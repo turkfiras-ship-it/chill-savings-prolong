@@ -17,6 +17,7 @@ const CLIENT_VERSION = "5.8.2.3";
 // In-memory session cache (per edge instance). Re-login on cold start.
 let cachedSID: string | null = null;
 let cachedAt = 0;
+let cookieJar = "";
 const SID_TTL_MS = 25 * 60 * 1000; // 25 min
 
 function md5Hex(s: string) {
@@ -61,46 +62,78 @@ function unwrap(data: any): any {
 }
 
 async function ev501(params: Record<string, string>) {
-  const plainForm = new URLSearchParams(params).toString();
-  const plainJson = JSON.stringify(params);
-  const mkBody = (inner: string) => {
-    const z = encryptZ(inner);
-    return new URLSearchParams({ z, z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }).toString();
-  };
-  const attempts: Array<{label:string; init: RequestInit}> = [
-    { label: "form-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainForm) }},
-    { label: "json-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainJson) }},
-    { label: "z-only", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: new URLSearchParams({ z: encryptZ(plainForm) }).toString() }},
-    { label: "cmd-outside", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: new URLSearchParams({ Cmd: params.Cmd, z: encryptZ(plainForm), z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }).toString() }},
-  ];
-  const debug: any[] = [];
-  let r: Response | null = null;
-  let text = "";
-  let data: any = null;
-  for (const a of attempts) {
-    r = await fetch(EV501, a.init);
-    text = await r.text();
-    try { data = JSON.parse(text); } catch { data = { raw: text }; }
-    const decoded = unwrap(data);
-    debug.push({ label: a.label, status: r.status, decoded });
-    // Heuristic: success if decoded has more than just DateMsUtc/Errors
-    if (decoded && typeof decoded === "object") {
-      const keys = Object.keys(decoded);
-      const interesting = keys.filter(k => !["DateMsUtc","Errors","_decryptError"].includes(k));
-      if (interesting.length > 0 || (Array.isArray(decoded.Errors) && decoded.Errors.length > 0)) {
-        return { ok: r.ok, status: r.status, data: decoded, raw: data, debug };
+  // Inner plaintext is form-urlencoded with Client/Version/z2 INCLUDED
+  const inner = new URLSearchParams({
+    ...params,
+    Client: CLIENT_NAME,
+    Version: CLIENT_VERSION,
+    z2: Z2_CLIENT,
+  }).toString();
+  const z = encryptZ(inner);
+  const body = new URLSearchParams({ z }).toString();
+
+  const r = await fetch(EV501, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Accept": "*/*",
+      "Origin": "https://my.eyedro.com",
+      "Referer": "https://my.eyedro.com/",
+      "X-Requested-With": "XMLHttpRequest",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      ...(cookieJar ? { "Cookie": cookieJar } : {}),
+    },
+    body,
+  });
+  const text = await r.text();
+  let data: any;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
+  const decoded = unwrap(data);
+  // Update cookie jar
+  const sc = r.headers.get("set-cookie");
+  if (sc) {
+    const parts = sc.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
+    for (const p of parts) {
+      const m = p.trim().match(/^([^=]+)=([^;]+)/);
+      if (m) {
+        // simple cookie merge
+        const name = m[1];
+        const re = new RegExp(`(^|;\\s*)${name}=[^;]*`);
+        if (cookieJar.match(re)) cookieJar = cookieJar.replace(re, `$1${name}=${m[2]}`);
+        else cookieJar = (cookieJar ? cookieJar + "; " : "") + `${name}=${m[2]}`;
       }
     }
   }
-  // None matched — return last + debug
-  const decoded = unwrap(data);
-  return { ok: r?.ok ?? false, status: r?.status ?? 0, data: decoded, raw: data, debug, setCookie: r?.headers.get("set-cookie") };
+  return { ok: r.ok, status: r.status, data: decoded, raw: data, setCookie: r.headers.get("set-cookie") };
+}
+
+async function primeCookies() {
+  try {
+    const r = await fetch("https://my.eyedro.com/", {
+      method: "GET",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+    });
+    const sc = r.headers.get("set-cookie");
+    if (sc) {
+      const parts = sc.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
+      for (const p of parts) {
+        const m = p.trim().match(/^([^=]+)=([^;]+)/);
+        if (m) cookieJar = (cookieJar ? cookieJar + "; " : "") + `${m[1]}=${m[2]}`;
+      }
+    }
+    await r.text();
+  } catch {}
 }
 
 async function login(): Promise<string> {
   const username = Deno.env.get("EYEDRO_USERNAME") || "chadinkairouz@gmail.com";
   const password = Deno.env.get("EYEDRO_PASSWORD");
   if (!password) throw new Error("EYEDRO_PASSWORD is not configured");
+
+  if (!cookieJar) await primeCookies();
 
   const emailLower = username.toLowerCase();
   const passLower = password.toLowerCase();
@@ -118,7 +151,7 @@ async function login(): Promise<string> {
     const m = res.setCookie.match(/(?:SID|sid|PHPSESSID|JSESSIONID)=([^;]+)/);
     if (m) sid = m[1];
   }
-  if (!sid) throw new Error("Login: no SID. debug=" + JSON.stringify((res as any).debug).slice(0, 1500));
+  if (!sid) throw new Error("Login: no SID. status=" + res.status + " data=" + JSON.stringify(res.data).slice(0, 1500) + " setCookie=" + (res.setCookie || "none"));
   cachedSID = String(sid);
   cachedAt = Date.now();
   return cachedSID;
@@ -142,6 +175,17 @@ serve(async (req) => {
     if (command === "Login") {
       const sid = await login();
       return new Response(JSON.stringify({ ok: true, sid }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Debug: show what hashes we'd compute (no secrets leaked beyond hashes)
+    if (command === "DebugHashes") {
+      const username = Deno.env.get("EYEDRO_USERNAME") || "chadinkairouz@gmail.com";
+      const password = Deno.env.get("EYEDRO_PASSWORD") || "";
+      const h32 = md5Hex(username.toLowerCase() + password.toLowerCase());
+      const h64 = sha256Hex(username + password);
+      return new Response(JSON.stringify({ ok: true, username, Hash32: h32, Hash64: h64, passwordLen: password.length }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
