@@ -58,7 +58,8 @@ function unwrap(data: any): any {
 }
 
 async function ev501(params: Record<string, string>) {
-  const plain = new URLSearchParams(params).toString();
+  // Server expects JSON body encrypted as `z`
+  const plain = JSON.stringify(params);
   const z = encryptZ(plain);
   const body = new URLSearchParams({ z }).toString();
   const r = await fetch(EV501, {
