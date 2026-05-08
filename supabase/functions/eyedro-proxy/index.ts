@@ -111,7 +111,7 @@ async function login(): Promise<string> {
     const m = res.setCookie.match(/(?:SID|sid|PHPSESSID|JSESSIONID)=([^;]+)/);
     if (m) sid = m[1];
   }
-  if (!sid) throw new Error("Login: no SID. debug=" + JSON.stringify((res as any).debug).slice(0, 1500));
+  if (!sid) throw new Error("Login: no SID. status=" + res.status + " data=" + JSON.stringify(res.data).slice(0, 1500) + " setCookie=" + (res.setCookie || "none"));
   cachedSID = String(sid);
   cachedAt = Date.now();
   return cachedSID;
