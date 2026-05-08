@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createHash } from "node:crypto";
+import { pbkdf2Sync, createDecipheriv } from "node:crypto";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -21,6 +22,31 @@ function sha256Hex(s: string) {
   return createHash("sha256").update(s).digest("hex");
 }
 
+const AES_PASSWORD = "oszgbaMqXFHLj0NK3hQxy80SRob";
+
+function decryptZ(z: string): any {
+  // Layout: hex(64 chars = 32 bytes) = salt(16) + iv(16) || base64(ciphertext)
+  // PBKDF2-SHA1, 10 iterations, AES-256-CBC
+  const hexPart = z.slice(0, 64);
+  const b64Part = z.slice(64);
+  const hexBytes = Buffer.from(hexPart, "hex");
+  const salt = hexBytes.subarray(0, 16);
+  const iv = hexBytes.subarray(16, 32);
+  const ct = Buffer.from(b64Part, "base64");
+  const key = pbkdf2Sync(AES_PASSWORD, salt, 10, 32, "sha1");
+  const d = createDecipheriv("aes-256-cbc", key, iv);
+  const out = Buffer.concat([d.update(ct), d.final()]);
+  const text = out.toString("utf8");
+  try { return JSON.parse(text); } catch { return { raw: text }; }
+}
+
+function unwrap(data: any): any {
+  if (data && typeof data === "object" && typeof data.z === "string") {
+    try { return decryptZ(data.z); } catch (e) { return { ...data, _decryptError: String(e) }; }
+  }
+  return data;
+}
+
 async function ev501(params: Record<string, string>) {
   const body = new URLSearchParams(params).toString();
   const r = await fetch(EV501, {
@@ -31,7 +57,8 @@ async function ev501(params: Record<string, string>) {
   const text = await r.text();
   let data: any;
   try { data = JSON.parse(text); } catch { data = { raw: text }; }
-  return { ok: r.ok, status: r.status, data };
+  const decoded = unwrap(data);
+  return { ok: r.ok, status: r.status, data: decoded, raw: data };
 }
 
 async function login(): Promise<string> {
@@ -51,7 +78,7 @@ async function login(): Promise<string> {
     d.SID || d.Sid || d.sid ||
     d?.Data?.SID || d?.Data?.Sid ||
     d?.Result?.SID || d?.Result?.Sid;
-  if (!sid) throw new Error("Login succeeded but no SID returned: " + JSON.stringify(d).slice(0, 300));
+  if (!sid) throw new Error("Login: no SID. Decoded=" + JSON.stringify(d).slice(0, 500));
   cachedSID = String(sid);
   cachedAt = Date.now();
   return cachedSID;
