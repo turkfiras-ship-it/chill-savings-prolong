@@ -80,10 +80,28 @@ async function ev501(params: Record<string, string>) {
   return { ok: r.ok, data: unwrap(data), setCookie: sc };
 }
 
+async function primeCookies() {
+  try {
+    const r = await fetch("https://my.eyedro.com/", {
+      headers: { "User-Agent": "Mozilla/5.0", "Accept": "text/html,*/*" },
+    });
+    const sc = r.headers.get("set-cookie");
+    if (sc) {
+      const parts = sc.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
+      for (const p of parts) {
+        const m = p.trim().match(/^([^=]+)=([^;]+)/);
+        if (m) cookieJar = (cookieJar ? cookieJar + "; " : "") + `${m[1]}=${m[2]}`;
+      }
+    }
+    await r.text();
+  } catch {}
+}
+
 async function login(): Promise<string> {
   const username = Deno.env.get("EYEDRO_USERNAME") || "chadinkairouz@gmail.com";
   const password = Deno.env.get("EYEDRO_PASSWORD");
   if (!password) throw new Error("EYEDRO_PASSWORD missing");
+  if (!cookieJar) await primeCookies();
   const Hash32 = md5Hex(username.toLowerCase() + password.toLowerCase());
   const Hash64 = sha256Hex(username + password);
   const res = await ev501({ Cmd: "Login", Username: username, Hash32, Hash64 });
@@ -93,7 +111,7 @@ async function login(): Promise<string> {
     const m = res.setCookie.match(/(?:SID|sid|PHPSESSID)=([^;]+)/);
     if (m) sid = m[1];
   }
-  if (!sid) throw new Error("Login failed: no SID");
+  if (!sid) throw new Error("Login failed: no SID. data=" + JSON.stringify(d).slice(0, 400));
   cachedSID = String(sid); cachedAt = Date.now();
   return cachedSID;
 }
