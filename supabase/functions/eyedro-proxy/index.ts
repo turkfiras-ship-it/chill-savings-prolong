@@ -58,15 +58,40 @@ function unwrap(data: any): any {
 }
 
 async function ev501(params: Record<string, string>) {
-  // Server expects JSON body encrypted as `z`
-  const plain = JSON.stringify(params);
-  const z = encryptZ(plain);
-  const body = new URLSearchParams({ z }).toString();
-  const r = await fetch(EV501, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-  });
+  // Try several body encodings; first that returns non-empty payload wins.
+  const plainForm = new URLSearchParams(params).toString();
+  const plainJson = JSON.stringify(params);
+  const attempts: Array<{label:string; init: RequestInit}> = [
+    { label: "form-z(form)", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({z: encryptZ(plainForm)}).toString() }},
+    { label: "json-z(form)", init: { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({z: encryptZ(plainForm)}) }},
+    { label: "raw-z(form)", init: { method:"POST", headers:{"Content-Type":"text/plain"}, body: encryptZ(plainForm) }},
+    { label: "form-z(json)", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({z: encryptZ(plainJson)}).toString() }},
+    { label: "json-z(json)", init: { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({z: encryptZ(plainJson)}) }},
+    { label: "raw-z(json)", init: { method:"POST", headers:{"Content-Type":"text/plain"}, body: encryptZ(plainJson) }},
+    { label: "plain-form", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: plainForm }},
+  ];
+  const debug: any[] = [];
+  let r: Response | null = null;
+  let text = "";
+  let data: any = null;
+  for (const a of attempts) {
+    r = await fetch(EV501, a.init);
+    text = await r.text();
+    try { data = JSON.parse(text); } catch { data = { raw: text }; }
+    const decoded = unwrap(data);
+    debug.push({ label: a.label, status: r.status, decoded });
+    // Heuristic: success if decoded has more than just DateMsUtc/Errors
+    if (decoded && typeof decoded === "object") {
+      const keys = Object.keys(decoded);
+      const interesting = keys.filter(k => !["DateMsUtc","Errors","_decryptError"].includes(k));
+      if (interesting.length > 0 || (Array.isArray(decoded.Errors) && decoded.Errors.length > 0)) {
+        return { ok: r.ok, status: r.status, data: decoded, raw: data, debug };
+      }
+    }
+  }
+  // None matched — return last + debug
+  const decoded = unwrap(data);
+  return { ok: r?.ok ?? false, status: r?.status ?? 0, data: decoded, raw: data, debug };
   const text = await r.text();
   let data: any;
   try { data = JSON.parse(text); } catch { data = { raw: text }; }
