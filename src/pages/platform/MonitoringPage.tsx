@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import readXlsxFile from "read-excel-file";
+import readXlsxFile from "read-excel-file/browser";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -115,14 +115,57 @@ const parseEyedroRows = (rows: SheetCell[][]): ImportedDataset["points"] => {
 export default function MonitoringPage() {
   const [range, setRange] = useState('Live');
   const [selectedSite, setSelectedSite] = useState('all');
+  const [importedData, setImportedData] = useState<ImportedDataset | null>(() => {
+    try {
+      const stored = localStorage.getItem(IMPORT_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+  const { toast } = useToast();
   const activeSites = sites.filter(s => s.status === 'active');
   const site = selectedSite !== 'all' ? sites.find(s => s.id === selectedSite) : null;
-  const currentPower = site ? site.demand_kw : activeSites.reduce((a, s) => a + s.demand_kw, 0);
-  const peakPower = site ? site.peak_kw : activeSites.reduce((a, s) => a + s.peak_kw, 0);
+  const importedPoints = importedData?.points ?? [];
+  const hasImportedData = importedPoints.length > 0;
+  const chartData = hasImportedData ? importedPoints.slice(-120) : liveData;
+  const latestImported = importedPoints.at(-1);
+  const importedPeak = hasImportedData ? Math.max(...importedPoints.map(d => Math.max(d.power, d.demand))) : 0;
+  const currentPower = hasImportedData ? Math.round(latestImported?.power ?? 0) : site ? site.demand_kw : activeSites.reduce((a, s) => a + s.demand_kw, 0);
+  const peakPower = hasImportedData ? Math.round(importedPeak) : site ? site.peak_kw : activeSites.reduce((a, s) => a + s.peak_kw, 0);
   const utilization = Math.round((currentPower / peakPower) * 100);
+  const importedUsage = hasImportedData
+    ? importedPoints.reduce((sum, point) => sum + (point.consumption ?? 0), 0)
+    : null;
 
-  const powerSpark = useMemo(() => liveData.slice(-20).map(d => ({ value: d.power })), []);
-  const demandSpark = useMemo(() => liveData.slice(-20).map(d => ({ value: d.demand })), []);
+  const powerSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.power })), [chartData]);
+  const demandSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.demand })), [chartData]);
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const rows = file.name.match(/\.csv$/i)
+        ? parseCsvRows(await file.text())
+        : await readXlsxFile(file) as SheetCell[][];
+      const points = parseEyedroRows(rows);
+      if (points.length < 2) throw new Error("No usable kW/kWh columns found");
+      const dataset = { fileName: file.name, points, hasConsumption: points.some(point => point.consumption !== undefined) };
+      localStorage.setItem(IMPORT_STORAGE_KEY, JSON.stringify(dataset));
+      setImportedData(dataset);
+      toast({ title: "Eyedro export loaded", description: `${points.length} monitoring rows extracted from ${file.name}.` });
+    } catch (error) {
+      toast({ title: "Could not read file", description: error instanceof Error ? error.message : "Upload the CSV/XLSX export from Eyedro.", variant: "destructive" });
+    } finally {
+      event.target.value = "";
+    }
+  };
+
+  const clearImportedData = () => {
+    localStorage.removeItem(IMPORT_STORAGE_KEY);
+    setImportedData(null);
+    toast({ title: "Live model restored", description: "Monitoring is back to the built-in live simulation." });
+  };
 
   return (
     <PageTransition>
