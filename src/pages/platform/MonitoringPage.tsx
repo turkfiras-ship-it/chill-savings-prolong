@@ -206,11 +206,24 @@ export default function MonitoringPage() {
           </div>
         </div>
 
+        {hasImportedData && (
+          <Card className="border-energy/30 bg-energy-light/40">
+            <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-xs">
+                <FileSpreadsheet className="h-4 w-4 text-energy" />
+                <span className="font-medium text-foreground">{importedData?.fileName}</span>
+                <span className="text-muted-foreground">{importedPoints.length} rows extracted locally</span>
+              </div>
+              <span className="font-mono text-[10px] text-muted-foreground">Eyedro export mode</span>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <AnimatedKpiCard title="Current Power" value={currentPower} suffix=" kW" icon={Activity} variant="energy" delay={0} sparkline={powerSpark} />
           <AnimatedKpiCard title="Peak Demand" value={peakPower} suffix=" kW" icon={Zap} variant="warning" delay={100} sparkline={demandSpark} />
-          <AnimatedKpiCard title="Today's Usage" value={Math.round(currentPower * 14)} suffix=" kWh" icon={TrendingDown} delay={200} />
-          <AnimatedKpiCard title="Est. Cost" value={Math.round(currentPower * 14 * 0.30)} suffix=" SAR" icon={DollarSign} variant="savings" delay={300} />
+          <AnimatedKpiCard title={hasImportedData ? "Imported Usage" : "Today's Usage"} value={usageValue} suffix=" kWh" icon={TrendingDown} delay={200} />
+          <AnimatedKpiCard title="Est. Cost" value={Math.round(usageValue * 0.30)} suffix=" SAR" icon={DollarSign} variant="savings" delay={300} />
           <AnimatedKpiCard title="Utilization" value={utilization} suffix="%" icon={Gauge} variant={utilization > 85 ? 'danger' : utilization > 70 ? 'warning' : 'savings'} delay={400} />
           <AnimatedKpiCard title="Uptime" value={99.7} suffix="%" decimals={1} icon={Clock} variant="savings" delay={500} />
         </div>
@@ -221,13 +234,13 @@ export default function MonitoringPage() {
               <div className="h-2 w-2 rounded-full bg-savings pulse-dot" />
               Power Demand — {range}
               <span className="ml-auto text-[10px] text-muted-foreground font-normal">
-                {selectedSite === 'all' ? 'All Sites Aggregated' : site?.name}
+                {hasImportedData ? "Uploaded Eyedro Export" : selectedSite === 'all' ? 'All Sites Aggregated' : site?.name}
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={liveData}>
+              <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id="pGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="hsl(192, 70%, 50%)" stopOpacity={0.4} />
