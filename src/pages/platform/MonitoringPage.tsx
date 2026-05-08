@@ -133,12 +133,13 @@ export default function MonitoringPage() {
   const importedPeak = hasImportedData ? Math.max(...importedPoints.map(d => Math.max(d.power, d.demand))) : 0;
   const currentPower = hasImportedData ? Math.round(latestImported?.power ?? 0) : site ? site.demand_kw : activeSites.reduce((a, s) => a + s.demand_kw, 0);
   const peakPower = hasImportedData ? Math.round(importedPeak) : site ? site.peak_kw : activeSites.reduce((a, s) => a + s.peak_kw, 0);
-  const utilization = Math.round((currentPower / peakPower) * 100);
+  const utilization = peakPower > 0 ? Math.round((currentPower / peakPower) * 100) : 0;
   const importedUsage = hasImportedData
     ? importedPoints.reduce((sum, point) => sum + (point.consumption ?? 0), 0)
     : null;
   const usageValue = hasImportedData && importedUsage ? Math.round(importedUsage) : Math.round(currentPower * 14);
   const consumptionTrend = hasImportedData && importedData?.hasConsumption ? chartData : monthlyTrends;
+  const trendTimeKey = hasImportedData ? "time" : "month";
 
   const powerSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.power })), [chartData]);
   const demandSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.demand })), [chartData]);
@@ -264,9 +265,9 @@ export default function MonitoringPage() {
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Consumption Trend</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={monthlyTrends}>
+                <LineChart data={consumptionTrend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 20%, 16%)" />
-                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey={trendTimeKey} tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1e6).toFixed(1)}M`} />
                   <Tooltip contentStyle={{ background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 }} />
                   <Line type="monotone" dataKey="consumption" stroke="hsl(210, 80%, 55%)" strokeWidth={2} dot={false} name="kWh" />
@@ -278,9 +279,9 @@ export default function MonitoringPage() {
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Demand Trend</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={monthlyTrends}>
+                <LineChart data={hasImportedData ? chartData : monthlyTrends}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 20%, 16%)" />
-                  <XAxis dataKey="month" tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
+                  <XAxis dataKey={trendTimeKey} tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
                   <Tooltip contentStyle={{ background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 }} />
                   <Line type="monotone" dataKey="demand" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={false} name="kW" />
