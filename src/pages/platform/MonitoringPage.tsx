@@ -1,15 +1,16 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import readXlsxFile from "read-excel-file/browser";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { sites, monthlyTrends } from "@/data/mockData";
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Activity, Zap, DollarSign, TrendingDown, Clock, Gauge, Upload, FileSpreadsheet, RotateCcw } from "lucide-react";
+import { Activity, Zap, DollarSign, TrendingDown, Clock, Gauge, Upload, FileSpreadsheet, RotateCcw, Radio, Copy } from "lucide-react";
 import { AnimatedKpiCard } from "@/components/platform/AnimatedKpiCard";
 import { PageTransition } from "@/components/platform/PageTransition";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
 
@@ -126,7 +127,48 @@ export default function MonitoringPage() {
   const { toast } = useToast();
   const activeSites = sites.filter(s => s.status === 'active');
   const site = selectedSite !== 'all' ? sites.find(s => s.id === selectedSite) : null;
-  const importedPoints = importedData?.points ?? [];
+
+  const [livePoints, setLivePoints] = useState<MonitorPoint[]>([]);
+  const [lastLiveAt, setLastLiveAt] = useState<Date | null>(null);
+
+  const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eyedro-ingest`;
+
+  useEffect(() => {
+    const mapRow = (r: any): MonitorPoint => {
+      const power = Number(r.power_kw ?? 0);
+      return {
+        time: new Date(r.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+        power,
+        demand: power,
+        baseline: 310,
+        consumption: r.energy_kwh != null ? Number(r.energy_kwh) : undefined,
+      };
+    };
+    supabase
+      .from("eyedro_readings")
+      .select("ts,power_kw,energy_kwh")
+      .order("ts", { ascending: false })
+      .limit(240)
+      .then(({ data }) => {
+        if (data && data.length) {
+          const sorted = [...data].reverse().map(mapRow);
+          setLivePoints(sorted);
+          setLastLiveAt(new Date(data[0].ts));
+        }
+      });
+    const channel = supabase
+      .channel("eyedro-live")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "eyedro_readings" }, (payload) => {
+        const row = payload.new as any;
+        setLivePoints(prev => [...prev.slice(-239), mapRow(row)]);
+        setLastLiveAt(new Date(row.ts));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  const hasLiveStream = livePoints.length > 0;
+  const importedPoints = hasLiveStream ? livePoints : (importedData?.points ?? []);
   const hasImportedData = importedPoints.length > 0;
   const chartData = hasImportedData ? importedPoints.slice(-120) : liveData;
   const latestImported = importedPoints.at(-1);
@@ -170,6 +212,11 @@ export default function MonitoringPage() {
     toast({ title: "Live model restored", description: "Monitoring is back to the built-in live simulation." });
   };
 
+  const copyWebhook = async () => {
+    await navigator.clipboard.writeText(webhookUrl);
+    toast({ title: "Webhook URL copied", description: "Paste it into Zapier / Make as a POST endpoint." });
+  };
+
   return (
     <PageTransition>
       <div className="space-y-6">
@@ -179,6 +226,11 @@ export default function MonitoringPage() {
             <p className="text-sm text-muted-foreground mt-1">Live power usage and historical data</p>
           </div>
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={copyWebhook}>
+              <Radio className="mr-1.5 h-3.5 w-3.5 text-savings" />
+              Webhook URL
+              <Copy className="ml-1.5 h-3 w-3" />
+            </Button>
             <label className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-medium hover:bg-muted">
               <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImportFile} />
               <Upload className="h-3.5 w-3.5 text-energy" />
@@ -207,7 +259,23 @@ export default function MonitoringPage() {
           </div>
         </div>
 
-        {hasImportedData && (
+        {hasLiveStream && (
+          <Card className="border-savings/30 bg-savings/5">
+            <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-xs">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-savings opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-savings" />
+                </span>
+                <span className="font-medium text-foreground">Live webhook stream active</span>
+                <span className="text-muted-foreground">{livePoints.length} readings · last {lastLiveAt ? lastLiveAt.toLocaleTimeString() : "—"}</span>
+              </div>
+              <span className="font-mono text-[10px] text-muted-foreground">Auto-updating in real time</span>
+            </CardContent>
+          </Card>
+        )}
+
+        {!hasLiveStream && hasImportedData && (
           <Card className="border-energy/30 bg-energy-light/40">
             <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2 text-xs">
