@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { EYEDRO_DEVICES } from "@/data/eyedroDevices";
-import { Sparklines, SparklinesLine } from "react-sparklines";
 
 const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
 
