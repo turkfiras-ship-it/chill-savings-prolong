@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createHash } from "node:crypto";
-import { pbkdf2Sync, createDecipheriv } from "node:crypto";
+import { pbkdf2Sync, createDecipheriv, createCipheriv, randomBytes } from "node:crypto";
 import { Buffer } from "node:buffer";
 
 const corsHeaders = {
@@ -41,6 +41,15 @@ function decryptZ(z: string): any {
   try { return JSON.parse(text); } catch { return { raw: text }; }
 }
 
+function encryptZ(plain: string): string {
+  const salt = randomBytes(16);
+  const iv = randomBytes(16);
+  const key = pbkdf2Sync(AES_PASSWORD, salt, 10, 32, "sha1");
+  const c = createCipheriv("aes-256-cbc", key, iv);
+  const ct = Buffer.concat([c.update(plain, "utf8"), c.final()]);
+  return salt.toString("hex") + iv.toString("hex") + ct.toString("base64");
+}
+
 function unwrap(data: any): any {
   if (data && typeof data === "object" && typeof data.z === "string") {
     try { return decryptZ(data.z); } catch (e) { return { ...data, _decryptError: String(e) }; }
@@ -49,7 +58,9 @@ function unwrap(data: any): any {
 }
 
 async function ev501(params: Record<string, string>) {
-  const body = new URLSearchParams(params).toString();
+  const plain = new URLSearchParams(params).toString();
+  const z = encryptZ(plain);
+  const body = new URLSearchParams({ z }).toString();
   const r = await fetch(EV501, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
