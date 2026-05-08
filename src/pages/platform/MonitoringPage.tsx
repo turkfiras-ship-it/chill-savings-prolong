@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/platform/PageTransition";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { EYEDRO_DEVICES } from "@/data/eyedroDevices";
 
 const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
 
@@ -130,6 +131,7 @@ export default function MonitoringPage() {
 
   const [livePoints, setLivePoints] = useState<MonitorPoint[]>([]);
   const [lastLiveAt, setLastLiveAt] = useState<Date | null>(null);
+  const [deviceLive, setDeviceLive] = useState<Record<string, { ts: string; power_kw: number; energy_kwh: number | null; history: number[] }>>({});
 
   const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eyedro-ingest`;
 
@@ -144,9 +146,26 @@ export default function MonitoringPage() {
         consumption: r.energy_kwh != null ? Number(r.energy_kwh) : undefined,
       };
     };
+    const ingestDevice = (r: any) => {
+      const serial: string | null = r.device_serial ?? null;
+      if (!serial) return;
+      setDeviceLive(prev => {
+        const prevDev = prev[serial] ?? { ts: r.ts, power_kw: 0, energy_kwh: null, history: [] };
+        const power = Number(r.power_kw ?? 0);
+        return {
+          ...prev,
+          [serial]: {
+            ts: r.ts,
+            power_kw: power,
+            energy_kwh: r.energy_kwh != null ? Number(r.energy_kwh) : prevDev.energy_kwh,
+            history: [...prevDev.history.slice(-29), power],
+          },
+        };
+      });
+    };
     supabase
       .from("eyedro_readings")
-      .select("ts,power_kw,energy_kwh")
+      .select("ts,power_kw,energy_kwh,device_serial")
       .order("ts", { ascending: false })
       .limit(240)
       .then(({ data }) => {
@@ -154,6 +173,24 @@ export default function MonitoringPage() {
           const sorted = [...data].reverse().map(mapRow);
           setLivePoints(sorted);
           setLastLiveAt(new Date(data[0].ts));
+          // Build per-device latest + sparkline history
+          const grouped: Record<string, any[]> = {};
+          for (const r of [...data].reverse()) {
+            const s = (r as any).device_serial;
+            if (!s) continue;
+            (grouped[s] ||= []).push(r);
+          }
+          const next: Record<string, any> = {};
+          for (const [serial, rows] of Object.entries(grouped)) {
+            const last = rows[rows.length - 1];
+            next[serial] = {
+              ts: last.ts,
+              power_kw: Number(last.power_kw ?? 0),
+              energy_kwh: last.energy_kwh != null ? Number(last.energy_kwh) : null,
+              history: rows.slice(-30).map(r => Number(r.power_kw ?? 0)),
+            };
+          }
+          setDeviceLive(next);
         }
       });
     const channel = supabase
@@ -162,6 +199,7 @@ export default function MonitoringPage() {
         const row = payload.new as any;
         setLivePoints(prev => [...prev.slice(-239), mapRow(row)]);
         setLastLiveAt(new Date(row.ts));
+        ingestDevice(row);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -274,6 +312,66 @@ export default function MonitoringPage() {
             </CardContent>
           </Card>
         )}
+
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Radio className="h-3.5 w-3.5 text-savings" />
+              Per-Device Live Readings
+              <span className="ml-auto text-[10px] text-muted-foreground font-normal">
+                {EYEDRO_DEVICES.length} Eyedro devices · Jarir Bookstore — Rawdah
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
+              {EYEDRO_DEVICES.map((dev) => {
+                const live = deviceLive[dev.serialHex];
+                const isLive = !!live && (Date.now() - new Date(live.ts).getTime()) < 5 * 60 * 1000;
+                const power = live?.power_kw ?? 0;
+                const max = Math.max(1, ...(live?.history ?? [1]));
+                const points = (live?.history ?? []).map((v, i, arr) => {
+                  const x = arr.length > 1 ? (i / (arr.length - 1)) * 100 : 0;
+                  const y = 28 - (v / max) * 24;
+                  return `${x.toFixed(1)},${y.toFixed(1)}`;
+                }).join(" ");
+                return (
+                  <div key={dev.serialHex} className="rounded-md border border-border bg-secondary/40 p-2.5 flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="font-mono font-semibold text-foreground">{dev.unit}</span>
+                      <span className={`flex items-center gap-1 ${isLive ? "text-savings" : "text-muted-foreground"}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-savings animate-pulse" : "bg-muted-foreground/40"}`} />
+                        {isLive ? "LIVE" : "—"}
+                      </span>
+                    </div>
+                    <div className="font-mono text-lg font-bold tracking-tight text-foreground tabular-nums">
+                      {power.toFixed(2)}<span className="text-[10px] text-muted-foreground ml-1">kW</span>
+                    </div>
+                    <svg viewBox="0 0 100 30" className="w-full h-7" preserveAspectRatio="none">
+                      {points && (
+                        <polyline
+                          fill="none"
+                          stroke="hsl(var(--savings, 152 60% 48%))"
+                          strokeWidth="1.5"
+                          points={points}
+                        />
+                      )}
+                    </svg>
+                    <div className="flex items-center justify-between text-[9px] text-muted-foreground font-mono">
+                      <span>{dev.serialHex}</span>
+                      <span>{live?.energy_kwh != null ? `${live.energy_kwh.toFixed(1)} kWh` : "—"}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {Object.keys(deviceLive).length === 0 && (
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Waiting for the Eyedro pusher to send readings tagged with each device serial (G1=00C004EC, G2=00C003A3, G3=B1400AA4, FF1=B1400AA5, FF2=B1400AA2, FF3=B1400AA6, FF4=B1400AA3).
+              </p>
+            )}
+          </CardContent>
+        </Card>
 
         {!hasLiveStream && hasImportedData && (
           <Card className="border-energy/30 bg-energy-light/40">
