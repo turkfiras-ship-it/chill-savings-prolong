@@ -22,48 +22,30 @@ function analyzeLoadShifting(): LoadShiftOpportunity[] {
   const opportunities: LoadShiftOpportunity[] = [
     {
       id: 'LS-001',
-      from: { name: 'Al Othaim — King Fahd', city: 'Riyadh', peakHour: '13:00–15:00', peakKw: 820 },
-      to: { name: 'King Saud University', city: 'Riyadh', offPeakHour: '13:00–15:00', availableKw: 600 },
-      shiftableKw: 120,
-      savingsSar: 4200,
-      reason: "KSU's academic break leaves 600kW headroom during Al Othaim's peak grocery rush. Pre-cool KSU buildings earlier, shift Al Othaim's cold room defrost cycles to KSU's off-peak window.",
-      difficulty: 'moderate',
+      from: { name: 'G3 (afternoon peak stage)', city: 'Rawdah', peakHour: '14:00–16:00', peakKw: 72 },
+      to: { name: 'G1 + G4 (pre-cool window)', city: 'Rawdah', offPeakHour: '04:00–06:00', availableKw: 130 },
+      shiftableKw: 18,
+      savingsSar: 1820,
+      reason: "Pre-cool the showroom thermal mass via G1 and G4 between 04:00–06:00 (off-peak tariff). G3 then stages later in the afternoon, dropping the 14:00 demand peak by ~18 kW and avoiding the upper tariff tier.",
+      difficulty: 'easy',
     },
     {
       id: 'LS-002',
-      from: { name: 'Saudi German Hospital', city: 'Riyadh', peakHour: '10:00–14:00', peakKw: 1400 },
-      to: { name: 'Al Rajhi — HQ Tower', city: 'Riyadh', offPeakHour: '18:00–07:00', availableKw: 500 },
-      shiftableKw: 80,
-      savingsSar: 2800,
-      reason: "Hospital's non-critical loads (laundry, water heating) can shift to evening. Al Rajhi Tower's HVAC shuts down at 18:00, freeing grid capacity. Shared transformer benefits from flattened aggregate demand.",
-      difficulty: 'easy',
+      from: { name: 'G2 (zone-2 daytime)', city: 'Rawdah', peakHour: '12:00–15:00', peakKw: 66 },
+      to: { name: 'G6 (zone-2 evening)', city: 'Rawdah', offPeakHour: '19:00–22:00', availableKw: 60 },
+      shiftableKw: 12,
+      savingsSar: 980,
+      reason: "G2 is short-cycling at midday. Shifting half its setpoint duty to G6 in the evening flattens the unit-level peak and reduces compressor wear on G2 while waiting for coil service.",
+      difficulty: 'moderate',
     },
     {
       id: 'LS-003',
-      from: { name: 'Hilton — Jeddah Corniche', city: 'Jeddah', peakHour: '14:00–17:00', peakKw: 1100 },
-      to: { name: 'Panda — Khalidiyah', city: 'Jeddah', offPeakHour: '01:00–06:00', availableKw: 400 },
-      shiftableKw: 150,
-      savingsSar: 5500,
-      reason: "Hotel pool chillers and ice-making can pre-charge overnight using Panda's idle cold-storage compressors. Thermal storage strategy reduces Hilton's afternoon peak by 14%.",
-      difficulty: 'complex',
-    },
-    {
-      id: 'LS-004',
-      from: { name: 'Jarir — Rawdah', city: 'Riyadh', peakHour: '15:00–19:00', peakKw: 495 },
-      to: { name: 'Jarir — Malaz', city: 'Riyadh', offPeakHour: '09:00–12:00', availableKw: 200 },
-      shiftableKw: 60,
-      savingsSar: 1800,
-      reason: "Same-brand portfolio optimization: stagger store pre-cooling. Rawdah opens later on weekends — shift its pre-cool to Malaz's morning off-peak. Both share the same SEC transformer district.",
+      from: { name: 'G5 (after-hours load)', city: 'Rawdah', peakHour: '23:00–06:00', peakKw: 12 },
+      to: { name: 'BMS overnight setback', city: 'Rawdah', offPeakHour: 'closed hours', availableKw: 0 },
+      shiftableKw: 12,
+      savingsSar: 410,
+      reason: "G5 is running unattended after closing. Re-enabling the BMS setback schedule eliminates the 12 kW phantom load entirely — pure waste recovery, no operational impact.",
       difficulty: 'easy',
-    },
-    {
-      id: 'LS-005',
-      from: { name: 'SABIC — Admin Tower', city: 'Jubail', peakHour: '09:00–12:00', peakKw: 580 },
-      to: { name: 'Jarir — Corniche', city: 'Dammam', offPeakHour: '09:00–12:00', availableKw: 180 },
-      shiftableKw: 45,
-      savingsSar: 1200,
-      reason: "SABIC's data center cooling peaks in morning server load hours. Jarir Dammam's retail traffic is low before noon. Shift SABIC's non-essential lighting and AHU scheduling to flatten the Eastern Province grid contribution.",
-      difficulty: 'moderate',
     },
   ];
 
@@ -87,7 +69,7 @@ export function CrossBuildingLoadShift() {
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm font-medium flex items-center gap-2">
             <Zap className="h-4 w-4 text-energy" />
-            Cross-Building Load Shifting
+            Unit Staging & Load Shifting
           </CardTitle>
           <div className="flex gap-2">
             <Badge variant="outline" className="text-[9px] h-5 gap-1 text-savings">
@@ -99,7 +81,7 @@ export function CrossBuildingLoadShift() {
           </div>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          Portfolio-level demand optimization — shift loads between buildings to flatten aggregate demand
+          Stage G1–G7 packaged units to flatten the showroom demand profile and avoid peak-tariff hours
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
