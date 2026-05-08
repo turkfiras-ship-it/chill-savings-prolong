@@ -20,9 +20,9 @@ const generateInsights = (): Insight[] => [
   {
     id: "INS-001",
     type: "anomaly",
-    title: "Compressor cycling anomaly",
-    description: "Compressor #3 cycling increased 31% at Jarir Rawdah without corresponding demand increase. Possible valve degradation.",
-    metric: "3,100 SAR/mo",
+    title: "G3 compressor cycling anomaly",
+    description: "G3 cycling increased 31% without corresponding demand. Possible valve degradation — open work order recommended.",
+    metric: "3,120 SAR/mo",
     metricLabel: "Est. cost impact",
     severity: "warning",
     timestamp: "2 min ago",
@@ -31,7 +31,7 @@ const generateInsights = (): Insight[] => [
     id: "INS-002",
     type: "prediction",
     title: "Cooling load surge predicted",
-    description: "Temperature forecast shows 47°C Thursday across Riyadh. Portfolio cooling load expected +22% above baseline.",
+    description: "Riyadh forecast shows 47°C Thursday. Showroom cooling load expected +22% above baseline across G1–G7.",
     metric: "+22%",
     metricLabel: "Load increase",
     severity: "critical",
@@ -41,8 +41,8 @@ const generateInsights = (): Insight[] => [
     id: "INS-003",
     type: "recommendation",
     title: "Pre-cooling opportunity",
-    description: "Enable pre-cooling mode for 6 Riyadh sites between 4-6 AM tomorrow. Estimated demand charge reduction: 15,200 SAR.",
-    metric: "15,200 SAR",
+    description: "Stage G1, G4, G7 between 04:00–06:00 to reduce 14:00 peak demand charge. Estimated monthly saving: 1,820 SAR.",
+    metric: "1,820 SAR",
     metricLabel: "Potential savings",
     severity: "info",
     timestamp: "12 min ago",
@@ -50,8 +50,8 @@ const generateInsights = (): Insight[] => [
   {
     id: "INS-004",
     type: "anomaly",
-    title: "Efficiency drop detected",
-    description: "Al Othaim King Fahd showing 8% efficiency decline over past 72 hours. Filter inspection recommended.",
+    title: "G2 efficiency drop",
+    description: "G2 showing 8% efficiency decline over past 72 hours. Evaporator coil inspection recommended.",
     metric: "-8%",
     metricLabel: "Efficiency delta",
     severity: "warning",
@@ -60,8 +60,8 @@ const generateInsights = (): Insight[] => [
   {
     id: "INS-005",
     type: "prediction",
-    title: "Equipment maintenance window",
-    description: "Condenser Unit A at Panda Khalidiyah approaching 6,000 run hours. Schedule maintenance within 14 days.",
+    title: "G6 maintenance window",
+    description: "G6 approaching 4,200 run hours. Schedule filter + belt service within 14 days to maintain SCC/VMF gains.",
     metric: "14 days",
     metricLabel: "Time to service",
     severity: "info",
@@ -178,7 +178,7 @@ export function IntelligencePanel() {
       <div className="p-3 border-t border-border/30">
         <div className="flex items-center justify-between text-[9px] text-muted-foreground/50">
           <span className="uppercase tracking-wider">Active alerts: {alerts.filter(a => !a.acknowledged).length}</span>
-          <span className="uppercase tracking-wider">{sites.filter(s => s.status === "active").length} sites online</span>
+          <span className="uppercase tracking-wider">7 units · 1 site online</span>
         </div>
       </div>
     </div>

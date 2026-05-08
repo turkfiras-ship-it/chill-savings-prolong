@@ -82,12 +82,12 @@ export interface EquipmentRisk {
 export const equipmentRisks: EquipmentRisk[] = (() => {
   const rand = seeded(55);
   const items = [
-    { id: "EQ-001", name: "Compressor #3", type: "Compressor" as const, site: "Jarir — Rawdah", failureRisk: 68, daysToFailure: 21, lastMaintenance: "2025-11-15", runHours: 4820 },
-    { id: "EQ-002", name: "Condenser Unit A", type: "Condenser" as const, site: "Al Othaim — King Fahd", failureRisk: 54, daysToFailure: 45, lastMaintenance: "2025-10-02", runHours: 5200 },
-    { id: "EQ-003", name: "Evaporator Coil #2", type: "Evaporator" as const, site: "Panda — Khalidiyah", failureRisk: 82, daysToFailure: 12, lastMaintenance: "2025-09-20", runHours: 6100 },
-    { id: "EQ-004", name: "Refrigerant Loop R1", type: "Refrigerant" as const, site: "Saudi German Hospital", failureRisk: 35, daysToFailure: 90, lastMaintenance: "2026-01-10", runHours: 3200 },
-    { id: "EQ-005", name: "Compressor #1", type: "Compressor" as const, site: "Hilton — Jeddah", failureRisk: 72, daysToFailure: 18, lastMaintenance: "2025-12-01", runHours: 5500 },
-    { id: "EQ-006", name: "Condenser Fan Motor", type: "Condenser" as const, site: "SABIC — Admin Tower", failureRisk: 45, daysToFailure: 60, lastMaintenance: "2025-11-28", runHours: 4100 },
+    { id: "EQ-001", name: "G3 Compressor", type: "Compressor" as const, site: "Jarir — Rawdah", failureRisk: 68, daysToFailure: 21, lastMaintenance: "2025-11-15", runHours: 4820 },
+    { id: "EQ-002", name: "G2 Condenser Coil", type: "Condenser" as const, site: "Jarir — Rawdah", failureRisk: 54, daysToFailure: 45, lastMaintenance: "2025-10-02", runHours: 4520 },
+    { id: "EQ-003", name: "G6 Evaporator Coil", type: "Evaporator" as const, site: "Jarir — Rawdah", failureRisk: 47, daysToFailure: 55, lastMaintenance: "2025-09-20", runHours: 4180 },
+    { id: "EQ-004", name: "G7 Refrigerant Loop", type: "Refrigerant" as const, site: "Jarir — Rawdah", failureRisk: 35, daysToFailure: 90, lastMaintenance: "2026-01-10", runHours: 3680 },
+    { id: "EQ-005", name: "G1 Compressor", type: "Compressor" as const, site: "Jarir — Rawdah", failureRisk: 28, daysToFailure: 120, lastMaintenance: "2025-12-01", runHours: 3200 },
+    { id: "EQ-006", name: "G4 Condenser Fan Motor", type: "Condenser" as const, site: "Jarir — Rawdah", failureRisk: 41, daysToFailure: 70, lastMaintenance: "2025-11-28", runHours: 3920 },
   ].map(eq => ({
     ...eq,
     degradationTrend: Array.from({ length: 30 }, (_, i) => ({

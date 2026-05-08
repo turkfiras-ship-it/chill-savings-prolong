@@ -6,13 +6,13 @@ import { AlertTriangle, Bell, Info } from "lucide-react";
 const ALERT_INTERVAL = 15000; // simulate new alerts every 15s
 
 const alertPool = [
-  { severity: 'critical' as const, message: 'Peak demand exceeded threshold at Jarir — Rawdah', site: 'Jarir — Rawdah' },
-  { severity: 'critical' as const, message: 'Gateway offline for 30+ minutes at Panda — Khalidiyah', site: 'Panda — Khalidiyah' },
-  { severity: 'warning' as const, message: 'Compressor-3 drawing 18% above baseline at SABIC Tower', site: 'SABIC — Admin Tower' },
-  { severity: 'warning' as const, message: 'After-hours energy usage detected at Al Othaim — King Fahd', site: 'Al Othaim — King Fahd' },
-  { severity: 'critical' as const, message: 'Chiller-1 tripped on high head pressure — Hilton Jeddah', site: 'Hilton — Jeddah Corniche' },
-  { severity: 'warning' as const, message: 'AHU-2 filter differential pressure high at KSU Campus', site: 'King Saud University' },
-  { severity: 'info' as const, message: 'Scheduled maintenance window starting in 1 hour — Al Rajhi HQ', site: 'Al Rajhi — HQ Tower' },
+  { severity: 'critical' as const, message: 'Peak demand exceeded 480 kW threshold', site: 'Jarir — Rawdah · G3' },
+  { severity: 'warning' as const, message: 'G3 compressor drawing 18% above baseline', site: 'Jarir — Rawdah' },
+  { severity: 'warning' as const, message: 'After-hours load detected — 12 kW sustained at 02:15', site: 'Jarir — Rawdah · G5' },
+  { severity: 'info' as const, message: 'G6 runtime exceeds 4,000 hrs — filter inspection recommended', site: 'Jarir — Rawdah' },
+  { severity: 'warning' as const, message: 'G2 short-cycling 4× in last hour', site: 'Jarir — Rawdah' },
+  { severity: 'info' as const, message: 'G7 supply-return ΔT narrowed to 4.2°C', site: 'Jarir — Rawdah' },
+  { severity: 'warning' as const, message: 'Eyedro gateway D-S001-1 lost sync for 12 min — recovered', site: 'Jarir — Rawdah' },
 ];
 
 export function AlertNotifications() {
