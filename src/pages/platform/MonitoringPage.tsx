@@ -11,6 +11,8 @@ import { PageTransition } from "@/components/platform/PageTransition";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import { EYEDRO_DEVICES } from "@/data/eyedroDevices";
+import { Sparklines, SparklinesLine } from "react-sparklines";
 
 const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
 
@@ -130,6 +132,7 @@ export default function MonitoringPage() {
 
   const [livePoints, setLivePoints] = useState<MonitorPoint[]>([]);
   const [lastLiveAt, setLastLiveAt] = useState<Date | null>(null);
+  const [deviceLive, setDeviceLive] = useState<Record<string, { ts: string; power_kw: number; energy_kwh: number | null; history: number[] }>>({});
 
   const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eyedro-ingest`;
 
@@ -144,9 +147,26 @@ export default function MonitoringPage() {
         consumption: r.energy_kwh != null ? Number(r.energy_kwh) : undefined,
       };
     };
+    const ingestDevice = (r: any) => {
+      const serial: string | null = r.device_serial ?? null;
+      if (!serial) return;
+      setDeviceLive(prev => {
+        const prevDev = prev[serial] ?? { ts: r.ts, power_kw: 0, energy_kwh: null, history: [] };
+        const power = Number(r.power_kw ?? 0);
+        return {
+          ...prev,
+          [serial]: {
+            ts: r.ts,
+            power_kw: power,
+            energy_kwh: r.energy_kwh != null ? Number(r.energy_kwh) : prevDev.energy_kwh,
+            history: [...prevDev.history.slice(-29), power],
+          },
+        };
+      });
+    };
     supabase
       .from("eyedro_readings")
-      .select("ts,power_kw,energy_kwh")
+      .select("ts,power_kw,energy_kwh,device_serial")
       .order("ts", { ascending: false })
       .limit(240)
       .then(({ data }) => {
@@ -154,6 +174,24 @@ export default function MonitoringPage() {
           const sorted = [...data].reverse().map(mapRow);
           setLivePoints(sorted);
           setLastLiveAt(new Date(data[0].ts));
+          // Build per-device latest + sparkline history
+          const grouped: Record<string, any[]> = {};
+          for (const r of [...data].reverse()) {
+            const s = (r as any).device_serial;
+            if (!s) continue;
+            (grouped[s] ||= []).push(r);
+          }
+          const next: Record<string, any> = {};
+          for (const [serial, rows] of Object.entries(grouped)) {
+            const last = rows[rows.length - 1];
+            next[serial] = {
+              ts: last.ts,
+              power_kw: Number(last.power_kw ?? 0),
+              energy_kwh: last.energy_kwh != null ? Number(last.energy_kwh) : null,
+              history: rows.slice(-30).map(r => Number(r.power_kw ?? 0)),
+            };
+          }
+          setDeviceLive(next);
         }
       });
     const channel = supabase
@@ -162,6 +200,7 @@ export default function MonitoringPage() {
         const row = payload.new as any;
         setLivePoints(prev => [...prev.slice(-239), mapRow(row)]);
         setLastLiveAt(new Date(row.ts));
+        ingestDevice(row);
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
