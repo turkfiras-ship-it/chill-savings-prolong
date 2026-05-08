@@ -12,6 +12,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { EYEDRO_DEVICES } from "@/data/eyedroDevices";
+import type { EyedroDevice } from "@/data/eyedroDevices";
+import { DeviceDetailDialog } from "@/components/platform/DeviceDetailDialog";
 
 const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
 
@@ -132,6 +134,7 @@ export default function MonitoringPage() {
   const [livePoints, setLivePoints] = useState<MonitorPoint[]>([]);
   const [lastLiveAt, setLastLiveAt] = useState<Date | null>(null);
   const [deviceLive, setDeviceLive] = useState<Record<string, { ts: string; power_kw: number; energy_kwh: number | null; history: number[] }>>({});
+  const [selectedDevice, setSelectedDevice] = useState<EyedroDevice | null>(null);
 
   const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eyedro-ingest`;
 
@@ -336,7 +339,12 @@ export default function MonitoringPage() {
                   return `${x.toFixed(1)},${y.toFixed(1)}`;
                 }).join(" ");
                 return (
-                  <div key={dev.serialHex} className="rounded-md border border-border bg-secondary/40 p-2.5 flex flex-col gap-1.5">
+                  <button
+                    key={dev.serialHex}
+                    type="button"
+                    onClick={() => setSelectedDevice(dev)}
+                    className="text-left rounded-md border border-border bg-secondary/40 p-2.5 flex flex-col gap-1.5 hover:border-savings/60 hover:bg-secondary/70 transition-colors cursor-pointer"
+                  >
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="font-mono font-semibold text-foreground">{dev.unit}</span>
                       <span className={`flex items-center gap-1 ${isLive ? "text-savings" : "text-muted-foreground"}`}>
@@ -361,7 +369,7 @@ export default function MonitoringPage() {
                       <span>{dev.serialHex}</span>
                       <span>{live?.energy_kwh != null ? `${live.energy_kwh.toFixed(1)} kWh` : "—"}</span>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -372,6 +380,12 @@ export default function MonitoringPage() {
             )}
           </CardContent>
         </Card>
+
+        <DeviceDetailDialog
+          device={selectedDevice}
+          open={!!selectedDevice}
+          onOpenChange={(o) => { if (!o) setSelectedDevice(null); }}
+        />
 
         {!hasLiveStream && hasImportedData && (
           <Card className="border-energy/30 bg-energy-light/40">
