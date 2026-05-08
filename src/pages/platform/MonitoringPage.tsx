@@ -1,12 +1,14 @@
 import { useState, useMemo } from "react";
+import readXlsxFile from "read-excel-file";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { sites, monthlyTrends } from "@/data/mockData";
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Activity, Zap, DollarSign, TrendingDown, Clock, Gauge } from "lucide-react";
+import { Activity, Zap, DollarSign, TrendingDown, Clock, Gauge, Upload, FileSpreadsheet, RotateCcw } from "lucide-react";
 import { AnimatedKpiCard } from "@/components/platform/AnimatedKpiCard";
 import { PageTransition } from "@/components/platform/PageTransition";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
@@ -18,6 +20,97 @@ const liveData = Array.from({ length: 60 }, (_, i) => ({
   demand: 300 + Math.cos(i / 8) * 50 + Math.random() * 20,
   baseline: 310,
 }));
+
+type SheetCell = string | number | boolean | Date | null | undefined;
+type MonitorPoint = { time: string; power: number; demand: number; baseline: number; consumption?: number };
+type ImportedDataset = { fileName: string; points: MonitorPoint[]; hasConsumption: boolean };
+
+const IMPORT_STORAGE_KEY = "dc-evolve-eyedro-export";
+
+const cellText = (cell: SheetCell) => (cell instanceof Date ? cell.toISOString() : String(cell ?? "")).trim();
+const cleanLabel = (cell: SheetCell) => cellText(cell).toLowerCase().replace(/[^a-z0-9/%]+/g, " ").trim();
+
+const toNumber = (cell: SheetCell) => {
+  if (typeof cell === "number" && Number.isFinite(cell)) return cell;
+  const value = cellText(cell).replace(/,/g, "").match(/-?\d+(\.\d+)?/);
+  return value ? Number(value[0]) : null;
+};
+
+const excelSerialToDate = (value: number) => new Date(Math.round((value - 25569) * 86400 * 1000));
+
+const formatTimestamp = (value: SheetCell, index: number, fallback?: SheetCell) => {
+  const primary = value instanceof Date ? value : typeof value === "number" && value > 20000 ? excelSerialToDate(value) : null;
+  if (primary) return primary.toLocaleString([], { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+  const joined = [cellText(value), cellText(fallback)].filter(Boolean).join(" ").trim();
+  return joined || `Row ${index + 1}`;
+};
+
+const parseCsvRows = (text: string): SheetCell[][] => {
+  const rows: SheetCell[][] = [];
+  let row: string[] = [];
+  let value = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (char === '"' && quoted && next === '"') {
+      value += '"';
+      i++;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === "," && !quoted) {
+      row.push(value);
+      value = "";
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && next === "\n") i++;
+      row.push(value);
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      value = "";
+    } else {
+      value += char;
+    }
+  }
+  row.push(value);
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+};
+
+const parseEyedroRows = (rows: SheetCell[][]): ImportedDataset["points"] => {
+  const headerIndex = rows.slice(0, 25).findIndex(row => {
+    const labels = row.map(cleanLabel);
+    return labels.some(label => /date|time|timestamp/.test(label)) && labels.some(label => /kw|kwh|power|demand|energy|usage|consumption/.test(label));
+  });
+  const headers = rows[Math.max(headerIndex, 0)]?.map(cleanLabel) ?? [];
+  const findCol = (test: (label: string) => boolean) => headers.findIndex(test);
+  const timestampCol = findCol(label => /timestamp|date time|datetime/.test(label));
+  const dateCol = timestampCol >= 0 ? timestampCol : findCol(label => /date/.test(label));
+  const timeCol = findCol(label => /time/.test(label) && !/runtime|uptime/.test(label));
+  const energyCol = findCol(label => /kwh|energy|consumption|usage/.test(label));
+  const demandCol = findCol(label => /demand|peak/.test(label));
+  const powerCol = findCol(label => (/\bkw\b|power|load/.test(label) && !/kwh|factor|cost/.test(label))) >= 0
+    ? findCol(label => (/\bkw\b|power|load/.test(label) && !/kwh|factor|cost/.test(label)))
+    : demandCol;
+  const valueCol = powerCol >= 0 ? powerCol : energyCol;
+  if (valueCol < 0) return [];
+
+  const dataRows = rows.slice(Math.max(headerIndex, 0) + 1);
+  const points = dataRows.map((row, index) => {
+    const power = toNumber(row[valueCol]);
+    const consumption = energyCol >= 0 ? toNumber(row[energyCol]) : null;
+    const demand = demandCol >= 0 ? toNumber(row[demandCol]) : power;
+    if (power === null) return null;
+    return {
+      time: formatTimestamp(dateCol >= 0 ? row[dateCol] : null, index, timeCol >= 0 && timeCol !== dateCol ? row[timeCol] : null),
+      power,
+      demand: demand ?? power,
+      baseline: Math.max(power, demand ?? power) * 1.08,
+      consumption: consumption ?? undefined,
+    };
+  }).filter(Boolean) as MonitorPoint[];
+
+  return points.slice(-500);
+};
 
 export default function MonitoringPage() {
   const [range, setRange] = useState('Live');
