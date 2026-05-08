@@ -61,20 +61,15 @@ function unwrap(data: any): any {
 }
 
 async function ev501(params: Record<string, string>) {
-  // Real client always sends Client + Version envelope params and the z2 token.
-  // Inner payload (the part that gets encrypted into z) is querystring-encoded.
   const plainForm = new URLSearchParams(params).toString();
-  const z = encryptZ(plainForm);
-  const envelope = new URLSearchParams({
-    z,
-    z2: Z2_CLIENT,
-    Client: CLIENT_NAME,
-    Version: CLIENT_VERSION,
-  }).toString();
+  const plainJson = JSON.stringify(params);
+  const mkBody = (inner: string) => {
+    const z = encryptZ(inner);
+    return new URLSearchParams({ z, z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }).toString();
+  };
   const attempts: Array<{label:string; init: RequestInit}> = [
-    { label: "envelope-form", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: envelope }},
-    { label: "envelope-json", init: { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ z, z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }) }},
-    { label: "z-only-form", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({ z }).toString() }},
+    { label: "form-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainForm) }},
+    { label: "json-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainJson) }},
   ];
   const debug: any[] = [];
   let r: Response | null = null;
