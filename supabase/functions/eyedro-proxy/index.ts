@@ -10,6 +10,9 @@ const corsHeaders = {
 };
 
 const EV501 = "https://my.eyedro.com/ev501";
+const Z2_CLIENT = "8rnlPFXgI9jw";
+const CLIENT_NAME = "MyEyedro";
+const CLIENT_VERSION = "5.8.2.3";
 
 // In-memory session cache (per edge instance). Re-login on cold start.
 let cachedSID: string | null = null;
@@ -58,17 +61,20 @@ function unwrap(data: any): any {
 }
 
 async function ev501(params: Record<string, string>) {
-  // Try several body encodings; first that returns non-empty payload wins.
+  // Real client always sends Client + Version envelope params and the z2 token.
+  // Inner payload (the part that gets encrypted into z) is querystring-encoded.
   const plainForm = new URLSearchParams(params).toString();
-  const plainJson = JSON.stringify(params);
+  const z = encryptZ(plainForm);
+  const envelope = new URLSearchParams({
+    z,
+    z2: Z2_CLIENT,
+    Client: CLIENT_NAME,
+    Version: CLIENT_VERSION,
+  }).toString();
   const attempts: Array<{label:string; init: RequestInit}> = [
-    { label: "form-z(form)", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({z: encryptZ(plainForm)}).toString() }},
-    { label: "json-z(form)", init: { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({z: encryptZ(plainForm)}) }},
-    { label: "raw-z(form)", init: { method:"POST", headers:{"Content-Type":"text/plain"}, body: encryptZ(plainForm) }},
-    { label: "form-z(json)", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({z: encryptZ(plainJson)}).toString() }},
-    { label: "json-z(json)", init: { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({z: encryptZ(plainJson)}) }},
-    { label: "raw-z(json)", init: { method:"POST", headers:{"Content-Type":"text/plain"}, body: encryptZ(plainJson) }},
-    { label: "plain-form", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: plainForm }},
+    { label: "envelope-form", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: envelope }},
+    { label: "envelope-json", init: { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({ z, z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }) }},
+    { label: "z-only-form", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({ z }).toString() }},
   ];
   const debug: any[] = [];
   let r: Response | null = null;
