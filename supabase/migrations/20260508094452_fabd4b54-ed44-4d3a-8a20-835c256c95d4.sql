@@ -1,0 +1,1 @@
+DROP POLICY "Public can insert readings" ON public.eyedro_readings;
