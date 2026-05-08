@@ -17,6 +17,7 @@ const CLIENT_VERSION = "5.8.2.3";
 // In-memory session cache (per edge instance). Re-login on cold start.
 let cachedSID: string | null = null;
 let cachedAt = 0;
+let cookieJar = "";
 const SID_TTL_MS = 25 * 60 * 1000; // 25 min
 
 function md5Hex(s: string) {
@@ -80,6 +81,7 @@ async function ev501(params: Record<string, string>) {
       "Referer": "https://my.eyedro.com/",
       "X-Requested-With": "XMLHttpRequest",
       "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+      ...(cookieJar ? { "Cookie": cookieJar } : {}),
     },
     body,
   });
@@ -87,13 +89,51 @@ async function ev501(params: Record<string, string>) {
   let data: any;
   try { data = JSON.parse(text); } catch { data = { raw: text }; }
   const decoded = unwrap(data);
+  // Update cookie jar
+  const sc = r.headers.get("set-cookie");
+  if (sc) {
+    const parts = sc.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
+    for (const p of parts) {
+      const m = p.trim().match(/^([^=]+)=([^;]+)/);
+      if (m) {
+        // simple cookie merge
+        const name = m[1];
+        const re = new RegExp(`(^|;\\s*)${name}=[^;]*`);
+        if (cookieJar.match(re)) cookieJar = cookieJar.replace(re, `$1${name}=${m[2]}`);
+        else cookieJar = (cookieJar ? cookieJar + "; " : "") + `${name}=${m[2]}`;
+      }
+    }
+  }
   return { ok: r.ok, status: r.status, data: decoded, raw: data, setCookie: r.headers.get("set-cookie") };
+}
+
+async function primeCookies() {
+  try {
+    const r = await fetch("https://my.eyedro.com/", {
+      method: "GET",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+    });
+    const sc = r.headers.get("set-cookie");
+    if (sc) {
+      const parts = sc.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
+      for (const p of parts) {
+        const m = p.trim().match(/^([^=]+)=([^;]+)/);
+        if (m) cookieJar = (cookieJar ? cookieJar + "; " : "") + `${m[1]}=${m[2]}`;
+      }
+    }
+    await r.text();
+  } catch {}
 }
 
 async function login(): Promise<string> {
   const username = Deno.env.get("EYEDRO_USERNAME") || "chadinkairouz@gmail.com";
   const password = Deno.env.get("EYEDRO_PASSWORD");
   if (!password) throw new Error("EYEDRO_PASSWORD is not configured");
+
+  if (!cookieJar) await primeCookies();
 
   const emailLower = username.toLowerCase();
   const passLower = password.toLowerCase();
