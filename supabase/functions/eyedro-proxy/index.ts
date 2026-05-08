@@ -70,7 +70,8 @@ async function ev501(params: Record<string, string>) {
   let data: any;
   try { data = JSON.parse(text); } catch { data = { raw: text }; }
   const decoded = unwrap(data);
-  return { ok: r.ok, status: r.status, data: decoded, raw: data };
+  const setCookie = r.headers.get("set-cookie");
+  return { ok: r.ok, status: r.status, data: decoded, raw: data, setCookie };
 }
 
 async function login(): Promise<string> {
@@ -86,10 +87,14 @@ async function login(): Promise<string> {
   const res = await ev501({ Cmd: "Login", Username: username, Hash32, Hash64 });
   if (!res.ok) throw new Error(`Login HTTP ${res.status}`);
   const d = res.data ?? {};
-  const sid =
+  let sid =
     d.SID || d.Sid || d.sid ||
     d?.Data?.SID || d?.Data?.Sid ||
     d?.Result?.SID || d?.Result?.Sid;
+  if (!sid && res.setCookie) {
+    const m = res.setCookie.match(/(?:SID|sid|PHPSESSID|JSESSIONID)=([^;]+)/);
+    if (m) sid = m[1];
+  }
   if (!sid) throw new Error("Login: no SID. Decoded=" + JSON.stringify(d).slice(0, 500));
   cachedSID = String(sid);
   cachedAt = Date.now();
