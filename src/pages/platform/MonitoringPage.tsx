@@ -313,6 +313,66 @@ export default function MonitoringPage() {
           </Card>
         )}
 
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Radio className="h-3.5 w-3.5 text-savings" />
+              Per-Device Live Readings
+              <span className="ml-auto text-[10px] text-muted-foreground font-normal">
+                {EYEDRO_DEVICES.length} Eyedro devices · Jarir Bookstore — Rawdah
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
+              {EYEDRO_DEVICES.map((dev) => {
+                const live = deviceLive[dev.serialHex];
+                const isLive = !!live && (Date.now() - new Date(live.ts).getTime()) < 5 * 60 * 1000;
+                const power = live?.power_kw ?? 0;
+                const max = Math.max(1, ...(live?.history ?? [1]));
+                const points = (live?.history ?? []).map((v, i, arr) => {
+                  const x = arr.length > 1 ? (i / (arr.length - 1)) * 100 : 0;
+                  const y = 28 - (v / max) * 24;
+                  return `${x.toFixed(1)},${y.toFixed(1)}`;
+                }).join(" ");
+                return (
+                  <div key={dev.serialHex} className="rounded-md border border-border bg-secondary/40 p-2.5 flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between text-[10px]">
+                      <span className="font-mono font-semibold text-foreground">{dev.unit}</span>
+                      <span className={`flex items-center gap-1 ${isLive ? "text-savings" : "text-muted-foreground"}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-savings animate-pulse" : "bg-muted-foreground/40"}`} />
+                        {isLive ? "LIVE" : "—"}
+                      </span>
+                    </div>
+                    <div className="font-mono text-lg font-bold tracking-tight text-foreground tabular-nums">
+                      {power.toFixed(2)}<span className="text-[10px] text-muted-foreground ml-1">kW</span>
+                    </div>
+                    <svg viewBox="0 0 100 30" className="w-full h-7" preserveAspectRatio="none">
+                      {points && (
+                        <polyline
+                          fill="none"
+                          stroke="hsl(var(--savings, 152 60% 48%))"
+                          strokeWidth="1.5"
+                          points={points}
+                        />
+                      )}
+                    </svg>
+                    <div className="flex items-center justify-between text-[9px] text-muted-foreground font-mono">
+                      <span>{dev.serialHex}</span>
+                      <span>{live?.energy_kwh != null ? `${live.energy_kwh.toFixed(1)} kWh` : "—"}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {Object.keys(deviceLive).length === 0 && (
+              <p className="text-[11px] text-muted-foreground mt-3">
+                Waiting for the Eyedro pusher to send readings tagged with each device serial (G1=00C004EC, G2=00C003A3, G3=B1400AA4, FF1=B1400AA5, FF2=B1400AA2, FF3=B1400AA6, FF4=B1400AA3).
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
         {!hasLiveStream && hasImportedData && (
           <Card className="border-energy/30 bg-energy-light/40">
             <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
