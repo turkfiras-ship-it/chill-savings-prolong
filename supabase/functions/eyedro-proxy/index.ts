@@ -91,13 +91,7 @@ async function ev501(params: Record<string, string>) {
   }
   // None matched — return last + debug
   const decoded = unwrap(data);
-  return { ok: r?.ok ?? false, status: r?.status ?? 0, data: decoded, raw: data, debug };
-  const text = await r.text();
-  let data: any;
-  try { data = JSON.parse(text); } catch { data = { raw: text }; }
-  const decoded = unwrap(data);
-  const setCookie = r.headers.get("set-cookie");
-  return { ok: r.ok, status: r.status, data: decoded, raw: data, setCookie };
+  return { ok: r?.ok ?? false, status: r?.status ?? 0, data: decoded, raw: data, debug, setCookie: r?.headers.get("set-cookie") };
 }
 
 async function login(): Promise<string> {
@@ -121,7 +115,7 @@ async function login(): Promise<string> {
     const m = res.setCookie.match(/(?:SID|sid|PHPSESSID|JSESSIONID)=([^;]+)/);
     if (m) sid = m[1];
   }
-  if (!sid) throw new Error("Login: no SID. Decoded=" + JSON.stringify(d).slice(0, 500) + " | raw=" + JSON.stringify(res.raw).slice(0,300) + " | cookie=" + (res.setCookie || "none"));
+  if (!sid) throw new Error("Login: no SID. debug=" + JSON.stringify((res as any).debug).slice(0, 1500));
   cachedSID = String(sid);
   cachedAt = Date.now();
   return cachedSID;
