@@ -139,6 +139,17 @@ serve(async (req) => {
       });
     }
 
+    // Debug: show what hashes we'd compute (no secrets leaked beyond hashes)
+    if (command === "DebugHashes") {
+      const username = Deno.env.get("EYEDRO_USERNAME") || "chadinkairouz@gmail.com";
+      const password = Deno.env.get("EYEDRO_PASSWORD") || "";
+      const h32 = md5Hex(username.toLowerCase() + password.toLowerCase());
+      const h64 = sha256Hex(username + password);
+      return new Response(JSON.stringify({ ok: true, username, Hash32: h32, Hash64: h64, passwordLen: password.length }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     let sid = await getSID();
     let res = await ev501({ Cmd: command, SID: sid, ...extraParams });
 
