@@ -6,14 +6,9 @@ import { Users, Shield, UserPlus, Eye, Edit, Settings } from "lucide-react";
 import { KpiCard } from "@/components/platform/KpiCard";
 
 const users = [
-  { id: 1, name: 'Ahmed Al-Rashid', email: 'ahmed@thermodynamics.sa', role: 'Super Admin', status: 'active', lastActive: '2025-03-12', sites: 'All' },
-  { id: 2, name: 'Khalid Al-Dosari', email: 'khalid@thermodynamics.sa', role: 'ESCO Admin', status: 'active', lastActive: '2025-03-12', sites: 'All' },
-  { id: 3, name: 'Omar Bin Faisal', email: 'omar@thermodynamics.sa', role: 'Operations Manager', status: 'active', lastActive: '2025-03-11', sites: '12 sites' },
-  { id: 4, name: 'Faisal Al-Harbi', email: 'faisal@thermodynamics.sa', role: 'Engineer', status: 'active', lastActive: '2025-03-12', sites: '8 sites' },
-  { id: 5, name: 'Mohammed Jarir', email: 'mohammed@jarir.com', role: 'Client Viewer', status: 'active', lastActive: '2025-03-10', sites: '6 sites (Jarir)' },
-  { id: 6, name: 'Sara Al-Othaim', email: 'sara@othaim.com', role: 'Client Viewer', status: 'active', lastActive: '2025-03-08', sites: '2 sites (Al Othaim)' },
-  { id: 7, name: 'Yusuf Khan', email: 'yusuf@thermodynamics.sa', role: 'Finance / Billing', status: 'active', lastActive: '2025-03-11', sites: 'All' },
-  { id: 8, name: 'Ali Panda', email: 'ali@panda.sa', role: 'Tenant Viewer', status: 'invited', lastActive: '—', sites: '2 sites (Panda)' },
+  { id: 1, name: 'Chadi Nkairouz', email: 'chadinkairouz@gmail.com', role: 'Super Admin', status: 'active', lastActive: '2026-05-08', sites: 'Jarir — Rawdah' },
+  { id: 2, name: 'Mohammed Jarir', email: 'mohammed@jarir.com', role: 'Client Viewer', status: 'active', lastActive: '2026-05-07', sites: 'Jarir — Rawdah' },
+  { id: 3, name: 'Site Engineer', email: 'engineer@dcevolve.io', role: 'Engineer', status: 'invited', lastActive: '—', sites: 'Jarir — Rawdah' },
 ];
 
 const roleBadge: Record<string, string> = {
