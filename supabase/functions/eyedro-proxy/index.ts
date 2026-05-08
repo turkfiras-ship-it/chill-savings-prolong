@@ -95,7 +95,7 @@ async function login(): Promise<string> {
     const m = res.setCookie.match(/(?:SID|sid|PHPSESSID|JSESSIONID)=([^;]+)/);
     if (m) sid = m[1];
   }
-  if (!sid) throw new Error("Login: no SID. Decoded=" + JSON.stringify(d).slice(0, 500));
+  if (!sid) throw new Error("Login: no SID. Decoded=" + JSON.stringify(d).slice(0, 500) + " | raw=" + JSON.stringify(res.raw).slice(0,300) + " | cookie=" + (res.setCookie || "none"));
   cachedSID = String(sid);
   cachedAt = Date.now();
   return cachedSID;
