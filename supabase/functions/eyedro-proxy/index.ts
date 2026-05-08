@@ -70,6 +70,8 @@ async function ev501(params: Record<string, string>) {
   const attempts: Array<{label:string; init: RequestInit}> = [
     { label: "form-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainForm) }},
     { label: "json-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainJson) }},
+    { label: "z-only", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: new URLSearchParams({ z: encryptZ(plainForm) }).toString() }},
+    { label: "cmd-outside", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: new URLSearchParams({ Cmd: params.Cmd, z: encryptZ(plainForm), z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }).toString() }},
   ];
   const debug: any[] = [];
   let r: Response | null = null;
