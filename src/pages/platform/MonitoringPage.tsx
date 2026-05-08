@@ -137,6 +137,8 @@ export default function MonitoringPage() {
   const importedUsage = hasImportedData
     ? importedPoints.reduce((sum, point) => sum + (point.consumption ?? 0), 0)
     : null;
+  const usageValue = hasImportedData && importedUsage ? Math.round(importedUsage) : Math.round(currentPower * 14);
+  const consumptionTrend = hasImportedData && importedData?.hasConsumption ? chartData : monthlyTrends;
 
   const powerSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.power })), [chartData]);
   const demandSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.demand })), [chartData]);
@@ -147,7 +149,7 @@ export default function MonitoringPage() {
     try {
       const rows = file.name.match(/\.csv$/i)
         ? parseCsvRows(await file.text())
-        : await readXlsxFile(file) as SheetCell[][];
+        : (await readXlsxFile(file) as unknown as SheetCell[][]);
       const points = parseEyedroRows(rows);
       if (points.length < 2) throw new Error("No usable kW/kWh columns found");
       const dataset = { fileName: file.name, points, hasConsumption: points.some(point => point.consumption !== undefined) };
@@ -176,6 +178,17 @@ export default function MonitoringPage() {
             <p className="text-sm text-muted-foreground mt-1">Live power usage and historical data</p>
           </div>
           <div className="flex items-center gap-2">
+            <label className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-medium hover:bg-muted">
+              <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImportFile} />
+              <Upload className="h-3.5 w-3.5 text-energy" />
+              Import Export
+            </label>
+            {hasImportedData && (
+              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={clearImportedData}>
+                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+                Reset
+              </Button>
+            )}
             <Select value={selectedSite} onValueChange={setSelectedSite}>
               <SelectTrigger className="w-48 h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
