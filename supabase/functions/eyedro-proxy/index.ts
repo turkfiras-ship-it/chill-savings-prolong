@@ -61,40 +61,33 @@ function unwrap(data: any): any {
 }
 
 async function ev501(params: Record<string, string>) {
-  const plainForm = new URLSearchParams(params).toString();
-  const plainJson = JSON.stringify(params);
-  const mkBody = (inner: string) => {
-    const z = encryptZ(inner);
-    return new URLSearchParams({ z, z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }).toString();
-  };
-  const attempts: Array<{label:string; init: RequestInit}> = [
-    { label: "form-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainForm) }},
-    { label: "json-inner", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: mkBody(plainJson) }},
-    { label: "z-only", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: new URLSearchParams({ z: encryptZ(plainForm) }).toString() }},
-    { label: "cmd-outside", init: { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded","User-Agent":"MyEyedro/5.8.2.3"}, body: new URLSearchParams({ Cmd: params.Cmd, z: encryptZ(plainForm), z2: Z2_CLIENT, Client: CLIENT_NAME, Version: CLIENT_VERSION }).toString() }},
-  ];
-  const debug: any[] = [];
-  let r: Response | null = null;
-  let text = "";
-  let data: any = null;
-  for (const a of attempts) {
-    r = await fetch(EV501, a.init);
-    text = await r.text();
-    try { data = JSON.parse(text); } catch { data = { raw: text }; }
-    const decoded = unwrap(data);
-    debug.push({ label: a.label, status: r.status, decoded });
-    // Heuristic: success if decoded has more than just DateMsUtc/Errors
-    if (decoded && typeof decoded === "object") {
-      const keys = Object.keys(decoded);
-      const interesting = keys.filter(k => !["DateMsUtc","Errors","_decryptError"].includes(k));
-      if (interesting.length > 0 || (Array.isArray(decoded.Errors) && decoded.Errors.length > 0)) {
-        return { ok: r.ok, status: r.status, data: decoded, raw: data, debug };
-      }
-    }
-  }
-  // None matched — return last + debug
+  // Inner plaintext is form-urlencoded with Client/Version/z2 INCLUDED
+  const inner = new URLSearchParams({
+    ...params,
+    Client: CLIENT_NAME,
+    Version: CLIENT_VERSION,
+    z2: Z2_CLIENT,
+  }).toString();
+  const z = encryptZ(inner);
+  const body = new URLSearchParams({ z }).toString();
+
+  const r = await fetch(EV501, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      "Accept": "*/*",
+      "Origin": "https://my.eyedro.com",
+      "Referer": "https://my.eyedro.com/",
+      "X-Requested-With": "XMLHttpRequest",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+    },
+    body,
+  });
+  const text = await r.text();
+  let data: any;
+  try { data = JSON.parse(text); } catch { data = { raw: text }; }
   const decoded = unwrap(data);
-  return { ok: r?.ok ?? false, status: r?.status ?? 0, data: decoded, raw: data, debug, setCookie: r?.headers.get("set-cookie") };
+  return { ok: r.ok, status: r.status, data: decoded, raw: data, setCookie: r.headers.get("set-cookie") };
 }
 
 async function login(): Promise<string> {
