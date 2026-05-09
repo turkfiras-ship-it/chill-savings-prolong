@@ -10,7 +10,7 @@
 
 import { unitMonthlyData2025, unitAnnualTotals, unitNames } from "@/data/unitMonthlyData";
 import { monthlyWeatherData } from "@/data/weatherData";
-import { LockedFinancials } from "@/data/lockedPerformanceModel";
+import { ClimateConstants, LockedFinancials } from "@/data/lockedPerformanceModel";
 
 // 12 months of 2025 only (drop Dec-2024 + Jan-2026 partial cycles)
 export const months2025 = unitMonthlyData2025.filter(
@@ -192,7 +192,7 @@ export const monthlyWeatherProof = months2025.map((m, i) => {
   return {
     month: m.month,
     actualKwh: m.total,
-    expectedKwh: Math.round(expected * LockedFinancials.weatherAdjustedEnergyAvoided / LockedFinancials.conservativePresentationKwh), // weather-normalized expected
+    expectedKwh: Math.round(expected * ClimateConstants.weatherNormalizationFactor), // weather-normalized expected
     weatherImpact: Math.round(expected * 0.126),
   };
 });
