@@ -9,7 +9,7 @@ export interface EyedroSensor {
 }
 
 export interface EyedroDevice {
-  unit: string;            // G1..G3, FF1..FF4
+  unit: string;            // G1..G3, F1..F4
   devId: number;
   serialHex: string;
   firmware: string;
@@ -63,7 +63,7 @@ export const EYEDRO_DEVICES: EyedroDevice[] = [
     ],
   },
   {
-    unit: "FF1", devId: 44525, serialHex: "B1400AA5", firmware: "5.11.0.4",
+    unit: "F1", devId: 44525, serialHex: "B1400AA5", firmware: "5.11.0.4",
     state: "Active", aliasId: 47973, billProfileId: 22943,
     startedAt: new Date(1721061193 * 1000).toISOString(),
     sensors: [
@@ -74,7 +74,7 @@ export const EYEDRO_DEVICES: EyedroDevice[] = [
     ],
   },
   {
-    unit: "FF2", devId: 44522, serialHex: "B1400AA2", firmware: "5.11.0.4",
+    unit: "F2", devId: 44522, serialHex: "B1400AA2", firmware: "5.11.0.4",
     state: "Active", aliasId: 47975, billProfileId: 22943,
     startedAt: new Date(1721060673 * 1000).toISOString(),
     sensors: [
@@ -85,7 +85,7 @@ export const EYEDRO_DEVICES: EyedroDevice[] = [
     ],
   },
   {
-    unit: "FF3", devId: 44526, serialHex: "B1400AA6", firmware: "5.11.0.4",
+    unit: "F3", devId: 44526, serialHex: "B1400AA6", firmware: "5.11.0.4",
     state: "Active", aliasId: 49158, billProfileId: 22943,
     startedAt: new Date(1721061367 * 1000).toISOString(),
     sensors: [
@@ -96,7 +96,7 @@ export const EYEDRO_DEVICES: EyedroDevice[] = [
     ],
   },
   {
-    unit: "FF4", devId: 44523, serialHex: "B1400AA3", firmware: "5.11.0.4",
+    unit: "F4", devId: 44523, serialHex: "B1400AA3", firmware: "5.11.0.4",
     state: "Active", aliasId: 47972, billProfileId: 22943,
     startedAt: new Date(1721060850 * 1000).toISOString(),
     sensors: [
