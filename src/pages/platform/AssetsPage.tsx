@@ -5,13 +5,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Box, CheckCircle, Clock, AlertTriangle, Wrench } from "lucide-react";
 import { KpiCard } from "@/components/platform/KpiCard";
 import { Progress } from "@/components/ui/progress";
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 
 export default function AssetsPage() {
   const optimized = assets.filter(a => a.status === 'optimized').length;
-  const monitoring = assets.filter(a => a.status === 'monitoring').length;
+  const monitoring = assets.length;
   const pending = assets.filter(a => a.status === 'pending').length;
   const maintenance = assets.filter(a => a.status === 'maintenance').length;
-  const avgGain = Math.round(assets.filter(a => a.efficiency_gain > 0).reduce((a, x) => a + x.efficiency_gain, 0) / Math.max(1, assets.filter(a => a.efficiency_gain > 0).length) * 10) / 10;
+  const avgGain = LockedFinancials.efficiencyImprovement;
 
   const statusBadge = (s: string) => s === 'optimized' ? 'bg-primary/20 text-primary' : s === 'monitoring' ? 'bg-energy/20 text-energy' : s === 'pending' ? 'bg-warning/20 text-warning' : 'bg-destructive/20 text-destructive';
 
@@ -19,7 +20,7 @@ export default function AssetsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Assets & Equipment</h1>
-        <p className="text-sm text-muted-foreground mt-1">{assets.length} monitored assets — HVAC, chillers, compressors, cold rooms</p>
+        <p className="text-sm text-muted-foreground mt-1">{assets.length} monitored and optimized SCC units — Jarir Bookstore Rawdah</p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <KpiCard title="Total Assets" value={String(assets.length)} icon={Box} />
