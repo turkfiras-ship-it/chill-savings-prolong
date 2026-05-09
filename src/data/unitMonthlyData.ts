@@ -1,5 +1,8 @@
-// Rawdah Showroom — Per-Unit Monthly kW Consumption (2025)
+// Rawdah Showroom — Per-Unit Monthly kW Consumption
 // Units: G1, G2, G3, F1, F2, F3, F4, G8
+// Source: CONSUMPTION_SAVING_ANALYSIS_3.xlsx (billing-cycle data)
+// NOTE: Per-device data starts Dec 2024. Before that, only aggregate
+// Rawdah totals exist (see 23-24 sheet / aggregatedMonthlyConsumption).
 
 export interface UnitMonthlyData {
   month: string;
@@ -15,9 +18,12 @@ export interface UnitMonthlyData {
   totalWithG8: number;
 }
 
-// Monthly consumption per unit (kW) — from Excel monthly tabs
-// NOTE: F1 and F4 corrected to match Excel row assignments
+// Monthly consumption per unit (kWh) — from Excel monthly tabs
+// NOTE: F1 and F4 corrected to match Excel row assignments (Excel-F4 → user F1, Excel-F1 → user F4)
 export const unitMonthlyData2025: UnitMonthlyData[] = [
+  // ── 2024 ──
+  { month: 'December 2024', G1: 3713, G2: 3674, G3: 3845, F1: 3510, F2: 3145, F3: 2926, F4: 2330, G8: 853,   total: 23145, totalWithG8: 23998 },
+  // ── 2025 ──
   { month: 'January',   G1: 4784, G2: 3556, G3: 4652, F1: 2957, F2: 3941, F3: 3777, F4: 2714, G8: 776,   total: 26380, totalWithG8: 27157 },
   { month: 'February',  G1: 4140, G2: 3822, G3: 3758, F1: 3707, F2: 3623, F3: 4534, F4: 2021, G8: 1374,  total: 25607, totalWithG8: 26981 },
   { month: 'March',     G1: 5912, G2: 6508, G3: 5383, F1: 5747, F2: 5902, F3: 6611, F4: 4657, G8: 4208,  total: 40720, totalWithG8: 44928 },
@@ -30,6 +36,8 @@ export const unitMonthlyData2025: UnitMonthlyData[] = [
   { month: 'October',   G1: 5992, G2: 5785, G3: 5809, F1: 6264, F2: 7261, F3: 5870, F4: 3201, G8: 5757,  total: 40182, totalWithG8: 45939 },
   { month: 'November',  G1: 5359, G2: 4590, G3: 5049, F1: 5000, F2: 5880, F3: 5137, F4: 2408, G8: 3454,  total: 33424, totalWithG8: 36878 },
   { month: 'December',  G1: 2197, G2: 4248, G3: 3074, F1: 4216, F2: 3145, F3: 3214, F4: 2423, G8: 1750,  total: 22517, totalWithG8: 24267 },
+  // ── 2026 (partial billing cycle 13-Jan → 16-Feb 2026) ──
+  { month: 'January 2026', G1: 3313, G2: 4470, G3: 5033, F1: 5738, F2: 3501, F3: 4347, F4: 3144, G8: 0,   total: 29545, totalWithG8: 29545 },
 ];
 
 // Annual totals per unit (corrected F1/F4 swap)
