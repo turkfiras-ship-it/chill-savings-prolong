@@ -5,14 +5,16 @@ export interface MonthlyWeather {
   month: string;
   avgTemp2024: number;
   avgTemp2025: number;
+  avgTemp2026?: number; // populated as 2026 months close out (Open-Meteo archive)
   tempDiff: number; // positive = 2025 hotter
+  tempDiff2026vs2025?: number; // positive = 2026 hotter than 2025
   note?: string;
 }
 
 // Riyadh average high temperatures (°C) by month
 export const monthlyWeatherData: MonthlyWeather[] = [
-  { month: 'January',   avgTemp2024: 20.1, avgTemp2025: 21.3, tempDiff: 1.2 },
-  { month: 'February',  avgTemp2024: 23.0, avgTemp2025: 23.8, tempDiff: 0.8 },
+  { month: 'January',   avgTemp2024: 20.1, avgTemp2025: 21.3, avgTemp2026: 21.3, tempDiff: 1.2, tempDiff2026vs2025: 0.0, note: 'Jan-2026 nearly identical to Jan-2025; kWh dropped 16% — efficiency gain, not weather' },
+  { month: 'February',  avgTemp2024: 23.0, avgTemp2025: 23.8, avgTemp2026: 27.4, tempDiff: 0.8, tempDiff2026vs2025: 3.6, note: 'Feb-2026 ran +3.6°C hotter than Feb-2025; explains +10% kWh load' },
   { month: 'March',     avgTemp2024: 28.2, avgTemp2025: 30.1, tempDiff: 1.9, note: 'Early heat wave in 2025' },
   { month: 'April',     avgTemp2024: 33.5, avgTemp2025: 35.4, tempDiff: 1.9, note: 'Above-average heat' },
   { month: 'May',       avgTemp2024: 39.8, avgTemp2025: 41.2, tempDiff: 1.4 },
