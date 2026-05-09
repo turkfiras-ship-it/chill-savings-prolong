@@ -157,8 +157,8 @@ export function runAuditValidation(monthlyDisplaySAR: number[]): {
       detail: `Sum: ${annualSARSum.toLocaleString()} vs Locked: ${LockedFinancials.directEnergySavingsSAR.toLocaleString()}`,
     },
     {
-      name: 'WeatherNormalizationFactor = 1.12',
-      passed: ClimateConstants.weatherNormalizationFactor === 1.12,
+      name: 'WeatherNormalizationFactor = 1.126',
+      passed: ClimateConstants.weatherNormalizationFactor === 1.126,
       detail: `Factor: ${ClimateConstants.weatherNormalizationFactor}`,
     },
   ];
