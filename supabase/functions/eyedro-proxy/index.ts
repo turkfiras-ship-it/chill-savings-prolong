@@ -206,8 +206,21 @@ serve(async (req) => {
     });
   } catch (e) {
     console.error("eyedro-proxy error:", e);
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    // MyEyedro changed their dashboard auth flow — ev501 no longer returns an SID.
+    // Surface a clean 503 instead of a 500 so the UI can show a friendly message.
+    if (msg.startsWith("Login: no SID")) {
+      return new Response(
+        JSON.stringify({
+          ok: false,
+          disabled: true,
+          error: "MyEyedro dashboard login is currently unavailable (Eyedro changed their auth flow). Use the manual CSV/XLSX import or enable an official API key.",
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
     return new Response(
-      JSON.stringify({ ok: false, error: e instanceof Error ? e.message : "Unknown error" }),
+      JSON.stringify({ ok: false, error: msg }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }

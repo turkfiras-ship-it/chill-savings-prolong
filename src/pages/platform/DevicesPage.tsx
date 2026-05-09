@@ -36,11 +36,18 @@ export default function DevicesPage() {
       }
     } catch (e: any) {
       setFeedStatus("error");
-      setFeedError(e?.message || "Request failed");
+      // 503 from proxy = scrape disabled (Eyedro auth changed). Show friendly text.
+      const ctx = e?.context;
+      if (ctx?.status === 503 || /no SID|unavailable/i.test(e?.message || "")) {
+        setFeedError("MyEyedro live scrape unavailable — Eyedro changed their dashboard auth. Import your CSV export from /monitoring instead.");
+      } else {
+        setFeedError(e?.message || "Request failed");
+      }
     }
   };
 
-  useEffect(() => { pingLive(); }, []);
+  // Auto-poll disabled — endpoint is currently broken upstream. User can click "Poll Live Feed" to retry.
+  // useEffect(() => { pingLive(); }, []);
 
   return (
     <div className="space-y-6">
