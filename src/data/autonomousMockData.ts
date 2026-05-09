@@ -2,6 +2,7 @@
 // MOCK DATA — Autonomous Intelligence Layer
 // ═══════════════════════════════════════════════════════════════
 import { sites } from "@/data/mockData";
+import { unitMonthlyData2025, unitAnnualTotals, unitInfo } from "@/data/unitMonthlyData";
 
 function seeded(seed: number) {
   let s = seed;
@@ -79,23 +80,72 @@ export interface EquipmentRisk {
   runHours: number;
 }
 
+// ── Derived from REAL Rawdah per-unit kWh (unitMonthlyData2025) ──
+// Stress / risk model (transparent, no random numbers):
+//   - runHoursEquivalent  = annual_kWh / 30 kW  (25-ton RTU at avg 30 kW load when running)
+//   - peakRatio           = peakMonth_kWh / meanMonth_kWh  (cycling stress)
+//   - loadShare           = annual_kWh / max(unit annual)  (relative duty share)
+//   - failureRisk (0–95)  = round( 60 * loadShare + 35 * normalize(peakRatio) )
+//   - daysToFailure       = round( 365 * (1 - failureRisk/100) )  (linear proxy)
+// Degradation trend = inverted, normalized monthly consumption (high consumption month = lower health %).
 export const equipmentRisks: EquipmentRisk[] = (() => {
-  const rand = seeded(55);
-  const items = [
-    { id: "EQ-001", name: "G3 Compressor", type: "Compressor" as const, site: "Jarir — Rawdah", failureRisk: 68, daysToFailure: 21, lastMaintenance: "2025-11-15", runHours: 4820 },
-    { id: "EQ-002", name: "G2 Condenser Coil", type: "Condenser" as const, site: "Jarir — Rawdah", failureRisk: 54, daysToFailure: 45, lastMaintenance: "2025-10-02", runHours: 4520 },
-    { id: "EQ-003", name: "F3 Evaporator Coil", type: "Evaporator" as const, site: "Jarir — Rawdah", failureRisk: 47, daysToFailure: 55, lastMaintenance: "2025-09-20", runHours: 4180 },
-    { id: "EQ-004", name: "F4 Refrigerant Loop", type: "Refrigerant" as const, site: "Jarir — Rawdah", failureRisk: 35, daysToFailure: 90, lastMaintenance: "2026-01-10", runHours: 3680 },
-    { id: "EQ-005", name: "G1 Compressor", type: "Compressor" as const, site: "Jarir — Rawdah", failureRisk: 28, daysToFailure: 120, lastMaintenance: "2025-12-01", runHours: 3200 },
-    { id: "EQ-006", name: "F1 Condenser Fan Motor", type: "Condenser" as const, site: "Jarir — Rawdah", failureRisk: 41, daysToFailure: 70, lastMaintenance: "2025-11-28", runHours: 3920 },
-  ].map(eq => ({
-    ...eq,
-    degradationTrend: Array.from({ length: 30 }, (_, i) => ({
-      day: `Day ${i + 1}`,
-      health: Math.max(10, Math.round(100 - eq.failureRisk * (i / 30) - rand() * 10)),
-    })),
-  }));
-  return items.sort((a, b) => b.failureRisk - a.failureRisk);
+  const SCC_UNITS: { id: keyof typeof unitAnnualTotals; type: EquipmentRisk["type"]; component: string; lastMaint: string }[] = [
+    { id: "G1", type: "Compressor",  component: "Compressor (Lead)", lastMaint: "2025-12-01" },
+    { id: "G2", type: "Compressor",  component: "Compressor (Lead)", lastMaint: "2025-10-02" },
+    { id: "G3", type: "Condenser",   component: "Condenser Coil",    lastMaint: "2025-11-15" },
+    { id: "F1", type: "Compressor",  component: "Compressor + Duct", lastMaint: "2025-11-28" },
+    { id: "F2", type: "Evaporator",  component: "Evaporator Coil",   lastMaint: "2025-09-20" },
+    { id: "F3", type: "Condenser",   component: "Condenser Fan Motor", lastMaint: "2025-10-18" },
+    { id: "F4", type: "Refrigerant", component: "Refrigerant Loop",  lastMaint: "2026-01-10" },
+  ];
+
+  const months = unitMonthlyData2025.filter(m =>
+    !m.month.includes("2024") && !m.month.includes("2026")
+  ); // 12 months of 2025
+
+  const annualMax = Math.max(...SCC_UNITS.map(u => unitAnnualTotals[u.id] as number));
+
+  // peakRatio range across units, used to normalize 0..1
+  const peakRatios = SCC_UNITS.map(u => {
+    const vals = months.map(m => (m as any)[u.id] as number);
+    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    return Math.max(...vals) / mean;
+  });
+  const prMin = Math.min(...peakRatios);
+  const prMax = Math.max(...peakRatios);
+
+  return SCC_UNITS.map((u, idx) => {
+    const annual = unitAnnualTotals[u.id] as number;
+    const vals = months.map(m => (m as any)[u.id] as number);
+    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const peak = Math.max(...vals);
+    const peakRatio = peak / mean;
+
+    const loadShare = annual / annualMax;                          // 0..1
+    const peakNorm  = (peakRatio - prMin) / (prMax - prMin || 1);  // 0..1
+    const failureRisk = Math.min(95, Math.round(60 * loadShare + 35 * peakNorm));
+    const daysToFailure = Math.max(14, Math.round(365 * (1 - failureRisk / 100)));
+    const runHours = Math.round(annual / 30); // kWh ÷ avg 30 kW
+
+    // Health trend: month-by-month, inverted & rebased so heaviest month ≈ lowest health
+    const maxV = Math.max(...vals);
+    const degradationTrend = vals.map((v, i) => ({
+      day: months[i].month.slice(0, 3),
+      health: Math.max(20, Math.round(100 - (v / maxV) * (failureRisk + 15))),
+    }));
+
+    return {
+      id: `EQ-${String(idx + 1).padStart(3, "0")}`,
+      name: `${u.id} ${u.component}`,
+      type: u.type,
+      site: "Jarir — Rawdah",
+      failureRisk,
+      daysToFailure,
+      degradationTrend,
+      lastMaintenance: u.lastMaint,
+      runHours,
+    };
+  }).sort((a, b) => b.failureRisk - a.failureRisk);
 })();
 
 // ── 5. Cooling Demand Forecast ────────────────────────────
