@@ -1,6 +1,4 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { createHash, pbkdf2Sync, createDecipheriv, createCipheriv, randomBytes } from "node:crypto";
-import { Buffer } from "node:buffer";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,131 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
-const EV501 = "https://my.eyedro.com/ev501";
-const Z2_CLIENT = "8rnlPFXgI9jw";
-const CLIENT_NAME = "MyEyedro";
-const CLIENT_VERSION = "5.8.2.3";
-const AES_PASSWORD = "oszgbaMqXFHLj0NK3hQxy80SRob";
-
-let cachedSID: string | null = null;
-let cachedAt = 0;
-let cookieJar = "";
-const SID_TTL_MS = 25 * 60 * 1000;
-
-const md5Hex = (s: string) => createHash("md5").update(s).digest("hex");
-const sha256Hex = (s: string) => createHash("sha256").update(s).digest("hex");
-
-function decryptZ(z: string): any {
-  const hexBytes = Buffer.from(z.slice(0, 64), "hex");
-  const salt = hexBytes.subarray(0, 16);
-  const iv = hexBytes.subarray(16, 32);
-  const ct = Buffer.from(z.slice(64), "base64");
-  const key = pbkdf2Sync(AES_PASSWORD, salt, 10, 32, "sha1");
-  const d = createDecipheriv("aes-256-cbc", key, iv);
-  const out = Buffer.concat([d.update(ct), d.final()]).toString("utf8");
-  try { return JSON.parse(out); } catch { return { raw: out }; }
-}
-
-function encryptZ(plain: string): string {
-  const salt = randomBytes(16);
-  const iv = randomBytes(16);
-  const key = pbkdf2Sync(AES_PASSWORD, salt, 10, 32, "sha1");
-  const c = createCipheriv("aes-256-cbc", key, iv);
-  const ct = Buffer.concat([c.update(plain, "utf8"), c.final()]);
-  return salt.toString("hex") + iv.toString("hex") + ct.toString("base64");
-}
-
-function unwrap(data: any): any {
-  if (data && typeof data === "object" && typeof data.z === "string") {
-    try { return decryptZ(data.z); } catch { return data; }
-  }
-  return data;
-}
-
-async function ev501(params: Record<string, string>) {
-  const inner = new URLSearchParams({ ...params, Client: CLIENT_NAME, Version: CLIENT_VERSION, z2: Z2_CLIENT }).toString();
-  const z = encryptZ(inner);
-  const r = await fetch(EV501, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      "Origin": "https://my.eyedro.com",
-      "Referer": "https://my.eyedro.com/",
-      "X-Requested-With": "XMLHttpRequest",
-      "User-Agent": "Mozilla/5.0",
-      ...(cookieJar ? { "Cookie": cookieJar } : {}),
-    },
-    body: new URLSearchParams({ z }).toString(),
-  });
-  const text = await r.text();
-  let data: any; try { data = JSON.parse(text); } catch { data = { raw: text }; }
-  const sc = r.headers.get("set-cookie");
-  if (sc) {
-    const parts = sc.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
-    for (const p of parts) {
-      const m = p.trim().match(/^([^=]+)=([^;]+)/);
-      if (m) {
-        const re = new RegExp(`(^|;\\s*)${m[1]}=[^;]*`);
-        cookieJar = cookieJar.match(re) ? cookieJar.replace(re, `$1${m[1]}=${m[2]}`) : (cookieJar ? cookieJar + "; " : "") + `${m[1]}=${m[2]}`;
-      }
-    }
-  }
-  return { ok: r.ok, data: unwrap(data), setCookie: sc };
-}
-
-async function primeCookies() {
-  try {
-    const r = await fetch("https://my.eyedro.com/", {
-      headers: { "User-Agent": "Mozilla/5.0", "Accept": "text/html,*/*" },
-    });
-    const sc = r.headers.get("set-cookie");
-    if (sc) {
-      const parts = sc.split(/,(?=\s*[A-Za-z0-9_-]+=)/);
-      for (const p of parts) {
-        const m = p.trim().match(/^([^=]+)=([^;]+)/);
-        if (m) cookieJar = (cookieJar ? cookieJar + "; " : "") + `${m[1]}=${m[2]}`;
-      }
-    }
-    await r.text();
-  } catch {}
-}
-
-async function login(): Promise<string> {
-  const username = Deno.env.get("EYEDRO_USERNAME") || "chadinkairouz@gmail.com";
-  const password = Deno.env.get("EYEDRO_PASSWORD");
-  if (!password) throw new Error("EYEDRO_PASSWORD missing");
-  if (!cookieJar) await primeCookies();
-  const Hash32 = md5Hex(username.toLowerCase() + password.toLowerCase());
-  const Hash64 = sha256Hex(username + password);
-  const res = await ev501({ Cmd: "Login", Username: username, Hash32, Hash64 });
-  const d = res.data ?? {};
-  let sid = d.SID || d.Sid || d?.Data?.SID || d?.Result?.SID;
-  if (!sid && res.setCookie) {
-    const m = res.setCookie.match(/(?:SID|sid|PHPSESSID)=([^;]+)/);
-    if (m) sid = m[1];
-  }
-  if (!sid) throw new Error("Login failed: no SID. data=" + JSON.stringify(d).slice(0, 400));
-  cachedSID = String(sid); cachedAt = Date.now();
-  return cachedSID;
-}
-
-async function getSID(force = false) {
-  if (!force && cachedSID && Date.now() - cachedAt < SID_TTL_MS) return cachedSID;
-  return await login();
-}
-
-function deepFind(obj: any, keys: string[]): any {
-  if (obj == null) return undefined;
-  if (typeof obj !== "object") return undefined;
-  for (const k of Object.keys(obj)) {
-    if (keys.some(kk => kk.toLowerCase() === k.toLowerCase())) return obj[k];
-  }
-  for (const k of Object.keys(obj)) {
-    const v = deepFind(obj[k], keys);
-    if (v !== undefined) return v;
-  }
-  return undefined;
-}
+const API_BASE = "https://api.eyedro.com/customer";
 
 function num(v: any): number | null {
   if (v === null || v === undefined || v === "") return null;
@@ -140,64 +14,130 @@ function num(v: any): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-async function fetchAndInsert(supabase: any) {
-  let sid = await getSID();
-  let res = await ev501({ Cmd: "GetUserDevicesLive", SID: sid });
-  const errStr = JSON.stringify(res.data ?? {}).toLowerCase();
-  if (!res.ok || errStr.includes("session") || errStr.includes("invalid sid")) {
-    sid = await getSID(true);
-    res = await ev501({ Cmd: "GetUserDevicesLive", SID: sid });
-  }
+async function getJson(url: string) {
+  const r = await fetch(url, {
+    headers: {
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept-Language": "en-US,en;q=0.9",
+    },
+  });
+  const text = await r.text();
+  let j: any; try { j = JSON.parse(text); } catch { j = { raw: text }; }
+  if (!r.ok) throw new Error(`HTTP ${r.status}: ${text.slice(0, 300)}`);
+  return j;
+}
 
-  const data = res.data ?? {};
-  // Try to find a list of devices
-  const list: any[] = deepFind(data, ["DeviceList", "Devices", "UserDeviceList", "List"]) ?? [];
-  const rows: any[] = [];
-  const ts = new Date().toISOString();
-
-  if (Array.isArray(list)) {
-    for (const dev of list) {
-      const serial = String(deepFind(dev, ["SerialHex", "Serial", "DeviceSerial", "DevSerial"]) ?? "").toUpperCase();
-      const power_w = num(deepFind(dev, ["PowerNowWatts", "PowerW", "Watts", "PowerNow"]));
-      const power_kw_direct = num(deepFind(dev, ["PowerKW", "PowerNowKW", "kW"]));
-      const power_kw = power_kw_direct ?? (power_w !== null ? power_w / 1000 : null);
-      if (!serial || power_kw === null) continue;
-      rows.push({ ts, device_serial: serial, power_kw, payload: dev });
-    }
-  }
-
-  if (rows.length === 0) {
-    return { inserted: 0, sample: JSON.stringify(data).slice(0, 500) };
-  }
-  const { error } = await supabase.from("eyedro_readings").insert(rows);
-  if (error) throw error;
-  return { inserted: rows.length };
+function ymd(d: Date): string {
+  return d.toISOString().slice(0, 10);
 }
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
-  try {
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-    const url = new URL(req.url);
-    const loops = Math.max(1, Math.min(6, parseInt(url.searchParams.get("loops") || "6")));
-    const intervalMs = Math.max(1000, parseInt(url.searchParams.get("interval") || "10000"));
 
-    const results: any[] = [];
-    for (let i = 0; i < loops; i++) {
-      const start = Date.now();
-      try {
-        const r = await fetchAndInsert(supabase);
-        results.push({ i, ...r });
-      } catch (e) {
-        results.push({ i, error: e instanceof Error ? e.message : String(e) });
-      }
-      const elapsed = Date.now() - start;
-      if (i < loops - 1) await new Promise(r => setTimeout(r, Math.max(0, intervalMs - elapsed)));
+  try {
+    const userKey = Deno.env.get("EYEDRO_USER_KEY");
+    if (!userKey) throw new Error("EYEDRO_USER_KEY not configured");
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+    const url = new URL(req.url);
+    // How many days back to pull (default 1 = yesterday + today)
+    const daysBack = Math.max(0, Math.min(31, parseInt(url.searchParams.get("days") || "1")));
+
+    // 1. Get device list
+    const devList = await getJson(`${API_BASE}/?UserKey=${userKey}&Action=GetUserDevicesList`);
+    const devices: any[] = devList.Devices || devList.DeviceList || [];
+    if (devices.length === 0) {
+      return new Response(JSON.stringify({ ok: false, error: "No devices returned", sample: JSON.stringify(devList).slice(0, 500) }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
-    return new Response(JSON.stringify({ ok: true, results }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    // Build date list (UTC)
+    const today = new Date();
+    const dates: string[] = [];
+    for (let i = daysBack; i >= 0; i--) {
+      const d = new Date(today.getTime() - i * 86400000);
+      dates.push(ymd(d));
+    }
+
+    let totalInserted = 0;
+    const errors: any[] = [];
+    const perDevice: any[] = [];
+
+    for (const dev of devices) {
+      const sn = String(dev.SerialNumber || dev.Serial || dev.SerialHex || "").toUpperCase();
+      if (!sn) continue;
+      let devInserted = 0;
+
+      for (const ds of dates) {
+        try {
+          const data = await getJson(`${API_BASE}/?UserKey=${userKey}&Action=GetData&DeviceSerial=${sn}&Date=${ds}&Resolution=Hour`);
+          const points: any[] = data.Data || data.Points || [];
+          const rows: any[] = [];
+          for (const pt of points) {
+            // Try common field names
+            const tsRaw = pt.Time || pt.Timestamp || pt.DateTime || pt.Date;
+            let ts: string | null = null;
+            if (typeof tsRaw === "number") {
+              ts = new Date(tsRaw * (tsRaw > 1e12 ? 1 : 1000)).toISOString();
+            } else if (typeof tsRaw === "string") {
+              const d = new Date(tsRaw);
+              if (!isNaN(d.getTime())) ts = d.toISOString();
+            }
+            if (!ts) continue;
+
+            const wh = num(pt.Wh ?? pt.WattHours ?? pt.EnergyWh);
+            const kwh = num(pt.kWh ?? pt.KWh ?? pt.Energy) ?? (wh !== null ? wh / 1000 : null);
+            const w = num(pt.W ?? pt.Watts ?? pt.PowerW);
+            const kw = num(pt.kW ?? pt.KW ?? pt.Power) ?? (w !== null ? w / 1000 : null);
+
+            if (kwh === null && kw === null) continue;
+
+            rows.push({
+              ts,
+              device_serial: sn,
+              power_kw: kw,
+              energy_kwh: kwh,
+              voltage: num(pt.V ?? pt.Voltage),
+              current_a: num(pt.A ?? pt.Current),
+              payload: pt,
+            });
+          }
+
+          if (rows.length > 0) {
+            const { error } = await supabase
+              .from("eyedro_readings")
+              .upsert(rows, { onConflict: "device_serial,ts", ignoreDuplicates: true });
+            if (error) {
+              errors.push({ sn, ds, error: error.message });
+            } else {
+              devInserted += rows.length;
+              totalInserted += rows.length;
+            }
+          }
+
+          // gentle pacing
+          await new Promise(r => setTimeout(r, 150));
+        } catch (e) {
+          errors.push({ sn, ds, error: e instanceof Error ? e.message : String(e) });
+        }
+      }
+      perDevice.push({ sn, inserted: devInserted });
+    }
+
+    return new Response(JSON.stringify({
+      ok: true,
+      devices: devices.length,
+      days: dates,
+      totalInserted,
+      perDevice,
+      errors,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (e) {
     return new Response(JSON.stringify({ ok: false, error: e instanceof Error ? e.message : String(e) }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
