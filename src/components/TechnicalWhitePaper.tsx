@@ -270,26 +270,26 @@ export function TechnicalWhitePaper() {
           <div className="print:break-before-page">
             <SectionHeader number={7} title="Engineering Discussion" />
             <p className="mt-4">
-              The observed 14.1% efficiency improvement exceeds the conservative lower bound of industry estimates (10–15%) while remaining well below aggressive marketing claims (25–35%). This positioning strengthens the credibility of the result, as it aligns with the expected thermodynamic impact of compressor modulation on fixed-speed package units operating under sustained high-ambient conditions.
+              The observed {LockedFinancials.efficiencyImprovement}% efficiency improvement exceeds the conservative lower bound of industry estimates (10–15%) while remaining well below aggressive marketing claims (25–35%). This positioning strengthens the credibility of the result, as it aligns with the expected thermodynamic impact of compressor modulation on fixed-speed package units operating under sustained high-ambient conditions.
             </p>
             <p className="mt-3">
               The 61.8% peak demand reduction (495 kW to 189 kW) merits particular attention. This magnitude of demand-side reduction suggests that the smart control system effectively manages compressor cycling to avoid simultaneous start-up events across the seven units — a known contributor to peak demand charges and electrical infrastructure stress.
             </p>
             <p className="mt-3">
-              The fact that measurable savings were achieved during a year with +1.3°C higher average temperatures provides a robust stress-test of system efficacy. Under conventional operations (without smart controls), the hotter 2025 conditions would have been expected to increase cooling costs by approximately 8–12% ({weatherSummary.additionalCoolingCostLow.toLocaleString()}–{weatherSummary.additionalCoolingCostHigh.toLocaleString()} SAR). The system not only absorbed this additional load but delivered net positive savings, indicating genuine thermodynamic efficiency gains rather than mere weather-driven variance.
+               The fact that measurable savings were achieved during a year with +1.3°C higher average temperatures provides a robust stress-test of system efficacy. Under conventional operations (without smart controls), the hotter 2025 conditions would have been expected to increase cooling costs by approximately {ClimateConstants.coolingLoadImpactRange} ({weatherSummary.additionalCoolingCostLow.toLocaleString()}–{weatherSummary.additionalCoolingCostHigh.toLocaleString()} SAR). The system not only absorbed this additional load but delivered net positive savings, indicating genuine thermodynamic efficiency gains rather than mere weather-driven variance.
             </p>
 
             <p className="mt-4 font-medium">Financial Return Analysis:</p>
             <Equation
               label="Simple Payback Period"
-              formula="Payback = System Cost / Annual Savings = 175,000 / 33,052 ≈ 5.3 years (conservative, weather-adjusted)"
+              formula={`Payback = System Cost / Annual Savings = 175,000 / ${LockedFinancials.directEnergySavingsSAR.toLocaleString()} ≈ ${LockedFinancials.paybackYearsEnergyOnly.toFixed(1)} years (energy-only, weather-adjusted)`}
             />
             <Equation
               label="Weather-Adjusted ROI (Annual)"
-              formula="ROI = (Annual Savings / System Cost) × 100 = (33,052 / 175,000) × 100 ≈ 18.9%"
+              formula={`ROI = (Annual Savings / System Cost) × 100 = (${LockedFinancials.directEnergySavingsSAR.toLocaleString()} / 175,000) × 100 ≈ ${((LockedFinancials.directEnergySavingsSAR / LockedFinancials.systemInvestment) * 100).toFixed(1)}%`}
             />
             <p className="text-muted-foreground mt-2">
-              Note: Payback calculations use weather-adjusted savings (33,052 SAR) as the conservative baseline. Under normalized weather conditions, the effective payback period may be shorter due to the elimination of the +1.3°C thermal penalty absorbed during the observation period.
+              Note: Payback calculations use weather-adjusted direct energy savings ({LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR) as the baseline. Combined operational incentives are reported separately and are not mixed into direct energy savings.
             </p>
           </div>
 
@@ -322,7 +322,7 @@ export function TechnicalWhitePaper() {
           <div>
             <SectionHeader number={9} title="Conclusion" />
             <p className="mt-4">
-              This field study provides invoice-backed validation that retrofit smart control systems deliver measurable, economically significant energy savings in high-ambient commercial cooling applications. The 14.1% efficiency gain and 33,052 SAR annual savings — achieved during a year 1.3°C hotter than baseline — demonstrate robust performance under thermal stress conditions that exceed typical operating assumptions.
+              This field study provides invoice-backed validation that retrofit smart control systems deliver measurable, economically significant energy savings in high-ambient commercial cooling applications. The {LockedFinancials.efficiencyImprovement}% efficiency gain and {LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR annual direct energy savings — achieved during a year 1.3°C hotter than baseline — demonstrate robust performance under thermal stress conditions that exceed typical operating assumptions.
             </p>
             <p className="mt-3">
               The 61.8% peak demand reduction further suggests significant potential for demand-side management benefits, including reduced electrical infrastructure sizing requirements and lower peak demand charges for operators on time-of-use tariff structures.
