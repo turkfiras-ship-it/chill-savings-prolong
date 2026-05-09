@@ -375,7 +375,7 @@ export default function MonitoringPage() {
             </div>
             {Object.keys(deviceLive).length === 0 && (
               <p className="text-[11px] text-muted-foreground mt-3">
-                Waiting for the Eyedro pusher to send readings tagged with each device serial (G1=00C004EC, G2=00C003A3, G3=B1400AA4, FF1=B1400AA5, FF2=B1400AA2, FF3=B1400AA6, FF4=B1400AA3).
+                Waiting for the Eyedro pusher to send readings tagged with each device serial (G1=00C004EC, G2=00C003A3, G3=B1400AA4, F1=B1400AA5, F2=B1400AA2, F3=B1400AA6, F4=B1400AA3).
               </p>
             )}
           </CardContent>
