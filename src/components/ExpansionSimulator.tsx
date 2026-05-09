@@ -20,9 +20,9 @@ const DEFAULT_SYSTEM_COST = LockedFinancials.systemInvestment;
 export function ExpansionSimulator() {
   const [branches, setBranches] = useState(20);
   const [avgBill, setAvgBill] = useState(220028);
-  const [weatherAdj, setWeatherAdj] = useState(DEFAULT_WEATHER);
-  const [efficiencyGain, setEfficiencyGain] = useState(DEFAULT_EFFICIENCY);
-  const [systemCostPerBranch, setSystemCostPerBranch] = useState(DEFAULT_SYSTEM_COST);
+  const [weatherAdj, setWeatherAdj] = useState<number>(DEFAULT_WEATHER);
+  const [efficiencyGain, setEfficiencyGain] = useState<number>(DEFAULT_EFFICIENCY);
+  const [systemCostPerBranch, setSystemCostPerBranch] = useState<number>(DEFAULT_SYSTEM_COST);
 
   const results = useMemo(() => {
     const weatherFactor = 1 + weatherAdj / 100;
