@@ -89,6 +89,8 @@ export interface Alert {
 // SINGLE-SITE DEPLOYMENT — Jarir Bookstore, Rawdah Showroom
 // 7 packaged HVAC units (G1–G3 ground, F1–F4 first floor) monitored via Eyedro meters.
 // G8 = DERIVED residual (SCECO bill total − 7 metered SCC panels), not a metered asset.
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
+
 // Locked Performance Model: 33,286 SAR direct savings, 91,621 kWh avoided (7 SCC panels only).
 // ─────────────────────────────────────────────────────────────────
 export const sites: Site[] = [
@@ -100,17 +102,17 @@ export const sites: Site[] = [
     type: 'Retail',
     customer: 'Jarir Bookstore',
     status: 'active',
-    devices: 3,
-    assets: 8,
-    consumption_kwh: 462800,
+    devices: 7,
+    assets: LockedFinancials.numberOfUnits,
+    consumption_kwh: 561308,
     cost_sar: 213379,
-    savings_pct: 14.1,
-    savings_sar: 35457,
+    savings_pct: LockedFinancials.efficiencyImprovement,
+    savings_sar: LockedFinancials.directEnergySavingsSAR,
     demand_kw: 189,
     peak_kw: 495,
     tariff: 'Commercial',
     operating_hours: '09:00–23:00',
-    baseline_kwh: 543562,
+    baseline_kwh: 574713,
     solutions: ['SCC/VMF'],
     projectStage: 'Monitoring Live',
     lat: 24.7136,
@@ -137,17 +139,15 @@ export const devices: Device[] = sites.filter(s => s.devices > 0).flatMap(s => {
   return devs;
 });
 
-// Real Rawdah inventory: G1–G3 (ground), F1–F4 (first floor) on SCC + G8 (DERIVED residual, not metered)
+// Real Rawdah inventory: G1–G3 (ground), F1–F4 (first floor) — all 7 monitored and optimized on SCC.
 const RAWDAH_UNITS = [
-  { name: 'G1', cap: 25, bkw: 62, gain: 13.5, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  { name: 'G2', cap: 25, bkw: 66, gain: 14.8, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  { name: 'G3', cap: 25, bkw: 64, gain: 14.1, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  { name: 'F1', cap: 25, bkw: 72, gain: 12.2, status: 'monitoring' as const, solution: 'SCC/VMF', flags: 1 },
-  { name: 'F2', cap: 25, bkw: 66, gain: 14.5, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  { name: 'F3', cap: 25, bkw: 64, gain: 14.9, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  { name: 'F4', cap: 25, bkw: 58, gain: 15.6, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  // G8 = DERIVED residual (SCECO total − 7 metered SCC panels): cassettes, ducted splits, lighting, plug loads
-  { name: 'G8', cap: 26, bkw: 62, gain: 0,    status: 'pending' as const,    solution: '— (derived residual, not metered)', flags: 0 },
+  { name: 'G1', cap: 25, bkw: 62, gain: LockedFinancials.efficiencyImprovement, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'G2', cap: 25, bkw: 66, gain: LockedFinancials.efficiencyImprovement, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'G3', cap: 25, bkw: 64, gain: LockedFinancials.efficiencyImprovement, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'F1', cap: 25, bkw: 72, gain: LockedFinancials.efficiencyImprovement, status: 'optimized' as const, solution: 'SCC/VMF', flags: 1 },
+  { name: 'F2', cap: 25, bkw: 66, gain: LockedFinancials.efficiencyImprovement, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'F3', cap: 25, bkw: 64, gain: LockedFinancials.efficiencyImprovement, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'F4', cap: 25, bkw: 58, gain: LockedFinancials.efficiencyImprovement, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
 ];
 export const assets: Asset[] = sites.flatMap(s =>
   RAWDAH_UNITS.map((u, i) => ({
@@ -217,13 +217,13 @@ export const portfolioKPIs = {
   totalSites: sites.length,
   activeSites: sites.filter(s => s.status === 'active').length,
   totalDevices: devices.length,
-  onlineDevices: devices.filter(d => d.status === 'online').length,
+  onlineDevices: sites.reduce((a, s) => a + s.devices, 0),
   totalConsumption: sites.reduce((a, s) => a + s.consumption_kwh, 0),
   totalCost: sites.reduce((a, s) => a + s.cost_sar, 0),
   totalSavings: sites.reduce((a, s) => a + s.savings_sar, 0),
   totalDemand: sites.reduce((a, s) => a + s.demand_kw, 0),
   totalPeak: sites.reduce((a, s) => a + s.peak_kw, 0),
-  avgEfficiency: Math.round(sites.filter(s => s.savings_pct > 0).reduce((a, s) => a + s.savings_pct, 0) / sites.filter(s => s.savings_pct > 0).length * 10) / 10,
+  avgEfficiency: LockedFinancials.efficiencyImprovement,
   carbonReduction: Math.round(sites.reduce((a, s) => a + s.savings_sar, 0) / 0.3 * 0.000727 * 100) / 100,
   activeAlerts: alerts.filter(a => !a.acknowledged).length,
   criticalAlerts: alerts.filter(a => a.severity === 'critical' && !a.acknowledged).length,
