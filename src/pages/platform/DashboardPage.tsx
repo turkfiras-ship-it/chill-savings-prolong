@@ -8,6 +8,7 @@ import { CoolingForecast } from "@/components/platform/CoolingForecast";
 import { PortfolioHealthRing } from "@/components/platform/PortfolioHealthRing";
 import { SystemUptimeBar } from "@/components/platform/SystemUptimeBar";
 import { PageTransition } from "@/components/platform/PageTransition";
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
@@ -41,7 +42,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Command Center</h1>
-            <p className="text-sm text-muted-foreground mt-1">Portfolio overview — {kpis.activeSites} active sites monitored</p>
+            <p className="text-sm text-muted-foreground mt-1">Jarir Rawdah overview — {kpis.activeSites} active site monitored</p>
           </div>
           <div className="hidden md:flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-savings pulse-dot" />
@@ -53,14 +54,14 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           <AnimatedKpiCard title="Total Consumption" value={Number((kpis.totalConsumption / 1e6).toFixed(1))} suffix="M kWh" decimals={1} icon={Zap} variant="energy" trend={{ value: "4.2% vs last year", positive: false }} delay={0} sparkline={consumptionSpark} />
           <AnimatedKpiCard title="Total Cost" value={Number((kpis.totalCost / 1e6).toFixed(2))} suffix="M SAR" decimals={2} icon={DollarSign} subtitle="Annual portfolio cost" delay={100} sparkline={costSpark} />
-          <AnimatedKpiCard title="Total Savings" value={Number((kpis.totalSavings / 1000).toFixed(0))} suffix="K SAR" icon={TrendingUp} variant="savings" trend={{ value: "12.3% improvement", positive: true }} delay={200} sparkline={savingsSpark} />
+          <AnimatedKpiCard title="Total Savings" value={Number((kpis.totalSavings / 1000).toFixed(0))} suffix="K SAR" icon={TrendingUp} variant="savings" trend={{ value: `${LockedFinancials.efficiencyImprovement}% savings`, positive: true }} delay={200} sparkline={savingsSpark} />
           <AnimatedKpiCard title="Active Sites" value={kpis.activeSites} suffix={` / ${kpis.totalSites}`} icon={MapPin} subtitle={`${kpis.totalSites - kpis.activeSites} pending`} delay={300} />
           <AnimatedKpiCard title="Active Alerts" value={kpis.activeAlerts} icon={Bell} variant={kpis.criticalAlerts > 0 ? 'danger' : 'warning'} subtitle={`${kpis.criticalAlerts} critical`} delay={400} />
         </div>
 
         {/* Animated KPI row 2 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <AnimatedKpiCard title="Connected Devices" value={kpis.onlineDevices} suffix={` / ${kpis.totalDevices}`} icon={Cpu} delay={500} />
+          <AnimatedKpiCard title="Units Monitored" value={kpis.onlineDevices} suffix={` / ${kpis.totalDevices}`} icon={Cpu} delay={500} />
           <AnimatedKpiCard title="Assets Optimized" value={kpis.optimizedAssets} suffix={` / ${kpis.totalAssets}`} icon={Box} variant="savings" delay={600} />
           <AnimatedKpiCard title="Carbon Reduced" value={kpis.carbonReduction} suffix=" tCO₂" decimals={2} icon={Leaf} variant="energy" delay={700} />
           <AnimatedKpiCard title="Open Projects" value={kpis.openProjects} icon={FolderKanban} delay={800} />
