@@ -567,7 +567,7 @@ export function ROIAnalysis2() {
         <p className="text-sm font-bold text-teal-400 mb-3">⚡ Why {totalRawSavingsPct.toFixed(1)}% Raw Savings Understates the True Value</p>
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-            <p className="font-semibold text-white mb-1">① Weather: 2025 was +1.3°C hotter → +12% cooling demand</p>
+            <p className="font-semibold text-white mb-1">① Weather: 2025 was +1.3°C hotter → +12.6% cooling demand</p>
             <p className="text-slate-400">The building <em>needed</em> 12% more energy just to maintain the same comfort. Any kWh savings on top of that is a true efficiency gain — the raw % ignores this extra demand pressure entirely.</p>
             <p className="text-teal-400 font-semibold mt-1">True adjusted savings: {totalTrueSavingsKw.toLocaleString()} kWh ({totalTrueSavingsPct.toFixed(1)}%)</p>
           </div>
