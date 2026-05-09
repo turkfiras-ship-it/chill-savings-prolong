@@ -15,7 +15,13 @@ function num(v: any): number | null {
 }
 
 async function getJson(url: string) {
-  const r = await fetch(url, { headers: { "Accept": "application/json" } });
+  const r = await fetch(url, {
+    headers: {
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept-Language": "en-US,en;q=0.9",
+    },
+  });
   const text = await r.text();
   let j: any; try { j = JSON.parse(text); } catch { j = { raw: text }; }
   if (!r.ok) throw new Error(`HTTP ${r.status}: ${text.slice(0, 300)}`);
