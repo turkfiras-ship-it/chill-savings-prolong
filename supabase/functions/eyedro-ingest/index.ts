@@ -87,10 +87,12 @@ Deno.serve(async (req) => {
     }
 
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
-    const { error } = await supabase.from("eyedro_readings").insert(normalized);
+    const { error } = await supabase
+      .from("eyedro_readings")
+      .upsert(normalized, { onConflict: "device_serial,ts", ignoreDuplicates: true });
     if (error) throw error;
 
-    return new Response(JSON.stringify({ ok: true, inserted: normalized.length }), {
+    return new Response(JSON.stringify({ ok: true, received: normalized.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
