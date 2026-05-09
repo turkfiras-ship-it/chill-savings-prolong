@@ -35,8 +35,8 @@ export interface OptimizationOpp {
 // Real opportunities — every SAR figure derives from Rawdah kWh × locked rate.
 export const optimizationOpps: OptimizationOpp[] = [
   {
-    id: "OPT-G8", strategy: "Migrate G8 panel onto SCC",
-    description: `G8 (26-ton multi-unit panel) consumed ${unitAnnualTotals.G8.toLocaleString()} kWh in 2025 — the largest uncontrolled load on site. Bringing it under SCC unlocks the next major savings tranche.`,
+    id: "OPT-G8", strategy: "Meter & control G8 residual loads",
+    description: `G8 is a DERIVED residual (SCECO bill total − 7 metered SCC panels), not a single asset. It accounted for ${unitAnnualTotals.G8.toLocaleString()} kWh in 2025 — all uncontrolled non-SCC loads (cassettes, ducted splits, plug loads). Adding meters and SCC control here unlocks the next major savings tranche.`,
     potentialSavings: sarFor(Math.round(unitAnnualTotals.G8 * 0.14)),
     confidence: 88, complexity: "Medium", energyReduction: 14,
     costSavings: sarFor(Math.round(unitAnnualTotals.G8 * 0.14)),
