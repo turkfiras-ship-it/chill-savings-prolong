@@ -4,20 +4,21 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, ReferenceLine,
 } from "recharts";
+import { ClimateConstants, LockedFinancials } from "@/data/lockedPerformanceModel";
 
 // ─── CFO-LOCKED CONSTANTS ───────────────────────────
 const ACTUAL_BILL_2024 = 220028;
 const ACTUAL_BILL_2025 = 213379;
-const WEATHER_FACTOR = 1.12;
-const EXPECTED_2025 = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR); // 246431
-const ENERGY_SAVINGS_SAR = 35457; // Conservative presentation, bill-verified + weather-adjusted
-const MAINTENANCE_DOWNTIME_SAR = 22660;
+const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor;
+const EXPECTED_2025 = LockedFinancials.expectedBill2025WithoutSCC;
+const ENERGY_SAVINGS_SAR = LockedFinancials.directEnergySavingsSAR;
+const MAINTENANCE_DOWNTIME_SAR = LockedFinancials.indirectTotal;
 const RECURRING_ANNUAL = ENERGY_SAVINGS_SAR + MAINTENANCE_DOWNTIME_SAR; // 58117
-const SYSTEM_COST = 175000;
-const DEFERRED_CAPITAL = 385000;
+const SYSTEM_COST = LockedFinancials.systemInvestment;
+const DEFERRED_CAPITAL = LockedFinancials.replacementCostAvg;
 const CAPITAL_RECOVERY_YRS = +(SYSTEM_COST / RECURRING_ANNUAL).toFixed(1); // 3.0
-const ANNUAL_KWH_SAVED = 80762;
-const EFFICIENCY_PCT = 14.1;
+const ANNUAL_KWH_SAVED = LockedFinancials.weatherAdjustedEnergyAvoided;
+const EFFICIENCY_PCT = LockedFinancials.efficiencyImprovement;
 const AUGUST_2025_RAW = 71586;
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -27,7 +28,7 @@ const KW_2025 = [26381,25607,40720,51248,51220,62835,68338,71586,56067,40182,323
 // ─── Validation ─────────────────────────────────────
 function useValidation() {
   const w: string[] = [];
-  if (EXPECTED_2025 !== 246431) w.push("Weather adjustment logic mismatch.");
+  if (EXPECTED_2025 !== LockedFinancials.expectedBill2025WithoutSCC) w.push("Weather adjustment logic mismatch.");
   if (KW_2025[7] !== AUGUST_2025_RAW) w.push("August 2025 Raw kWh mismatch.");
   if (CAPITAL_RECOVERY_YRS > 3.2 || CAPITAL_RECOVERY_YRS < 3.0) w.push("Capital recovery out of range.");
   return w;
@@ -63,8 +64,8 @@ function ExecutiveKPIs() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <KPICard label="5-Year Net Benefit" value="296,060" unit="SAR (recurring)" />
           <KPICard label="10-Year Modeled Value" value="942,120" unit="SAR" sub="Recurring + Deferred Capital" />
-          <KPICard label="Efficiency Improvement" value="14.1" unit="%" positive />
-          <KPICard label="Energy Avoided" value="80,762" unit="kWh" positive />
+          <KPICard label="Efficiency Improvement" value={EFFICIENCY_PCT.toFixed(1)} unit="%" positive />
+          <KPICard label="Energy Avoided" value={ANNUAL_KWH_SAVED.toLocaleString()} unit="kWh" positive />
         </div>
 
         <p className="text-xs text-muted-foreground mt-8 text-center">
@@ -243,13 +244,13 @@ function Methodology() {
         <div className="flex flex-wrap items-center justify-center gap-3 md:gap-4 mb-12">
           <StepBox label="2024 Actual" value="220,028 SAR" variant="neutral" />
           <StepArrow />
-          <StepBox label="12% Weather Normalization" value="× 1.12" variant="neutral" />
+          <StepBox label="12.6% Weather Normalization" value="× 1.126" variant="neutral" />
           <StepArrow />
-          <StepBox label="Expected 2025" value="246,431 SAR" variant="neutral" />
+          <StepBox label="Expected 2025" value={`${EXPECTED_2025.toLocaleString()} SAR`} variant="neutral" />
           <StepArrow />
           <StepBox label="Actual 2025" value="213,379 SAR" variant="neutral" />
           <StepArrow />
-          <StepBox label="Avoided Cost" value="33,052 SAR" variant="positive" />
+          <StepBox label="Avoided Cost" value={`${ENERGY_SAVINGS_SAR.toLocaleString()} SAR`} variant="positive" />
         </div>
 
         {/* Integrity */}
