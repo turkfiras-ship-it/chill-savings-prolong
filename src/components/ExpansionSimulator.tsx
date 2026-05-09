@@ -11,10 +11,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Building2, TrendingDown, Calculator, Clock } from "lucide-react";
+import { ClimateConstants, LockedFinancials } from "@/data/lockedPerformanceModel";
 
-const DEFAULT_WEATHER = 12;
-const DEFAULT_EFFICIENCY = 14.1;
-const DEFAULT_SYSTEM_COST = 162500; // 25000 SAR × 6.5 avg units
+const DEFAULT_WEATHER = ClimateConstants.adoptedNormalizationPct;
+const DEFAULT_EFFICIENCY = LockedFinancials.efficiencyImprovement;
+const DEFAULT_SYSTEM_COST = LockedFinancials.systemInvestment;
 
 export function ExpansionSimulator() {
   const [branches, setBranches] = useState(20);
@@ -112,7 +113,7 @@ export function ExpansionSimulator() {
               max={20}
               step={1}
             />
-            <p className="text-xs text-muted-foreground">Default: 12% (based on Rawdah)</p>
+            <p className="text-xs text-muted-foreground">Default: 12.6% (based on Rawdah)</p>
           </div>
           <div className="space-y-2">
             <Label>Expected Efficiency Gain: {efficiencyGain}%</Label>
@@ -123,7 +124,7 @@ export function ExpansionSimulator() {
               max={30}
               step={0.1}
             />
-            <p className="text-xs text-muted-foreground">Default: 14.1% (Rawdah proven)</p>
+            <p className="text-xs text-muted-foreground">Default: {LockedFinancials.efficiencyImprovement}% (Rawdah proven)</p>
           </div>
         </div>
       </div>
