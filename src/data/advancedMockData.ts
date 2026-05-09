@@ -124,19 +124,19 @@ export const caseFiles: CaseFile[] = [
     openedAt: new Date("2025-04-12T08:00:00Z").toISOString(),
     evidence: [
       { time: "Apr 01", event: "Building total climbed further: 40,720 → 51,248 kWh", type: "anomaly" },
-      { time: "Apr 05", event: "G8 panel jumped 4,208 → 8,605 kWh (+104%)", type: "alert" },
-      { time: "Apr 12", event: "G8 is NOT under SCC — uncontrolled multi-unit panel", type: "data" },
+      { time: "Apr 05", event: "G8 residual jumped 4,208 → 8,605 kWh (+104%) — derived from SCECO − 7 SCC meters", type: "alert" },
+      { time: "Apr 12", event: "G8 is a DERIVED residual (no meter) — captures all uncontrolled non-SCC loads", type: "data" },
       { time: "Apr 20", event: "F2 climbed 5,902 → 8,584 kWh (+45%)", type: "data" },
       { time: "Apr 30", event: "Weather model explains only +14% — operational driver remains", type: "alert" },
     ],
     suspects: [
-      { cause: "G8 multi-unit panel running uncontrolled (cassettes + duct splits)", probability: 64 },
+      { cause: "Uncontrolled non-SCC loads (G8 residual: cassettes + duct splits + plug loads)", probability: 64 },
       { cause: "Lingering March override not fully cleared", probability: 26 },
       { cause: "Door-open / air-curtain failure (G1 zone)", probability: 10 },
     ],
     financialImpact: 5238,
     narrative:
-      "April 2025 added 5,238 SAR of avoidable cost on top of March. The G8 panel doubled — confirming it as the largest remaining savings pool on site. Migrating G8 onto SCC is the single highest-ROI action available.",
+      "April 2025 added 5,238 SAR of avoidable cost on top of March. The G8 residual (SCECO total − 7 metered SCC panels) doubled — confirming uncontrolled non-SCC loads as the largest remaining savings pool. Metering and bringing those loads under SCC is the single highest-ROI action available.",
   },
   {
     id: "EC-2025-AUG-F1",
