@@ -85,11 +85,11 @@ const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
 // GLOBAL DEFINITIONS — from LockedPerformanceModel (Single Source of Truth)
 import { LockedFinancials, ClimateConstants, WeatherSource } from "@/data/lockedPerformanceModel";
 
-const WEATHER_ADJUSTMENT = ClimateConstants.adoptedNormalizationPct / 100; // 0.12
-const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor; // 1.12
-const EXPECTED_BILL_2025_WITHOUT_SCC = ACTUAL_BILL_2024 * WEATHER_FACTOR; // 246,431.36 SAR
-const TRUE_SAVINGS_SAR = LockedFinancials.directEnergySavingsSAR; // 35,457
-const ANNUAL_TRUE_SAVINGS_KWH = LockedFinancials.conservativePresentationKwh; // 86,636
+const WEATHER_ADJUSTMENT = ClimateConstants.adoptedNormalizationPct / 100; // 0.126
+const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor; // 1.126
+const EXPECTED_BILL_2025_WITHOUT_SCC = LockedFinancials.expectedBill2025WithoutSCC;
+const TRUE_SAVINGS_SAR = LockedFinancials.directEnergySavingsSAR;
+const ANNUAL_TRUE_SAVINGS_KWH = LockedFinancials.conservativePresentationKwh;
 const AVOIDED_RATE_SAR_PER_KWH = LockedFinancials.avoidedRateSarPerKwh; // ~0.4093 SAR/kWh
 
 // SCC 7-panel bill share — now corrected for G8's heavier non-inverter consumption weight
@@ -874,7 +874,7 @@ export function ROIAnalysis2() {
             </ul>
           </div>
           <div>
-            <h4 className="font-semibold mb-2">After 12% climate correction (weather-normalised)</h4>
+            <h4 className="font-semibold mb-2">After 12.6% climate correction (weather-normalised)</h4>
             <ul className="space-y-1 text-muted-foreground">
               <li>• True adjusted kWh saved: <span className="text-savings font-bold">{totalTrueSavingsKw.toLocaleString()} kWh ({totalTrueSavingsPct.toFixed(1)}%)</span></li>
               <li>• Financial value: <span className="text-savings font-bold">{TRUE_SAVINGS_SAR.toLocaleString()} SAR/year</span></li>
@@ -883,7 +883,7 @@ export function ROIAnalysis2() {
           </div>
         </div>
         <div className="p-3 rounded-lg bg-card border border-border mb-4 text-sm text-muted-foreground">
-          <strong className="text-foreground">CFO Narrative:</strong> In a ~12% hotter year, electricity cost decreased. Weather-normalised avoided cost: {TRUE_SAVINGS_SAR.toLocaleString()} SAR. Efficiency improvement: 14.1%. All values derived from actual SCECO invoices (VAT included).
+          <strong className="text-foreground">CFO Narrative:</strong> In a ~12.6% hotter year, electricity cost decreased. Weather-normalised avoided cost: {TRUE_SAVINGS_SAR.toLocaleString()} SAR. Efficiency improvement: {LockedFinancials.efficiencyImprovement}%. All values derived from actual SCECO invoices (VAT included).
         </div>
         <div className="p-4 rounded-lg bg-savings/10 border border-savings/20">
           <p className="text-sm font-semibold text-savings mb-2">

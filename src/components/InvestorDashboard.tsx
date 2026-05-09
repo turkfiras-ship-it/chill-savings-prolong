@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { FounderCompensation } from "@/components/FounderCompensation";
 import { ExecutiveSummary } from "@/components/ExecutiveSummary";
-import { WeatherSource } from "@/data/lockedPerformanceModel";
+import { LockedFinancials, WeatherSource } from "@/data/lockedPerformanceModel";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -47,8 +47,8 @@ function calcNPV(rate: number, cashflows: number[]): number {
 
 function InvestmentThesis() {
   const kpis = [
-    { label: "Validated Energy Efficiency", value: "14.1%", sub: "Invoice-backed" },
-    { label: "Invoice-Backed Energy Savings", value: "35,457 SAR", sub: "Annual recurring" },
+    { label: "Validated Energy Efficiency", value: `${LockedFinancials.efficiencyImprovement}%`, sub: "Invoice-backed" },
+    { label: "Invoice-Backed Energy Savings", value: `${LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR`, sub: "Annual recurring" },
     { label: "Capital Recovery (Client)", value: "3.0 Years", sub: "Payback period" },
     { label: "Deployment Model", value: "Retrofit", sub: "Non-disruptive installation" },
   ];

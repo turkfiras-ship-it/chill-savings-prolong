@@ -304,7 +304,7 @@ export function RawdahAnalysis() {
         <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
           <EditableText
             textKey="rawdah.chart1.note"
-            defaultValue="Raw YoY Result: Direct bill reduction 2024→2025: 6,649 SAR (220,028 − 213,379 = 6,649 SAR / 3.02% reduction). Even with cost increases in early months, net annual performance is positive. Savings are concentrated in mid-to-late year. True adjusted savings = 33,052 SAR — once weather normalization (+12% hotter 2025) is accounted for. See ROI 2 tab for full detail."
+            defaultValue="Raw YoY Result: Direct bill reduction 2024→2025: 6,649 SAR (220,028 − 213,379 = 6,649 SAR / 3.02% reduction). Even with cost increases in early months, net annual performance is positive. Savings are concentrated in mid-to-late year. True adjusted savings = 33,286 SAR — once weather normalization (+12.6% hotter 2025) is accounted for. See ROI 2 tab for full detail."
             as="p"
             className="text-sm text-muted-foreground"
           />

@@ -13,6 +13,7 @@ import {
   Zap, TrendingUp, Shield, Building2, Target, Eye,
   Landmark, Crown, Rocket,
 } from "lucide-react";
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
@@ -134,8 +135,8 @@ function SlideValidatedPerformance() {
     <Slide>
       <SlideHeader number={3} title="Validated Performance" subtitle="Invoice-backed results from Jarir Bookstore Rawdah showroom — 7 SCC units, 175 tons capacity" />
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <KPI label="Efficiency Gain" value="14.1%" accent />
-        <KPI label="Invoice Savings" value="35,457 SAR" accent />
+        <KPI label="Efficiency Gain" value={`${LockedFinancials.efficiencyImprovement}%`} accent />
+        <KPI label="Invoice Savings" value={`${LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR`} accent />
         <KPI label="Payback Period" value="3.0 Years" />
         <KPI label="Achieved In" value="+1.3°C Hotter Year" />
       </div>
@@ -465,7 +466,7 @@ function SlideRiskModel() {
 function SlideCompetitiveAdvantage() {
   const advantages = [
     { title: "Extreme-Climate Specialization", desc: "Purpose-built for GCC high-ambient environments where standard solutions underperform" },
-    { title: "Invoice-Backed Validation", desc: "Performance proven through real utility billing data — 35,457 SAR savings, 80,762 kWh, 14.1% efficiency gain" },
+    { title: "Invoice-Backed Validation", desc: "Performance proven through real utility billing data — 33,286 SAR savings, 91,621 kWh, 16.4% efficiency gain" },
     { title: "Monitoring Revenue Layer", desc: "Recurring subscription model creates predictable cash flow and long-term client retention" },
     { title: "Engineering Precision", desc: "Deep technical thermodynamics expertise in HVAC optimization separates us from generalist competitors" },
     { title: "Selective Client Strategy", desc: "Focus on high-value commercial accounts ensures premium positioning and margin protection" },
