@@ -19,8 +19,8 @@ export const WeatherSource = Object.freeze({
 export const ClimateConstants = Object.freeze({
   avgTemperatureIncrease: 1.3, // °C
   coolingLoadImpactRange: '8–12%' as const,
-  adoptedNormalizationPct: 12, // %
-  weatherNormalizationFactor: 1.12, // READ ONLY
+  adoptedNormalizationPct: 12.6, // %
+  weatherNormalizationFactor: 1.126, // READ ONLY — bill-verified
 });
 
 // ─── SECTION 4: Weather Normalization Engine ──────────────────────────────
@@ -41,12 +41,12 @@ export const LockedFinancials = Object.freeze({
   }, // 246,431 SAR
 
   // Direct Energy Savings (Invoice-Backed)
-  directEnergySavingsSAR: 35457, // SAR/year — conservative presentation, bill-verified + weather-adjusted
-  weatherAdjustedEnergyAvoided: 80762, // kWh — true adjusted kWh saved
-  efficiencyImprovement: 14.1, // %
+  directEnergySavingsSAR: 33286, // SAR/year — bill-verified + weather-normalized (factor 1.126)
+  weatherAdjustedEnergyAvoided: 91621, // kWh — true adjusted kWh saved (7 SCC panels)
+  efficiencyImprovement: 16.4, // % of 2024 baseline (574,713 kWh)
 
   // Conservative presentation kWh (for monthly alignment)
-  conservativePresentationKwh: 86636, // kWh — capped sum for display alignment
+  conservativePresentationKwh: 91621, // kWh — true adjusted kWh saved
 
   // Bill-based all-in avoided rate
   get avoidedRateSarPerKwh() {
@@ -78,12 +78,12 @@ export const LockedFinancials = Object.freeze({
   // Payback — energy only
   get paybackYearsEnergyOnly() {
     return this.systemInvestment / this.directEnergySavingsSAR;
-  }, // ~4.9 years
+  }, // ~5.3 years
 
   // Combined payback
   get paybackYearsCombined() {
     return this.systemInvestment / this.annualRecurringSavings;
-  }, // ~3.0 years
+  }, // ~3.1 years
 
   // 5-Year projections
   get fiveYearSavings() {
@@ -157,8 +157,8 @@ export function runAuditValidation(monthlyDisplaySAR: number[]): {
       detail: `Sum: ${annualSARSum.toLocaleString()} vs Locked: ${LockedFinancials.directEnergySavingsSAR.toLocaleString()}`,
     },
     {
-      name: 'WeatherNormalizationFactor = 1.12',
-      passed: ClimateConstants.weatherNormalizationFactor === 1.12,
+      name: 'WeatherNormalizationFactor = 1.126',
+      passed: ClimateConstants.weatherNormalizationFactor === 1.126,
       detail: `Factor: ${ClimateConstants.weatherNormalizationFactor}`,
     },
   ];
