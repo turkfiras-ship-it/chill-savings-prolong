@@ -44,8 +44,9 @@ export const unitMonthlyData2025: UnitMonthlyData[] = [
   { month: 'October',   G1: 5992, G2: 5785, G3: 5809, F1: 6264, F2: 7261, F3: 5870, F4: 3201, G8: 5757,  total: 40182, totalWithG8: 45939 },
   { month: 'November',  G1: 5359, G2: 4590, G3: 5049, F1: 5000, F2: 5880, F3: 5137, F4: 2408, G8: 3454,  total: 33424, totalWithG8: 36878 },
   { month: 'December',  G1: 2197, G2: 4248, G3: 3074, F1: 4216, F2: 3145, F3: 3214, F4: 2423, G8: 1750,  total: 22517, totalWithG8: 24267 },
-  // ── 2026 (partial billing cycle 13-Jan → 16-Feb 2026) ──
-  { month: 'January 2026', G1: 3313, G2: 4470, G3: 5033, F1: 5738, F2: 3501, F3: 4347, F4: 3144, G8: 0,   total: 29545, totalWithG8: 29545 },
+  // ── 2026 (from CONSUMPTION_SAVING_ANALYSIS-13.xlsx, F1↔F4 user-convention applied) ──
+  { month: 'January 2026',  G1: 2404, G2: 3396, G3: 3795, F1: 4185, F2: 2758, F3: 3098, F4: 2535, G8: 1759, total: 22171, totalWithG8: 23930 },
+  { month: 'February 2026', G1: 2987, G2: 4153, G3: 5194, F1: 4818, F2: 3818, F3: 4264, F4: 3007, G8: 3207, total: 28241, totalWithG8: 31448 },
 ];
 
 // Annual totals per unit (corrected F1/F4 swap)
