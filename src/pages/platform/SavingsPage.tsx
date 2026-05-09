@@ -15,13 +15,13 @@ const gridStroke = "hsl(215, 20%, 16%)";
 const tickStyle = { fontSize: 10, fill: 'hsl(215, 15%, 55%)' };
 
 export default function SavingsPage() {
-  const totalSavings = sites.reduce((a, s) => a + s.savings_sar, 0);
+  const totalSavings = LockedFinancials.directEnergySavingsSAR;
   const totalBaseline = sites.reduce((a, s) => a + s.baseline_kwh, 0);
   const totalActual = sites.reduce((a, s) => a + s.consumption_kwh, 0);
-  const totalKwhSaved = totalBaseline - totalActual;
-  const avgEfficiency = Math.round(sites.filter(s => s.savings_pct > 0).reduce((a, s) => a + s.savings_pct, 0) / Math.max(1, sites.filter(s => s.savings_pct > 0).length) * 10) / 10;
-  const totalInvestment = sites.filter(s => s.savings_pct > 0).length * 175000;
-  const annualRecurring = totalSavings + sites.filter(s => s.savings_pct > 0).length * 22660;
+  const totalKwhSaved = LockedFinancials.weatherAdjustedEnergyAvoided;
+  const avgEfficiency = LockedFinancials.efficiencyImprovement;
+  const totalInvestment = LockedFinancials.systemInvestment;
+  const annualRecurring = LockedFinancials.annualRecurringSavings;
   const payback = Math.round(totalInvestment / annualRecurring * 10) / 10;
   const carbonSaved = Math.round(totalKwhSaved * 0.000727 * 100) / 100;
 
