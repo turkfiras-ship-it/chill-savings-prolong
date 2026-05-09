@@ -115,81 +115,8 @@ export const caseFiles: CaseFile[] = [
   },
 ];
 
-// ── Energy Reputation Scores ──────────────────────────────
-export interface ERSData {
-  siteId: string;
-  siteName: string;
-  city: string;
-  score: number;
-  category: "Elite" | "Strong" | "Average" | "At Risk";
-  components: {
-    efficiency: number;
-    equipmentHealth: number;
-    demandStability: number;
-    carbonIntensity: number;
-    anomalyFrequency: number;
-  };
-  trend: { month: string; score: number }[];
-}
-
-function getERSCategory(score: number): ERSData["category"] {
-  if (score >= 850) return "Elite";
-  if (score >= 700) return "Strong";
-  if (score >= 500) return "Average";
-  return "At Risk";
-}
-
-export const ersData: ERSData[] = (() => {
-  const rand = seededRandom(99);
-  // Single tracked site + anonymized national peer set for benchmarking
-  const siteNames = [
-    "Jarir — Rawdah",
-    "Anonymous Retail A", "Anonymous Retail B", "Anonymous Retail C",
-    "Anonymous Retail D", "Anonymous Retail E", "Anonymous Retail F",
-    "Anonymous Retail G", "Anonymous Retail H", "Anonymous Retail I",
-    "Anonymous Retail J", "Anonymous Retail K", "Anonymous Retail L",
-    "Anonymous Retail M", "Anonymous Retail N", "Anonymous Retail O",
-  ];
-  const cities = ["Riyadh", "Riyadh", "Jeddah", "Dammam", "Riyadh", "Khobar", "Riyadh", "Jeddah", "Riyadh", "Madinah", "Jubail", "Riyadh", "Makkah", "Riyadh", "Jeddah", "Riyadh"];
-
-  return siteNames.map((name, i) => {
-    const eff = 500 + Math.round(rand() * 500);
-    const equip = 400 + Math.round(rand() * 600);
-    const demand = 450 + Math.round(rand() * 550);
-    const carbon = 500 + Math.round(rand() * 500);
-    const anomaly = 600 + Math.round(rand() * 400);
-    const score = Math.round((eff * 0.25 + equip * 0.2 + demand * 0.2 + carbon * 0.2 + anomaly * 0.15));
-    const trend = Array.from({ length: 12 }, (_, m) => ({
-      month: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m],
-      score: Math.max(300, Math.min(1000, score + Math.round((rand() - 0.5) * 80))),
-    }));
-    return {
-      siteId: `S${String(i + 1).padStart(3, "0")}`,
-      siteName: name,
-      city: cities[i],
-      score,
-      category: getERSCategory(score),
-      components: { efficiency: eff, equipmentHealth: equip, demandStability: demand, carbonIntensity: carbon, anomalyFrequency: anomaly },
-      trend,
-    };
-  }).sort((a, b) => b.score - a.score);
-})();
-
-// Override the Jarir — Rawdah entry with REAL components derived from
-// invoice-backed performance (locked model + per-unit weather fits).
-(() => {
-  const jarir = ersData.find((e) => e.siteName === "Jarir — Rawdah");
-  if (!jarir) return;
-  const meanR2 = unitWeatherFits.reduce((a, f) => a + f.r2, 0) / unitWeatherFits.length;
-  const efficiency = Math.round(LockedFinancials.efficiencyImprovement * 60);   // 14.1% → 846
-  const equipmentHealth = Math.round(LockedFinancials.peakDemandReduction * 14); // 61.8% → 865
-  const demandStability = Math.round(meanR2 * 1000);                             // R² → score
-  const carbonIntensity = 800;                                                   // 0.5825 kg/kWh × controlled load
-  const anomalyFrequency = 700;                                                  // 4 active cases / quarter
-  jarir.components = { efficiency, equipmentHealth, demandStability, carbonIntensity, anomalyFrequency };
-  jarir.score = Math.round(efficiency * 0.25 + equipmentHealth * 0.2 + demandStability * 0.2 + carbonIntensity * 0.2 + anomalyFrequency * 0.15);
-  jarir.category = jarir.score >= 850 ? "Elite" : jarir.score >= 700 ? "Strong" : jarir.score >= 500 ? "Average" : "At Risk";
-})();
+// Energy Reputation Score (peer benchmarking) removed — Jarir-only platform.
+// Will be reintroduced once multiple Jarir showrooms are onboarded for cross-site ranking.
 
 // ── Energy Value Engine Data — real ────────────────────────────
 // Daily kWh = annual ÷ 365; daily savings = locked SAR ÷ 365.
