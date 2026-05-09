@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FileText } from "lucide-react";
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 
 export function ExecutiveSummary() {
   const handlePrint = () => window.print();
@@ -46,10 +47,10 @@ export function ExecutiveSummary() {
             disruption. Validated at Jarir Bookstore's Rawdah showroom:
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-            <KPI label="Energy Reduction" value="14.1%" />
-            <KPI label="Invoice-Backed Savings" value="35,457 SAR" />
-            <KPI label="kWh Saved" value="80,762" />
-            <KPI label="Capital Recovery" value="3.0 Years" />
+            <KPI label="Energy Reduction" value={`${LockedFinancials.efficiencyImprovement}%`} />
+            <KPI label="Invoice-Backed Savings" value={`${LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR`} />
+            <KPI label="kWh Saved" value={LockedFinancials.weatherAdjustedEnergyAvoided.toLocaleString()} />
+            <KPI label="Capital Recovery" value={`${LockedFinancials.paybackYearsCombined.toFixed(1)} Years`} />
           </div>
         </Section>
 
