@@ -87,7 +87,8 @@ export interface Alert {
 
 // ─────────────────────────────────────────────────────────────────
 // SINGLE-SITE DEPLOYMENT — Jarir Bookstore, Rawdah Showroom
-// 7 packaged HVAC units (G1–G7) monitored via Eyedro meters.
+// 7 packaged HVAC units (G1–G3 ground, F1–F4 first floor) monitored via Eyedro meters,
+// plus G8 panel (cassettes/splits, not part of SCC).
 // Locked Performance Model: 35,457 SAR direct savings, 80,762 kWh avoided.
 // ─────────────────────────────────────────────────────────────────
 export const sites: Site[] = [
@@ -136,29 +137,34 @@ export const devices: Device[] = sites.filter(s => s.devices > 0).flatMap(s => {
   return devs;
 });
 
-// 7 packaged units G1–G7 (25-ton RTUs typical for retail showroom)
+// Real Rawdah inventory: G1–G3 (ground), F1–F4 (first floor) on SCC + G8 (non-SCC panel)
+const RAWDAH_UNITS = [
+  { name: 'G1', cap: 25, bkw: 62, gain: 13.5, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'G2', cap: 25, bkw: 66, gain: 14.8, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'G3', cap: 25, bkw: 64, gain: 14.1, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'F1', cap: 25, bkw: 72, gain: 12.2, status: 'monitoring' as const, solution: 'SCC/VMF', flags: 1 },
+  { name: 'F2', cap: 25, bkw: 66, gain: 14.5, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'F3', cap: 25, bkw: 64, gain: 14.9, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'F4', cap: 25, bkw: 58, gain: 15.6, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
+  { name: 'G8', cap: 18, bkw: 48, gain: 0,    status: 'pending' as const,    solution: '—',       flags: 0 },
+];
 export const assets: Asset[] = sites.flatMap(s =>
-  Array.from({ length: 7 }, (_, i) => {
-    const cap = 25;
-    const bkw = 62 + (i % 3) * 4; // 62/66/70 kW baseline staggered
-    const gain = 14.1 + ((i - 3) * 0.6); // around the locked 14.1%
-    return {
-      id: `A-${s.id}-G${i + 1}`,
-      name: `G${i + 1}`,
-      type: 'RTU' as const,
-      siteId: s.id,
-      siteName: s.name,
-      meterId: `D-${s.id}-${(i % s.devices) + 1}`,
-      capacity_tons: cap,
-      baseline_kw: bkw,
-      current_kw: Math.round(bkw * (1 - gain / 100)),
-      efficiency_gain: Math.round(gain * 10) / 10,
-      solution: 'SCC/VMF',
-      status: i === 2 ? 'monitoring' : 'optimized',
-      runHours: 3200 + i * 180,
-      abnormalFlags: i === 2 ? 1 : 0,
-    };
-  })
+  RAWDAH_UNITS.map((u, i) => ({
+    id: `A-${s.id}-${u.name}`,
+    name: u.name,
+    type: 'RTU' as const,
+    siteId: s.id,
+    siteName: s.name,
+    meterId: `D-${s.id}-${(i % s.devices) + 1}`,
+    capacity_tons: u.cap,
+    baseline_kw: u.bkw,
+    current_kw: Math.round(u.bkw * (1 - u.gain / 100)),
+    efficiency_gain: u.gain,
+    solution: u.solution,
+    status: u.status,
+    runHours: 3200 + i * 180,
+    abnormalFlags: u.flags,
+  }))
 );
 
 const stages = ['Lead', 'Site Survey Scheduled', 'Survey Complete', 'Audit Complete', 'Proposal Sent', 'Approved', 'Installation Planned', 'Installation Complete', 'Monitoring Live', 'M&V / Verification', 'Closed / Renewed'];
@@ -183,12 +189,12 @@ const alertTypes = ['Demand Threshold', 'Communication Loss', 'Abnormal Load', '
 
 export const alerts: Alert[] = [
   { id: 'AL001', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Demand Threshold', severity: 'critical', message: 'Peak demand exceeded 480 kW threshold at 14:32', timestamp: new Date(Date.now() - 1800000).toISOString(), acknowledged: false, assetName: 'G3' },
-  { id: 'AL002', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'After-Hours Usage', severity: 'warning', message: 'After-hours load on G5 detected at 02:15 — 12 kW sustained', timestamp: new Date(Date.now() - 7200000).toISOString(), acknowledged: false, assetName: 'G5' },
+  { id: 'AL002', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'After-Hours Usage', severity: 'warning', message: 'After-hours load on F1 detected at 02:15 — 12 kW sustained', timestamp: new Date(Date.now() - 7200000).toISOString(), acknowledged: false, assetName: 'F1' },
   { id: 'AL003', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Asset Anomaly', severity: 'warning', message: 'G3 compressor drawing 18% above baseline — possible valve degradation', timestamp: new Date(Date.now() - 14400000).toISOString(), acknowledged: false, assetName: 'G3' },
-  { id: 'AL004', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Maintenance Risk', severity: 'info', message: 'G6 runtime exceeds 4,000 hours — filter inspection recommended', timestamp: new Date(Date.now() - 28800000).toISOString(), acknowledged: true, assetName: 'G6' },
+  { id: 'AL004', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Maintenance Risk', severity: 'info', message: 'F3 runtime exceeds 4,000 hours — filter inspection recommended', timestamp: new Date(Date.now() - 28800000).toISOString(), acknowledged: true, assetName: 'F3' },
   { id: 'AL005', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Communication Loss', severity: 'warning', message: 'Eyedro gateway D-S001-1 lost sync for 12 minutes — recovered', timestamp: new Date(Date.now() - 3600000).toISOString(), acknowledged: true },
   { id: 'AL006', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Abnormal Load', severity: 'warning', message: 'G2 short-cycling 4× in last hour — refrigerant charge suspect', timestamp: new Date(Date.now() - 43200000).toISOString(), acknowledged: true, assetName: 'G2' },
-  { id: 'AL007', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Asset Anomaly', severity: 'info', message: 'G7 supply-return ΔT narrowed to 4.2°C (target 6–8°C)', timestamp: new Date(Date.now() - 5400000).toISOString(), acknowledged: false, assetName: 'G7' },
+  { id: 'AL007', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Asset Anomaly', severity: 'info', message: 'F4 supply-return ΔT narrowed to 4.2°C (target 6–8°C)', timestamp: new Date(Date.now() - 5400000).toISOString(), acknowledged: false, assetName: 'F4' },
 ];
 
 export const monthlyTrends = [
