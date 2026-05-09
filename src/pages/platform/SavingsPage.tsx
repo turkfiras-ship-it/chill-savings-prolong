@@ -16,8 +16,6 @@ const tickStyle = { fontSize: 10, fill: 'hsl(215, 15%, 55%)' };
 
 export default function SavingsPage() {
   const totalSavings = LockedFinancials.directEnergySavingsSAR;
-  const totalBaseline = sites.reduce((a, s) => a + s.baseline_kwh, 0);
-  const totalActual = sites.reduce((a, s) => a + s.consumption_kwh, 0);
   const totalKwhSaved = LockedFinancials.weatherAdjustedEnergyAvoided;
   const avgEfficiency = LockedFinancials.efficiencyImprovement;
   const totalInvestment = LockedFinancials.systemInvestment;
