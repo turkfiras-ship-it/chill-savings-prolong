@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { energyCostSummary } from "@/data/rawdahAnalysis";
 import { systemConfig, energySavings, downtimeSavings, maintenanceSavings } from "@/data/roiCalculations";
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -184,14 +185,14 @@ const initialState: EditableDataState = {
     maxCostPerUnit: 65000,
     avgCostPerUnit: 55000,
   },
-  trueSavings: 35457,
-  expectedBill2025: 246431,
+  trueSavings: LockedFinancials.directEnergySavingsSAR,
+  expectedBill2025: LockedFinancials.expectedBill2025WithoutSCC,
 };
 
 function energySav_init() {
-  // True adjusted savings: 35,457 SAR (conservative presentation, bill-verified + weather-adjusted)
+  // True adjusted savings: locked, bill-verified + weather-adjusted
   // This is the correct energy savings basis for ROI calculations
-  return energySavings.annualSavingsRawdah; // 35,457 SAR
+  return energySavings.annualSavingsRawdah;
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
