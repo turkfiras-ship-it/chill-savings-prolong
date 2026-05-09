@@ -101,7 +101,7 @@ export const sites: Site[] = [
     customer: 'Jarir Bookstore',
     status: 'active',
     devices: 3,
-    assets: 7,
+    assets: 8,
     consumption_kwh: 462800,
     cost_sar: 213379,
     savings_pct: 14.1,
