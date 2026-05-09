@@ -1,3 +1,6 @@
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
+import { unitMonthlyData2025 } from "@/data/unitMonthlyData";
+
 // ═══════════════════════════════════════════════════════════════
 // ESCO PLATFORM — MOCK DATA ENGINE
 // ═══════════════════════════════════════════════════════════════
@@ -89,8 +92,6 @@ export interface Alert {
 // SINGLE-SITE DEPLOYMENT — Jarir Bookstore, Rawdah Showroom
 // 7 packaged HVAC units (G1–G3 ground, F1–F4 first floor) monitored via Eyedro meters.
 // G8 = DERIVED residual (SCECO bill total − 7 metered SCC panels), not a metered asset.
-import { LockedFinancials } from "@/data/lockedPerformanceModel";
-
 // Locked Performance Model: 33,286 SAR direct savings, 91,621 kWh avoided (7 SCC panels only).
 // ─────────────────────────────────────────────────────────────────
 export const sites: Site[] = [
@@ -198,20 +199,19 @@ export const alerts: Alert[] = [
   { id: 'AL007', siteId: 'S001', siteName: 'Jarir — Rawdah', type: 'Asset Anomaly', severity: 'info', message: 'F4 supply-return ΔT narrowed to 4.2°C (target 6–8°C)', timestamp: new Date(Date.now() - 5400000).toISOString(), acknowledged: false, assetName: 'F4' },
 ];
 
-export const monthlyTrends = [
-  { month: 'Jan', consumption: 980000, cost: 294000, savings: 42000, demand: 3200 },
-  { month: 'Feb', consumption: 920000, cost: 276000, savings: 38000, demand: 3000 },
-  { month: 'Mar', consumption: 1050000, cost: 315000, savings: 51000, demand: 3400 },
-  { month: 'Apr', consumption: 1280000, cost: 384000, savings: 62000, demand: 4100 },
-  { month: 'May', consumption: 1560000, cost: 468000, savings: 78000, demand: 5000 },
-  { month: 'Jun', consumption: 1820000, cost: 546000, savings: 95000, demand: 5800 },
-  { month: 'Jul', consumption: 1950000, cost: 585000, savings: 108000, demand: 6200 },
-  { month: 'Aug', consumption: 1980000, cost: 594000, savings: 112000, demand: 6300 },
-  { month: 'Sep', consumption: 1680000, cost: 504000, savings: 88000, demand: 5400 },
-  { month: 'Oct', consumption: 1350000, cost: 405000, savings: 65000, demand: 4300 },
-  { month: 'Nov', consumption: 1050000, cost: 315000, savings: 48000, demand: 3400 },
-  { month: 'Dec', consumption: 960000, cost: 288000, savings: 40000, demand: 3100 },
-];
+const rawdah2025Months = unitMonthlyData2025.filter(m => !m.month.includes('2024') && !m.month.includes('2026'));
+const baseMonthlyTrends = rawdah2025Months.map((m) => ({
+  month: m.month.slice(0, 3),
+  consumption: m.total,
+  cost: Math.round(sites[0].cost_sar * (m.totalWithG8 / rawdah2025Months.reduce((a, x) => a + x.totalWithG8, 0))),
+  savings: Math.round(LockedFinancials.directEnergySavingsSAR * (m.total / sites[0].consumption_kwh)),
+  demand: Math.round(sites[0].peak_kw * (m.total / Math.max(...rawdah2025Months.map(x => x.total)))),
+}));
+
+export const monthlyTrends = baseMonthlyTrends.map((m, i) => i === baseMonthlyTrends.length - 1
+  ? { ...m, savings: LockedFinancials.directEnergySavingsSAR - baseMonthlyTrends.slice(0, -1).reduce((a, x) => a + x.savings, 0) }
+  : m
+);
 
 export const portfolioKPIs = {
   totalSites: sites.length,
