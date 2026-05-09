@@ -5,6 +5,7 @@ import {
 } from "recharts";
 import { Printer } from "lucide-react";
 import { monthlyWeatherData, weatherSummary } from "@/data/weatherData";
+import { ClimateConstants, LockedFinancials } from "@/data/lockedPerformanceModel";
 
 // ─── Print styles handled via className bp-whitepaper ─────────────────────
 
@@ -127,7 +128,7 @@ export function TechnicalWhitePaper() {
           <div className="print:break-before-page">
             <SectionHeader number={1} title="Abstract" />
             <p className="mt-4">
-              This paper presents a quantitative field study evaluating the performance impact of retrofit smart control devices installed on seven package air conditioning units (total rated capacity: 175 refrigeration tons) at a commercial retail facility in Riyadh, Saudi Arabia. Performance was assessed using a comparative invoice analysis methodology over a 24-month observation period spanning January 2024 through December 2025. The study employs weather normalization techniques to isolate device-attributable efficiency gains from ambient temperature variations. Results demonstrate a validated 14.1% reduction in electricity consumption (80,762 kWh) and 33,052 SAR in cost savings, achieved during a year in which average ambient temperatures were 1.3°C higher than the baseline period. These findings confirm the technical efficacy of smart compressor management systems in high-ambient commercial cooling applications.
+              This paper presents a quantitative field study evaluating the performance impact of retrofit smart control devices installed on seven monitored and optimized package air conditioning units (total rated capacity: 175 refrigeration tons) at a commercial retail facility in Riyadh, Saudi Arabia. Performance was assessed using a comparative invoice analysis methodology over a 24-month observation period spanning January 2024 through December 2025. The study employs weather normalization techniques to isolate device-attributable efficiency gains from ambient temperature variations. Results demonstrate a validated {LockedFinancials.efficiencyImprovement}% reduction in electricity consumption ({LockedFinancials.weatherAdjustedEnergyAvoided.toLocaleString()} kWh) and {LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR in direct energy savings, achieved during a year in which average ambient temperatures were 1.3°C higher than the baseline period. These findings confirm the technical efficacy of smart compressor management systems in high-ambient commercial cooling applications.
             </p>
           </div>
 
@@ -226,7 +227,7 @@ export function TechnicalWhitePaper() {
                 ["Average Temperature Increase", `+${weatherSummary.avgTempDiff}°C`],
                 ["Estimated Cooling Demand Increase", weatherSummary.coolingDegreeIncrease],
                 ["Peak Month (2025)", `${weatherSummary.hottestMonth2025} — ${weatherSummary.hottestTemp2025}°C`],
-                ["Weather-Adjusted Baseline (2025)", "246,431 SAR"],
+                ["Weather-Adjusted Baseline (2025)", `${LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR`],
               ]}
             />
           </div>
@@ -240,11 +241,11 @@ export function TechnicalWhitePaper() {
             <Table
               headers={["Metric", "2024 (Baseline)", "2025 (Post-Install)", "Delta"]}
               rows={[
-                ["Total Consumption (kWh)", "648,391", "567,629", "−80,762 (−12.5%)"],
+                ["Total Consumption (kWh)", "574,713", "561,308", `−${LockedFinancials.weatherAdjustedEnergyAvoided.toLocaleString()} weather-adjusted`],
                 ["Total Cost (SAR)", "220,028", "213,379", "−6,649 (raw)"],
-                ["Weather-Adjusted Baseline (SAR)", "—", "246,431", "—"],
-                ["True Adjusted Savings (SAR)", "—", "—", "33,052"],
-                ["Efficiency Improvement", "—", "—", "14.1%"],
+                ["Weather-Adjusted Baseline (SAR)", "—", LockedFinancials.expectedBill2025WithoutSCC.toLocaleString(), "—"],
+                ["Direct Energy Savings (SAR)", "—", "—", LockedFinancials.directEnergySavingsSAR.toLocaleString()],
+                ["Efficiency Improvement", "—", "—", `${LockedFinancials.efficiencyImprovement}%`],
                 ["Peak Demand Reduction", "495 kW", "189 kW", "−61.8%"],
               ]}
             />
