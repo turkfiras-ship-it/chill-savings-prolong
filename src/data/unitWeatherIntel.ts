@@ -4,13 +4,13 @@
 // All values trace back to:
 //   - unitMonthlyData2025  (real per-unit kWh, billing-cycle aligned)
 //   - monthlyWeatherData   (Riyadh OERK 2024 vs 2025 avg highs)
-//   - LockedFinancials     (35,457 SAR direct, 80,762 kWh avoided)
+//   - LockedFinancials     (33,286 SAR direct, 91,621 kWh avoided)
 // No random numbers. Every metric is reproducible from these three sources.
 // ═══════════════════════════════════════════════════════════════════
 
 import { unitMonthlyData2025, unitAnnualTotals, unitNames } from "@/data/unitMonthlyData";
 import { monthlyWeatherData } from "@/data/weatherData";
-import { LockedFinancials } from "@/data/lockedPerformanceModel";
+import { ClimateConstants, LockedFinancials } from "@/data/lockedPerformanceModel";
 
 // 12 months of 2025 only (drop Dec-2024 + Jan-2026 partial cycles)
 export const months2025 = unitMonthlyData2025.filter(
@@ -86,7 +86,7 @@ export const unitWeatherFitByName: Record<string, UnitWeatherFit> = unitWeatherF
 );
 
 // ── Real share of true savings per unit ─────────────────────────
-// Each unit's contribution to the locked 35,457 SAR direct savings is
+// Each unit's contribution to the locked 33,286 SAR direct savings is
 // proportional to its share of the 7-unit SCC kWh total.
 export const unitSavingsContribution = unitNames.map((u) => {
   const share = unitAnnualTotals[u] / unitAnnualTotals.total;
@@ -192,7 +192,7 @@ export const monthlyWeatherProof = months2025.map((m, i) => {
   return {
     month: m.month,
     actualKwh: m.total,
-    expectedKwh: Math.round(expected * 1.12), // weather-normalized expected
-    weatherImpact: Math.round(expected * 0.12),
+    expectedKwh: Math.round(expected * ClimateConstants.weatherNormalizationFactor), // weather-normalized expected
+    weatherImpact: Math.round(expected * 0.126),
   };
 });

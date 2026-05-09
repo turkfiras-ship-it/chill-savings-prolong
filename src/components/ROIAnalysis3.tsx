@@ -16,7 +16,7 @@ import { LockedFinancials, ClimateConstants, WeatherSource } from "@/data/locked
 const ACTUAL_BILL_2024 = LockedFinancials.actualBill2024;
 const ACTUAL_BILL_2025 = LockedFinancials.actualBill2025;
 const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor;
-const EXPECTED_2025 = Math.round(ACTUAL_BILL_2024 * WEATHER_FACTOR);
+const EXPECTED_2025 = LockedFinancials.expectedBill2025WithoutSCC;
 const TRUE_SAVINGS_SAR = LockedFinancials.directEnergySavingsSAR;
 const TRUE_SAVINGS_KWH = LockedFinancials.weatherAdjustedEnergyAvoided;
 const EFFICIENCY_PCT = LockedFinancials.efficiencyImprovement;
@@ -27,7 +27,7 @@ export function ROIAnalysis3() {
   const { data, derived } = useEditableData();
 
   const summary = useMemo(() => {
-    const energySAR = TRUE_SAVINGS_SAR; // 33,052
+    const energySAR = TRUE_SAVINGS_SAR;
     const maintenanceTotal = derived.maintenanceTotal; // from editable context
     const downtimeTotal = derived.downtimeSavingsAnnual;
     const replacementAvg = derived.replacementAvg; // 385,000 one-time
@@ -138,7 +138,7 @@ export function ROIAnalysis3() {
           </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          {["VAT included", "Invoice-backed", "Weather-adjusted +12%", "No compounding", "No tariff projections", "Energy-only payback"].map((t) => (
+          {["VAT included", "Invoice-backed", "Weather-adjusted +12.6%", "No compounding", "No tariff projections", "Energy-only payback"].map((t) => (
             <span key={t} className="inline-flex items-center gap-1 text-xs bg-muted/50 border border-border rounded-full px-3 py-1">
               <CheckCircle className="h-3 w-3 text-savings" />
               {t}

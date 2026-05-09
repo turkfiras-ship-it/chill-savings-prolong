@@ -1,3 +1,4 @@
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 import {
   overallFinancialImpact,
   majorSavingMonths,
@@ -35,7 +36,7 @@ export function FinancialImpact() {
           <div className="bg-savings/30 border border-savings/50 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{overallFinancialImpact.trueAdjustedSavings2025.toLocaleString()} SAR</p>
            <p className="text-sm opacity-90 mt-1 font-semibold">True Adjusted Savings ✓</p>
-38:             <p className="text-xs opacity-70">Expected 2025 (Weather-Adjusted Only): 246,431 SAR</p>
+            <p className="text-xs opacity-70">Expected 2025 without SCC: {LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{overallFinancialImpact.trueAdjustedSavingsKwh.toLocaleString()} kWh</p>
@@ -82,7 +83,7 @@ export function FinancialImpact() {
           {/* Arrow 2024 → 2025 */}
           <div className="flex items-center gap-2 ml-6 text-savings text-sm">
             <ArrowDown className="h-4 w-4" />
-            <span>Apparent: {energyCostComparison.year2025.changePercent}% — SAR {Math.abs(energyCostComparison.year2025.changeSAR).toLocaleString()} less. True adjusted savings: <strong>33,052 SAR</strong> (Expected 2025 Weather-Adjusted Only: 246,431 SAR)</span>
+            <span>Apparent: {energyCostComparison.year2025.changePercent}% — SAR {Math.abs(energyCostComparison.year2025.changeSAR).toLocaleString()} less. True adjusted savings: <strong>{LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR</strong> (Expected 2025 without SCC: {LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR)</span>
           </div>
 
           {/* 2025 */}
