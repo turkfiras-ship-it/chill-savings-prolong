@@ -3,6 +3,14 @@
 // Source: CONSUMPTION_SAVING_ANALYSIS_3.xlsx (billing-cycle data)
 // NOTE: Per-device data starts Dec 2024. Before that, only aggregate
 // Rawdah totals exist (see 23-24 sheet / aggregatedMonthlyConsumption).
+//
+// ⚠ G8 IS DERIVED, NOT METERED.
+// G8 has no physical Eyedro meter. Its monthly kWh is calculated as:
+//     G8 = SCECO_bill_total_kWh − (G1+G2+G3+F1+F2+F3+F4 metered kWh)
+// G8 therefore captures ALL non-SCC loads on site (cassettes, ducted
+// splits, lighting, plug loads, office HVAC) plus any meter drift.
+// All SCC savings figures (91,621 kWh / 33,286 SAR / 16.4%) are
+// computed on the 7 metered SCC panels ONLY and exclude G8.
 
 export interface UnitMonthlyData {
   month: string;
@@ -63,7 +71,7 @@ export const unitInfo: Record<string, { location: string; notes: string }> = {
   F2: { location: 'First Floor — Central Area', notes: 'Sensor issue resolved. Consumption spiked in August (12,236 kW).' },
   F3: { location: 'First Floor — Rear Section', notes: 'Consistent performer. Peak in July (10,910 kW).' },
   F4: { location: 'First Floor — Book Area', notes: 'Lowest consumption unit (45,730 kWh/year). Consistent low load with peak in April (6,975 kW).' },
-  G8: { location: 'Ground Floor — 8th Panel', notes: 'Consists of cassettes, ducted split, and split units. Not part of SCC system. 87,083 kWh/year. 3–18% of total building consumption depending on season.' },
+  G8: { location: 'Derived residual — non-SCC loads', notes: 'DERIVED, NOT METERED: G8 kWh = SCECO bill total − sum of the 7 metered SCC panels. Captures cassettes, ducted splits, lighting, plug loads, and any uncontrolled equipment. 87,083 kWh/year (3–18% of building total, seasonal). Excluded from all SCC savings comparisons.' },
 };
 
 // G8 consumption as percentage of total building

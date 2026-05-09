@@ -137,7 +137,7 @@ export const realAnomalies = [
     monthIdx: 6,
     month: "Year-round",
     description:
-      "G8 panel (26-ton multi-unit) consumed 87,083 kWh — equal to G1 and not on SCC. Migration would unlock the largest remaining savings pool.",
+      "G8 residual (DERIVED: SCECO total − 7 metered SCC panels) totalled 87,083 kWh in 2025 — equal to G1's draw. This bucket holds all uncontrolled loads (cassettes, ducted splits, lighting, plugs). Metering + SCC migration would unlock the largest remaining savings pool.",
     impactedUnits: ["G8"],
     severity: "High" as const,
     avoidableSAR: 12200,

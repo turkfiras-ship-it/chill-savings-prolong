@@ -87,9 +87,9 @@ export interface Alert {
 
 // ─────────────────────────────────────────────────────────────────
 // SINGLE-SITE DEPLOYMENT — Jarir Bookstore, Rawdah Showroom
-// 7 packaged HVAC units (G1–G3 ground, F1–F4 first floor) monitored via Eyedro meters,
-// plus G8 panel (cassettes/splits, not part of SCC).
-// Locked Performance Model: 35,457 SAR direct savings, 80,762 kWh avoided.
+// 7 packaged HVAC units (G1–G3 ground, F1–F4 first floor) monitored via Eyedro meters.
+// G8 = DERIVED residual (SCECO bill total − 7 metered SCC panels), not a metered asset.
+// Locked Performance Model: 33,286 SAR direct savings, 91,621 kWh avoided (7 SCC panels only).
 // ─────────────────────────────────────────────────────────────────
 export const sites: Site[] = [
   {
@@ -137,7 +137,7 @@ export const devices: Device[] = sites.filter(s => s.devices > 0).flatMap(s => {
   return devs;
 });
 
-// Real Rawdah inventory: G1–G3 (ground), F1–F4 (first floor) on SCC + G8 (non-SCC panel)
+// Real Rawdah inventory: G1–G3 (ground), F1–F4 (first floor) on SCC + G8 (DERIVED residual, not metered)
 const RAWDAH_UNITS = [
   { name: 'G1', cap: 25, bkw: 62, gain: 13.5, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
   { name: 'G2', cap: 25, bkw: 66, gain: 14.8, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
@@ -146,8 +146,8 @@ const RAWDAH_UNITS = [
   { name: 'F2', cap: 25, bkw: 66, gain: 14.5, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
   { name: 'F3', cap: 25, bkw: 64, gain: 14.9, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
   { name: 'F4', cap: 25, bkw: 58, gain: 15.6, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  // G8 = aggregate panel of cassettes / ducted-split / split units (multiple sub-units)
-  { name: 'G8', cap: 26, bkw: 62, gain: 0,    status: 'pending' as const,    solution: '— (multi-unit panel)', flags: 0 },
+  // G8 = DERIVED residual (SCECO total − 7 metered SCC panels): cassettes, ducted splits, lighting, plug loads
+  { name: 'G8', cap: 26, bkw: 62, gain: 0,    status: 'pending' as const,    solution: '— (derived residual, not metered)', flags: 0 },
 ];
 export const assets: Asset[] = sites.flatMap(s =>
   RAWDAH_UNITS.map((u, i) => ({
