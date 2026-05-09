@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { EYEDRO_DEVICES } from "@/data/eyedroDevices";
 import type { EyedroDevice } from "@/data/eyedroDevices";
 import { DeviceDetailDialog } from "@/components/platform/DeviceDetailDialog";
+import { UnitHistorySidebar } from "@/components/platform/UnitHistorySidebar";
 
 const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
 
@@ -267,6 +268,7 @@ export default function MonitoringPage() {
             <p className="text-sm text-muted-foreground mt-1">Live power usage and historical data</p>
           </div>
           <div className="flex items-center gap-2">
+            <UnitHistorySidebar />
             <Button size="sm" variant="outline" className="h-8 text-xs" onClick={copyWebhook}>
               <Radio className="mr-1.5 h-3.5 w-3.5 text-savings" />
               Webhook URL
