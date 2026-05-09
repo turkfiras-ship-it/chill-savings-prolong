@@ -381,7 +381,7 @@ function NarrativeLock() {
     <section className="py-8 px-6 pb-20">
       <div className="max-w-4xl mx-auto bg-exec-surface rounded-2xl border border-exec-divider p-8">
         <p className="text-sm text-exec-navy leading-relaxed">
-          In a ~12% hotter year, electricity cost decreased.
+          In a ~12.6% hotter year, electricity cost decreased.
           Invoice-validated avoided cost: <strong className="text-exec-green">{ENERGY_SAVINGS_SAR.toLocaleString()} SAR</strong>.
           Combined recurring annual benefit: <strong className="text-exec-green">{RECURRING_ANNUAL.toLocaleString()} SAR</strong>.
           Capital recovery: <strong className="text-exec-green">{CAPITAL_RECOVERY_YRS} years</strong>.

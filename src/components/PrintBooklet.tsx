@@ -163,12 +163,12 @@ export function PrintBooklet() {
               </div>
               <div className="p-2 rounded border border-red-200 bg-red-50/50 text-center">
                 <p className="text-muted-foreground">Expected Without SCC</p>
-                <p className="font-bold text-red-600">246,431 SAR</p>
-                <p className="text-xs text-muted-foreground">weather-adjusted only, +12%</p>
+                <p className="font-bold text-red-600">{LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR</p>
+                <p className="text-xs text-muted-foreground">weather-adjusted only, +12.6%</p>
               </div>
               <div className="p-2 rounded border-2 border-teal-300 bg-teal-50 text-center">
                 <p className="text-muted-foreground">True Savings</p>
-                <p className="font-bold text-teal-700 text-lg">33,052 SAR</p>
+                <p className="font-bold text-teal-700 text-lg">{LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR</p>
               </div>
             </div>
             <div className="grid grid-cols-4 gap-2 text-xs">

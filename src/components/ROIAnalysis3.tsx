@@ -138,7 +138,7 @@ export function ROIAnalysis3() {
           </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
-          {["VAT included", "Invoice-backed", "Weather-adjusted +12%", "No compounding", "No tariff projections", "Energy-only payback"].map((t) => (
+          {["VAT included", "Invoice-backed", "Weather-adjusted +12.6%", "No compounding", "No tariff projections", "Energy-only payback"].map((t) => (
             <span key={t} className="inline-flex items-center gap-1 text-xs bg-muted/50 border border-border rounded-full px-3 py-1">
               <CheckCircle className="h-3 w-3 text-savings" />
               {t}

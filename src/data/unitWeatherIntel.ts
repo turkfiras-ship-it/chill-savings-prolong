@@ -192,7 +192,7 @@ export const monthlyWeatherProof = months2025.map((m, i) => {
   return {
     month: m.month,
     actualKwh: m.total,
-    expectedKwh: Math.round(expected * 1.12), // weather-normalized expected
-    weatherImpact: Math.round(expected * 0.12),
+    expectedKwh: Math.round(expected * LockedFinancials.weatherAdjustedEnergyAvoided / LockedFinancials.conservativePresentationKwh), // weather-normalized expected
+    weatherImpact: Math.round(expected * 0.126),
   };
 });

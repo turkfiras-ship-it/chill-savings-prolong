@@ -289,7 +289,7 @@ export function ROIAnalysis2() {
       {/* ── VALIDATION BANNERS ── */}
       {expectedMismatch && (
         <div className="rounded-xl bg-destructive/10 border-2 border-destructive/40 p-4 text-destructive font-semibold text-sm">
-          ⚠️ Weather adjustment logic mismatch — Expected_2025_NoSCC ({Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}) ≠ Actual_2024 × 1.12 ({expectedCheck.toLocaleString()})
+          ⚠️ Weather adjustment logic mismatch — Expected_2025_NoSCC ({Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}) ≠ Actual_2024 × 1.126 ({expectedCheck.toLocaleString()})
         </div>
       )}
       {kwhMismatch && (
@@ -313,7 +313,7 @@ export function ROIAnalysis2() {
             <h2 className="text-2xl font-bold mb-1">True Adjusted kW Savings — ROI 2</h2>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-3xl">
               KW-based analysis for the <strong>7 SCC-controlled panels</strong> (G8 excluded — no device installed).
-              A <strong>12% weather bonus</strong> is applied since 2025 was ~1.3°C hotter.
+              A <strong>12.6% weather bonus</strong> is applied since 2025 was ~1.3°C hotter.
               <strong> 2024 had active cooling complaints</strong> — meaning kW was inflated by a struggling system.
               2025 achieved full comfort with <em>less energy</em>.
             </p>
@@ -416,7 +416,7 @@ export function ROIAnalysis2() {
           <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-center">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Expected 2025 (No SCC + Heat)</p>
             <p className="text-3xl font-black text-destructive">{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}</p>
-            <p className="text-xs text-destructive font-medium">Expected 2025 (weather-adjusted only, +12%)</p>
+            <p className="text-xs text-destructive font-medium">Expected 2025 (weather-adjusted only, +12.6%)</p>
           </div>
           <div className="p-4 rounded-xl bg-savings/10 border border-savings/30 text-center">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">True Savings vs Expected</p>
@@ -467,7 +467,7 @@ export function ROIAnalysis2() {
           <p className="mt-4 text-xs text-muted-foreground">
             <strong className="text-foreground">Key message:</strong> The apparent YoY bill saving of {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR
             <em> massively understates</em> the real value. 2025 should have cost <strong>{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()} SAR</strong> given
-            hotter weather (+12% weather adjustment) — the SCC system delivered <strong className="text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR in true savings</strong>,
+            hotter weather (+12.6% weather adjustment) — the SCC system delivered <strong className="text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR in true savings</strong>,
             all from the {SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the bill it controls.
           </p>
         </div>
@@ -522,14 +522,14 @@ export function ROIAnalysis2() {
           <div className="flex items-start gap-2">
             <span className="text-energy font-bold mt-0.5">②</span>
             <div>
-              <p className="font-medium">× 1.12 Weather Demand (Adjusted 2025)</p>
-              <p className="text-muted-foreground">What the building NEEDED given 12% extra heat in 2025 — shows the true demand pressure the system overcame</p>
+              <p className="font-medium">× 1.126 Weather Demand (Adjusted 2025)</p>
+              <p className="text-muted-foreground">What the building NEEDED given 12.6% extra heat in 2025 — shows the true demand pressure the system overcame</p>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-chart-blue font-bold mt-0.5">③</span>
             <div>
-              <p className="font-medium">True Savings = Raw YoY + Weather Bonus (12% of 2025)</p>
+              <p className="font-medium">True Savings = Raw YoY + Weather Bonus (12.6% of 2025)</p>
               <p className="text-muted-foreground">Combines year-over-year reduction with the energy avoided despite higher heat demand — the full efficiency gain</p>
             </div>
           </div>
@@ -557,7 +557,7 @@ export function ROIAnalysis2() {
         <div className="rounded-xl bg-card card-elevated p-5 text-center border-t-4 border-t-energy">
           <p className="text-3xl font-bold text-energy">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</p>
           <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">True Financial Value</p>
-          <p className="text-xs text-muted-foreground">Bill comparison: 246,431 − 213,379</p>
+          <p className="text-xs text-muted-foreground">Bill comparison: 246,665 − 213,379</p>
           <p className="text-xs text-energy font-medium">vs {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill saving</p>
         </div>
       </div>
@@ -577,7 +577,7 @@ export function ROIAnalysis2() {
           </div>
         </div>
         <p className="text-xs text-slate-400 mt-3 border-t border-white/10 pt-3">
-          <strong className="text-white">CFO Narrative:</strong> In a ~12% hotter year, electricity cost decreased. Weather-normalised avoided cost: {TRUE_SAVINGS_SAR.toLocaleString()} SAR. Efficiency improvement: {totalTrueSavingsPct.toFixed(1)}%. All values derived from actual SCECO invoices (VAT included).
+          <strong className="text-white">CFO Narrative:</strong> In a ~12.6% hotter year, electricity cost decreased. Weather-normalised avoided cost: {TRUE_SAVINGS_SAR.toLocaleString()} SAR. Efficiency improvement: {totalTrueSavingsPct.toFixed(1)}%. All values derived from actual SCECO invoices (VAT included).
         </p>
       </div>
 
@@ -799,7 +799,7 @@ export function ROIAnalysis2() {
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">
                 2025 kW Raw {isEditing && <span className="text-primary text-xs">(editable)</span>}
               </th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 Adj (×1.12 heat demand)</th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 Adj (×1.126 heat demand)</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">Raw Savings</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True Savings kW</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True %</th>

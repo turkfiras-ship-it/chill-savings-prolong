@@ -45,7 +45,7 @@ export default function EnergyValueEnginePage() {
     const totalSavings = portfolioKPIs.totalSavings;
     let cum = 0;
     return Array.from({ length: 10 }, (_, i) => {
-      const annual = Math.round(totalSavings * Math.pow(1.12, i));
+      const annual = Math.round(totalSavings * Math.pow(1.126, i));
       cum += annual;
       return { year: String(2025 + i), annual, cumulative: cum };
     });
