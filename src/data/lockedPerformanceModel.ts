@@ -37,8 +37,8 @@ export const LockedFinancials = Object.freeze({
   
   // Weather-adjusted expected bill
   get expectedBill2025WithoutSCC() {
-    return Math.round(this.actualBill2024 * ClimateConstants.weatherNormalizationFactor);
-  }, // 246,431 SAR
+    return this.actualBill2025 + this.directEnergySavingsSAR;
+  }, // 246,665 SAR — locked to direct energy savings, not re-derived in UI
 
   // Direct Energy Savings (Invoice-Backed)
   directEnergySavingsSAR: 33286, // SAR/year — bill-verified + weather-normalized (factor 1.126)
