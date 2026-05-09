@@ -36,7 +36,7 @@ export function FinancialImpact() {
           <div className="bg-savings/30 border border-savings/50 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{overallFinancialImpact.trueAdjustedSavings2025.toLocaleString()} SAR</p>
            <p className="text-sm opacity-90 mt-1 font-semibold">True Adjusted Savings ✓</p>
-38:             <p className="text-xs opacity-70">Expected 2025 without SCC: {LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR</p>
+            <p className="text-xs opacity-70">Expected 2025 without SCC: {LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR</p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
             <p className="text-3xl font-bold">{overallFinancialImpact.trueAdjustedSavingsKwh.toLocaleString()} kWh</p>
