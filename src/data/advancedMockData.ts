@@ -168,17 +168,18 @@ export const caseFiles: CaseFile[] = [
     severity: "High",
     openedAt: new Date("2025-12-31T08:00:00Z").toISOString(),
     evidence: [
-      { time: "FY 2025", event: `G8 panel consumed ${unitAnnualTotals.G8.toLocaleString()} kWh (≈ G1's annual draw)`, type: "data" },
-      { time: "FY 2025", event: "G8 represents 3–18% of monthly building total — varies with season", type: "data" },
-      { time: "Jul 2025", event: "G8 peaked at 14,667 kWh — outside any SCC control loop", type: "alert" },
-      { time: "Engineering", event: "G8 is mixed-mode: cassettes + ducted splits + standalone splits", type: "anomaly" },
+      { time: "Method", event: "G8 is DERIVED, not metered: kWh = SCECO bill total − sum of 7 metered SCC panels", type: "data" },
+      { time: "FY 2025", event: `G8 residual = ${unitAnnualTotals.G8.toLocaleString()} kWh (≈ G1's annual draw)`, type: "data" },
+      { time: "FY 2025", event: "G8 residual represents 3–18% of monthly building total — varies with season", type: "data" },
+      { time: "Jul 2025", event: "G8 residual peaked at 14,667 kWh — all uncontrolled loads combined", type: "alert" },
+      { time: "Engineering", event: "G8 contains: cassettes + ducted splits + splits + lighting + plug loads + meter drift", type: "anomaly" },
     ],
     suspects: [
-      { cause: "Panel never connected to SCC (scope decision)", probability: 100 },
+      { cause: "Loads never metered or connected to SCC (scope decision)", probability: 100 },
     ],
     financialImpact: 12200,
     narrative:
-      "G8 is the single largest uncontrolled load on site (87,083 kWh/yr). Migrating it under SCC is projected to deliver ~14% reduction = 12,200 SAR/yr. This is the highest-ROI engineering action available right now.",
+      "G8 is a DERIVED residual (SCECO total minus 7 metered SCC panels), not a single asset. It represents 87,083 kWh/yr of uncontrolled load — cassettes, ducted splits, lighting, plug loads. Adding meters + SCC control here would unlock the largest remaining savings pool, projected ~14% reduction = 12,200 SAR/yr.",
   },
 ];
 
