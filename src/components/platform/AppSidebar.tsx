@@ -40,9 +40,7 @@ const navGroups = [
     items: [
       { title: "AI Anomalies", url: "/anomaly-detection", icon: Brain },
       { title: "Cooling Stress™", url: "/cooling-stress", icon: Gauge },
-      { title: "Cooling Network", url: "/cooling-intelligence", icon: Globe },
       { title: "Energy Prosecutor", url: "/energy-prosecutor", icon: Shield },
-      { title: "Energy Reputation", url: "/energy-reputation", icon: Star },
       { title: "Heatwave Command", url: "/heatwave-command", icon: Flame },
       { title: "Cooling Forecast", url: "/cooling-forecast", icon: Forecast },
       { title: "Cooling Genome™", url: "/cooling-genome", icon: Dna },

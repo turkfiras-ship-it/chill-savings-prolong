@@ -5,76 +5,8 @@ import { unitAnnualTotals, unitNames, unitMonthlyData2025 } from "@/data/unitMon
 import { LockedFinancials } from "@/data/lockedPerformanceModel";
 import { unitWeatherFits, realAnomalies, unitSavingsContribution } from "@/data/unitWeatherIntel";
 
-const saudiCities = [
-  { city: "Riyadh", lat: 24.7136, lng: 46.6753, region: "Central" },
-  { city: "Jeddah", lat: 21.5433, lng: 39.1728, region: "Western" },
-  { city: "Dammam", lat: 26.4207, lng: 50.0888, region: "Eastern" },
-  { city: "Khobar", lat: 26.2794, lng: 50.2085, region: "Eastern" },
-  { city: "Mecca", lat: 21.4225, lng: 39.8262, region: "Western" },
-  { city: "Medina", lat: 24.4672, lng: 39.6024, region: "Western" },
-  { city: "Tabuk", lat: 28.3835, lng: 36.5662, region: "Northern" },
-  { city: "Abha", lat: 18.2164, lng: 42.5053, region: "Southern" },
-  { city: "Jubail", lat: 27.0174, lng: 49.6225, region: "Eastern" },
-  { city: "Yanbu", lat: 24.0895, lng: 38.0618, region: "Western" },
-];
-
-const buildingTypes = ["Retail", "Commercial", "Healthcare", "Hospitality", "Industrial", "Education", "Government", "Warehouse"];
-// Anonymized peer benchmarks — only "Jarir Bookstore" is a real customer
-const owners = ["Anonymous Operator A", "Anonymous Operator B", "Anonymous Operator C", "Anonymous Operator D", "Anonymous Operator E", "Anonymous Operator F", "Anonymous Operator G", "Anonymous Operator H", "Anonymous Operator I", "Anonymous Operator J"];
-
-function seededRandom(seed: number) {
-  let s = seed;
-  return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
-}
-
-export interface BenchmarkSite {
-  id: string;
-  name: string;
-  city: string;
-  region: string;
-  lat: number;
-  lng: number;
-  type: string;
-  owner: string;
-  coolingTons: number;
-  kwhPerTon: number;
-  efficiencyScore: number; // 0-100
-  annualKwh: number;
-  portfolioRank: number;
-  nationalRank: number;
-}
-
-export const benchmarkSites: BenchmarkSite[] = (() => {
-  const rand = seededRandom(42);
-  const sites: BenchmarkSite[] = [];
-  for (let i = 0; i < 50; i++) {
-    const cityData = saudiCities[i % saudiCities.length];
-    const type = buildingTypes[Math.floor(rand() * buildingTypes.length)];
-    const tons = Math.round(50 + rand() * 500);
-    const kwhPerTon = Math.round((800 + rand() * 1200) * 10) / 10;
-    const efficiency = Math.round(100 - (kwhPerTon - 800) / 12);
-    sites.push({
-      id: `BM-${String(i + 1).padStart(3, "0")}`,
-      name: `${owners[i % owners.length]} — ${cityData.city} ${i < 10 ? "" : String.fromCharCode(65 + (i % 26))}`.trim(),
-      city: cityData.city,
-      region: cityData.region,
-      lat: cityData.lat + (rand() - 0.5) * 0.5,
-      lng: cityData.lng + (rand() - 0.5) * 0.5,
-      type,
-      owner: owners[i % owners.length],
-      coolingTons: tons,
-      kwhPerTon,
-      efficiencyScore: Math.min(100, Math.max(10, efficiency)),
-      annualKwh: Math.round(tons * kwhPerTon),
-      portfolioRank: 0,
-      nationalRank: 0,
-    });
-  }
-  // Assign ranks
-  const sorted = [...sites].sort((a, b) => a.kwhPerTon - b.kwhPerTon);
-  sorted.forEach((s, i) => { s.nationalRank = i + 1; s.portfolioRank = i < 16 ? i + 1 : 0; });
-  return sites;
-})();
+// Jarir-only platform: no synthetic national peer set.
+// Sites are added as Jarir onboards each showroom (Rawdah is currently the only live site).
 
 // ── Case Files for Energy Prosecutor ──────────────────────
 export interface CaseFile {
@@ -183,81 +115,8 @@ export const caseFiles: CaseFile[] = [
   },
 ];
 
-// ── Energy Reputation Scores ──────────────────────────────
-export interface ERSData {
-  siteId: string;
-  siteName: string;
-  city: string;
-  score: number;
-  category: "Elite" | "Strong" | "Average" | "At Risk";
-  components: {
-    efficiency: number;
-    equipmentHealth: number;
-    demandStability: number;
-    carbonIntensity: number;
-    anomalyFrequency: number;
-  };
-  trend: { month: string; score: number }[];
-}
-
-function getERSCategory(score: number): ERSData["category"] {
-  if (score >= 850) return "Elite";
-  if (score >= 700) return "Strong";
-  if (score >= 500) return "Average";
-  return "At Risk";
-}
-
-export const ersData: ERSData[] = (() => {
-  const rand = seededRandom(99);
-  // Single tracked site + anonymized national peer set for benchmarking
-  const siteNames = [
-    "Jarir — Rawdah",
-    "Anonymous Retail A", "Anonymous Retail B", "Anonymous Retail C",
-    "Anonymous Retail D", "Anonymous Retail E", "Anonymous Retail F",
-    "Anonymous Retail G", "Anonymous Retail H", "Anonymous Retail I",
-    "Anonymous Retail J", "Anonymous Retail K", "Anonymous Retail L",
-    "Anonymous Retail M", "Anonymous Retail N", "Anonymous Retail O",
-  ];
-  const cities = ["Riyadh", "Riyadh", "Jeddah", "Dammam", "Riyadh", "Khobar", "Riyadh", "Jeddah", "Riyadh", "Madinah", "Jubail", "Riyadh", "Makkah", "Riyadh", "Jeddah", "Riyadh"];
-
-  return siteNames.map((name, i) => {
-    const eff = 500 + Math.round(rand() * 500);
-    const equip = 400 + Math.round(rand() * 600);
-    const demand = 450 + Math.round(rand() * 550);
-    const carbon = 500 + Math.round(rand() * 500);
-    const anomaly = 600 + Math.round(rand() * 400);
-    const score = Math.round((eff * 0.25 + equip * 0.2 + demand * 0.2 + carbon * 0.2 + anomaly * 0.15));
-    const trend = Array.from({ length: 12 }, (_, m) => ({
-      month: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][m],
-      score: Math.max(300, Math.min(1000, score + Math.round((rand() - 0.5) * 80))),
-    }));
-    return {
-      siteId: `S${String(i + 1).padStart(3, "0")}`,
-      siteName: name,
-      city: cities[i],
-      score,
-      category: getERSCategory(score),
-      components: { efficiency: eff, equipmentHealth: equip, demandStability: demand, carbonIntensity: carbon, anomalyFrequency: anomaly },
-      trend,
-    };
-  }).sort((a, b) => b.score - a.score);
-})();
-
-// Override the Jarir — Rawdah entry with REAL components derived from
-// invoice-backed performance (locked model + per-unit weather fits).
-(() => {
-  const jarir = ersData.find((e) => e.siteName === "Jarir — Rawdah");
-  if (!jarir) return;
-  const meanR2 = unitWeatherFits.reduce((a, f) => a + f.r2, 0) / unitWeatherFits.length;
-  const efficiency = Math.round(LockedFinancials.efficiencyImprovement * 60);   // 14.1% → 846
-  const equipmentHealth = Math.round(LockedFinancials.peakDemandReduction * 14); // 61.8% → 865
-  const demandStability = Math.round(meanR2 * 1000);                             // R² → score
-  const carbonIntensity = 800;                                                   // 0.5825 kg/kWh × controlled load
-  const anomalyFrequency = 700;                                                  // 4 active cases / quarter
-  jarir.components = { efficiency, equipmentHealth, demandStability, carbonIntensity, anomalyFrequency };
-  jarir.score = Math.round(efficiency * 0.25 + equipmentHealth * 0.2 + demandStability * 0.2 + carbonIntensity * 0.2 + anomalyFrequency * 0.15);
-  jarir.category = jarir.score >= 850 ? "Elite" : jarir.score >= 700 ? "Strong" : jarir.score >= 500 ? "Average" : "At Risk";
-})();
+// Energy Reputation Score (peer benchmarking) removed — Jarir-only platform.
+// Will be reintroduced once multiple Jarir showrooms are onboarded for cross-site ranking.
 
 // ── Energy Value Engine Data — real ────────────────────────────
 // Daily kWh = annual ÷ 365; daily savings = locked SAR ÷ 365.
