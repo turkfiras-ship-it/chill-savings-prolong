@@ -146,7 +146,8 @@ const RAWDAH_UNITS = [
   { name: 'F2', cap: 25, bkw: 66, gain: 14.5, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
   { name: 'F3', cap: 25, bkw: 64, gain: 14.9, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
   { name: 'F4', cap: 25, bkw: 58, gain: 15.6, status: 'optimized' as const, solution: 'SCC/VMF', flags: 0 },
-  { name: 'G8', cap: 18, bkw: 48, gain: 0,    status: 'pending' as const,    solution: '—',       flags: 0 },
+  // G8 = aggregate panel of cassettes / ducted-split / split units (multiple sub-units)
+  { name: 'G8', cap: 26, bkw: 62, gain: 0,    status: 'pending' as const,    solution: '— (multi-unit panel)', flags: 0 },
 ];
 export const assets: Asset[] = sites.flatMap(s =>
   RAWDAH_UNITS.map((u, i) => ({

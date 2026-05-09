@@ -139,16 +139,16 @@ export const caseFiles: CaseFile[] = [
     severity: "Medium",
     openedAt: new Date(Date.now() - 86400000).toISOString(),
     evidence: [
-      { time: "14:20", event: "G5 after-hours load detected: 12 kW at 02:15", type: "alert" },
-      { time: "14:35", event: "G5 running at full stage — no occupancy", type: "data" },
-      { time: "15:00", event: "BMS schedule override found active on G5", type: "data" },
+      { time: "14:20", event: "F2 after-hours load detected: 12 kW at 02:15", type: "alert" },
+      { time: "14:35", event: "F2 running at full stage — no occupancy", type: "data" },
+      { time: "15:00", event: "BMS schedule override found active on F2", type: "data" },
     ],
     suspects: [
       { cause: "BMS Schedule Override", probability: 92 },
       { cause: "Occupancy Sensor Failure", probability: 8 },
     ],
     financialImpact: 1450,
-    narrative: "A manual override on G5's after-hours schedule was left active following maintenance. Override removed; nightly load returned to setback. Case closed.",
+    narrative: "A manual override on F2's after-hours schedule was left active following maintenance. Override removed; nightly load returned to setback. Case closed.",
   },
   {
     id: "EC-4823",
@@ -158,9 +158,9 @@ export const caseFiles: CaseFile[] = [
     severity: "High",
     openedAt: new Date(Date.now() - 14400000).toISOString(),
     evidence: [
-      { time: "06:00", event: "G7 efficiency dropped 9% overnight", type: "anomaly" },
-      { time: "06:30", event: "G7 condenser inlet temp elevated: 47°C vs 41°C normal", type: "data" },
-      { time: "07:00", event: "G7 fan vibration spike on rooftop", type: "alert" },
+      { time: "06:00", event: "F4 efficiency dropped 9% overnight", type: "anomaly" },
+      { time: "06:30", event: "F4 condenser inlet temp elevated: 47°C vs 41°C normal", type: "data" },
+      { time: "07:00", event: "F4 fan vibration spike on rooftop", type: "alert" },
     ],
     suspects: [
       { cause: "Condenser Coil Fouling", probability: 55 },
@@ -168,7 +168,7 @@ export const caseFiles: CaseFile[] = [
       { cause: "Refrigerant Overcharge", probability: 15 },
     ],
     financialImpact: 2200,
-    narrative: "G7 showing progressive efficiency degradation linked to elevated condenser inlet temperatures. Rooftop fan vibration suggests mechanical wear. Multiple contributing factors likely. Recommend rooftop inspection within 7 days.",
+    narrative: "F4 showing progressive efficiency degradation linked to elevated condenser inlet temperatures. Rooftop fan vibration suggests mechanical wear. Multiple contributing factors likely. Recommend rooftop inspection within 7 days.",
   },
 ];
 
@@ -251,9 +251,9 @@ export const valueEngineData = {
     { site: "G1", value: 5350, pct: 15.1 },
     { site: "G2", value: 5180, pct: 14.6 },
     { site: "G3", value: 4920, pct: 13.9 },
-    { site: "G4", value: 5240, pct: 14.8 },
-    { site: "G5", value: 4880, pct: 13.8 },
-    { site: "G6", value: 5010, pct: 14.1 },
-    { site: "G7", value: 4877, pct: 13.7 },
+    { site: "F1", value: 5240, pct: 14.8 },
+    { site: "F2", value: 4880, pct: 13.8 },
+    { site: "F3", value: 5010, pct: 14.1 },
+    { site: "F4", value: 4877, pct: 13.7 },
   ],
 };

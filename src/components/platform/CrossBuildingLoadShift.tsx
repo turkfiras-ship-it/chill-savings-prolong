@@ -23,28 +23,28 @@ function analyzeLoadShifting(): LoadShiftOpportunity[] {
     {
       id: 'LS-001',
       from: { name: 'G3 (afternoon peak stage)', city: 'Rawdah', peakHour: '14:00–16:00', peakKw: 72 },
-      to: { name: 'G1 + G4 (pre-cool window)', city: 'Rawdah', offPeakHour: '04:00–06:00', availableKw: 130 },
+      to: { name: 'G1 + F1 (pre-cool window)', city: 'Rawdah', offPeakHour: '04:00–06:00', availableKw: 130 },
       shiftableKw: 18,
       savingsSar: 1820,
-      reason: "Pre-cool the showroom thermal mass via G1 and G4 between 04:00–06:00 (off-peak tariff). G3 then stages later in the afternoon, dropping the 14:00 demand peak by ~18 kW and avoiding the upper tariff tier.",
+      reason: "Pre-cool the showroom thermal mass via G1 and F1 between 04:00–06:00 (off-peak tariff). G3 then stages later in the afternoon, dropping the 14:00 demand peak by ~18 kW and avoiding the upper tariff tier.",
       difficulty: 'easy',
     },
     {
       id: 'LS-002',
       from: { name: 'G2 (zone-2 daytime)', city: 'Rawdah', peakHour: '12:00–15:00', peakKw: 66 },
-      to: { name: 'G6 (zone-2 evening)', city: 'Rawdah', offPeakHour: '19:00–22:00', availableKw: 60 },
+      to: { name: 'F3 (zone-2 evening)', city: 'Rawdah', offPeakHour: '19:00–22:00', availableKw: 60 },
       shiftableKw: 12,
       savingsSar: 980,
-      reason: "G2 is short-cycling at midday. Shifting half its setpoint duty to G6 in the evening flattens the unit-level peak and reduces compressor wear on G2 while waiting for coil service.",
+      reason: "G2 is short-cycling at midday. Shifting half its setpoint duty to F3 in the evening flattens the unit-level peak and reduces compressor wear on G2 while waiting for coil service.",
       difficulty: 'moderate',
     },
     {
       id: 'LS-003',
-      from: { name: 'G5 (after-hours load)', city: 'Rawdah', peakHour: '23:00–06:00', peakKw: 12 },
+      from: { name: 'F2 (after-hours load)', city: 'Rawdah', peakHour: '23:00–06:00', peakKw: 12 },
       to: { name: 'BMS overnight setback', city: 'Rawdah', offPeakHour: 'closed hours', availableKw: 0 },
       shiftableKw: 12,
       savingsSar: 410,
-      reason: "G5 is running unattended after closing. Re-enabling the BMS setback schedule eliminates the 12 kW phantom load entirely — pure waste recovery, no operational impact.",
+      reason: "F2 is running unattended after closing. Re-enabling the BMS setback schedule eliminates the 12 kW phantom load entirely — pure waste recovery, no operational impact.",
       difficulty: 'easy',
     },
   ];
@@ -81,7 +81,7 @@ export function CrossBuildingLoadShift() {
           </div>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          Stage G1–G7 packaged units to flatten the showroom demand profile and avoid peak-tariff hours
+          Stage G1–F4 packaged units to flatten the showroom demand profile and avoid peak-tariff hours
         </p>
       </CardHeader>
       <CardContent className="space-y-3">
