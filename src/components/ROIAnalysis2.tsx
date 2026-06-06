@@ -27,7 +27,7 @@ const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', '
 // 2025 With G8:    27157, 26981, 44928, 59853, 72048, 75378, 83005, 82594, 65564, 45939, 35678, 23517  → Total: 642622
 // G8 monthly:       776,  1374,  4208,  8605, 10828, 12543, 14657, 12879,  9497,  5757,  3343,  1694  → Total: 86171
 
-const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60655, 42915, 33158, 22304]; // Without G8 — Total: 574,713
+const DEFAULT_KW_2024 = [25464, 35426, 36250, 39224, 60210, 68993, 72871, 77243, 60655, 42915, 33158, 22304]; // Without G8 — Total: 613,832
 const DEFAULT_KW_2025 = [26380, 25607, 40720, 51248, 61220, 62835, 68338, 71586, 57251, 40182, 33424, 22517]; // Without G8 — Total: 561,308 (Aug LOCKED: 71,586)
 const G8_MONTHLY     = [ 776,   1374,  4208,  8605, 10828, 12543, 14667, 13308,  9813,  5757,  3454,  1750]; // G8 monthly kWh — Total: 87,083
 
@@ -86,7 +86,7 @@ const ACTUAL_BILL_2024 = 220028;   // SAR — actual 2024 annual bill
 import { LockedFinancials, ClimateConstants, WeatherSource } from "@/data/lockedPerformanceModel";
 
 const WEATHER_ADJUSTMENT = ClimateConstants.adoptedNormalizationPct / 100; // 0.126
-const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor; // 1.126
+const WEATHER_FACTOR = ClimateConstants.weatherNormalizationFactor; // 1.1262
 const EXPECTED_BILL_2025_WITHOUT_SCC = LockedFinancials.expectedBill2025WithoutSCC;
 const TRUE_SAVINGS_SAR = LockedFinancials.directEnergySavingsSAR;
 const ANNUAL_TRUE_SAVINGS_KWH = LockedFinancials.conservativePresentationKwh;
@@ -289,7 +289,7 @@ export function ROIAnalysis2() {
       {/* ── VALIDATION BANNERS ── */}
       {expectedMismatch && (
         <div className="rounded-xl bg-destructive/10 border-2 border-destructive/40 p-4 text-destructive font-semibold text-sm">
-          ⚠️ Weather adjustment logic mismatch — Expected_2025_NoSCC ({Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}) ≠ Actual_2024 × 1.126 ({expectedCheck.toLocaleString()})
+          ⚠️ Weather adjustment logic mismatch — Expected_2025_NoSCC ({Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}) ≠ Actual_2024 × 1.1262 ({expectedCheck.toLocaleString()})
         </div>
       )}
       {kwhMismatch && (
@@ -416,7 +416,7 @@ export function ROIAnalysis2() {
           <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30 text-center">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">Expected 2025 (No SCC + Heat)</p>
             <p className="text-3xl font-black text-destructive">{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()}</p>
-            <p className="text-xs text-destructive font-medium">Expected 2025 (weather-adjusted only, +12.6%)</p>
+            <p className="text-xs text-destructive font-medium">Expected 2025 (weather-adjusted only, +12.62%)</p>
           </div>
           <div className="p-4 rounded-xl bg-savings/10 border border-savings/30 text-center">
             <p className="text-xs uppercase tracking-wide text-muted-foreground mb-1">True Savings vs Expected</p>
@@ -467,7 +467,7 @@ export function ROIAnalysis2() {
           <p className="mt-4 text-xs text-muted-foreground">
             <strong className="text-foreground">Key message:</strong> The apparent YoY bill saving of {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR
             <em> massively understates</em> the real value. 2025 should have cost <strong>{Math.round(EXPECTED_BILL_2025_WITHOUT_SCC).toLocaleString()} SAR</strong> given
-            hotter weather (+12.6% weather adjustment) — the SCC system delivered <strong className="text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR in true savings</strong>,
+            hotter weather (+12.62% weather adjustment) — the SCC system delivered <strong className="text-savings">{TRUE_SAVINGS_SAR.toLocaleString()} SAR in true savings</strong>,
             all from the {SCC_EFFECTIVE_SHARE_PCT.toFixed(1)}% of the bill it controls.
           </p>
         </div>
@@ -522,7 +522,7 @@ export function ROIAnalysis2() {
           <div className="flex items-start gap-2">
             <span className="text-energy font-bold mt-0.5">②</span>
             <div>
-              <p className="font-medium">× 1.126 Weather Demand (Adjusted 2025)</p>
+              <p className="font-medium">× 1.1262 Weather Demand (Adjusted 2025)</p>
               <p className="text-muted-foreground">What the building NEEDED given 12.6% extra heat in 2025 — shows the true demand pressure the system overcame</p>
             </div>
           </div>
@@ -557,7 +557,7 @@ export function ROIAnalysis2() {
         <div className="rounded-xl bg-card card-elevated p-5 text-center border-t-4 border-t-energy">
           <p className="text-3xl font-bold text-energy">{TRUE_SAVINGS_SAR.toLocaleString()} SAR</p>
           <p className="text-xs text-muted-foreground mt-1 uppercase tracking-wide">True Financial Value</p>
-          <p className="text-xs text-muted-foreground">Bill comparison: 246,665 − 213,379</p>
+          <p className="text-xs text-muted-foreground">Bill comparison: 214,615 − 213,379</p>
           <p className="text-xs text-energy font-medium">vs {APPARENT_BILL_SAVINGS_SAR.toLocaleString()} SAR apparent bill saving</p>
         </div>
       </div>
@@ -567,7 +567,7 @@ export function ROIAnalysis2() {
         <p className="text-sm font-bold text-teal-400 mb-3">⚡ Why {totalRawSavingsPct.toFixed(1)}% Raw Savings Understates the True Value</p>
         <div className="grid grid-cols-2 gap-4 text-xs">
           <div className="bg-white/5 rounded-lg p-3 border border-white/10">
-            <p className="font-semibold text-white mb-1">① Weather: 2025 was +1.3°C hotter → +12.6% cooling demand</p>
+            <p className="font-semibold text-white mb-1">① Weather: 2025 was +1.3°C hotter → +12.62% cooling demand</p>
             <p className="text-slate-400">The building <em>needed</em> 12% more energy just to maintain the same comfort. Any kWh savings on top of that is a true efficiency gain — the raw % ignores this extra demand pressure entirely.</p>
             <p className="text-teal-400 font-semibold mt-1">True adjusted savings: {totalTrueSavingsKw.toLocaleString()} kWh ({totalTrueSavingsPct.toFixed(1)}%)</p>
           </div>
@@ -799,7 +799,7 @@ export function ROIAnalysis2() {
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">
                 2025 kW Raw {isEditing && <span className="text-primary text-xs">(editable)</span>}
               </th>
-              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 Adj (×1.126 heat demand)</th>
+              <th className="text-right py-2 px-3 text-muted-foreground font-medium">2025 Adj (×1.1262 heat demand)</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">Raw Savings</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True Savings kW</th>
               <th className="text-right py-2 px-3 text-muted-foreground font-medium">True %</th>

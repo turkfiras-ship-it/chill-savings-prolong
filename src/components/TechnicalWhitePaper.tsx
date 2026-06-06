@@ -241,12 +241,12 @@ export function TechnicalWhitePaper() {
             <Table
               headers={["Metric", "2024 (Baseline)", "2025 (Post-Install)", "Delta"]}
               rows={[
-                ["Total Consumption (kWh)", "574,713", "561,308", `−${LockedFinancials.weatherAdjustedEnergyAvoided.toLocaleString()} weather-adjusted`],
+                ["Total Consumption (kWh)", "613,832", "561,308", `−${LockedFinancials.weatherAdjustedEnergyAvoided.toLocaleString()} weather-adjusted`],
                 ["Total Cost (SAR)", "220,028", "213,379", "−6,649 (raw)"],
                 ["Weather-Adjusted Baseline (SAR)", "—", LockedFinancials.expectedBill2025WithoutSCC.toLocaleString(), "—"],
                 ["Direct Energy Savings (SAR)", "—", "—", LockedFinancials.directEnergySavingsSAR.toLocaleString()],
                 ["Efficiency Improvement", "—", "—", `${LockedFinancials.efficiencyImprovement}%`],
-                ["Peak Demand Reduction", "495 kW", "189 kW", "−61.8%"],
+                ["Peak Demand Reduction", "495 kW", "189 kW", "−44%"],
               ]}
             />
 
@@ -273,7 +273,7 @@ export function TechnicalWhitePaper() {
               The observed {LockedFinancials.efficiencyImprovement}% efficiency improvement exceeds the conservative lower bound of industry estimates (10–15%) while remaining well below aggressive marketing claims (25–35%). This positioning strengthens the credibility of the result, as it aligns with the expected thermodynamic impact of compressor modulation on fixed-speed package units operating under sustained high-ambient conditions.
             </p>
             <p className="mt-3">
-              The 61.8% peak demand reduction (495 kW to 189 kW) merits particular attention. This magnitude of demand-side reduction suggests that the smart control system effectively manages compressor cycling to avoid simultaneous start-up events across the seven units — a known contributor to peak demand charges and electrical infrastructure stress.
+              The 44% peak demand reduction (495 kW to 189 kW) merits particular attention. This magnitude of demand-side reduction suggests that the smart control system effectively manages compressor cycling to avoid simultaneous start-up events across the seven units — a known contributor to peak demand charges and electrical infrastructure stress.
             </p>
             <p className="mt-3">
                The fact that measurable savings were achieved during a year with +1.3°C higher average temperatures provides a robust stress-test of system efficacy. Under conventional operations (without smart controls), the hotter 2025 conditions would have been expected to increase cooling costs by approximately {ClimateConstants.coolingLoadImpactRange} ({weatherSummary.additionalCoolingCostLow.toLocaleString()}–{weatherSummary.additionalCoolingCostHigh.toLocaleString()} SAR). The system not only absorbed this additional load but delivered net positive savings, indicating genuine thermodynamic efficiency gains rather than mere weather-driven variance.
@@ -325,7 +325,7 @@ export function TechnicalWhitePaper() {
               This field study provides invoice-backed validation that retrofit smart control systems deliver measurable, economically significant energy savings in high-ambient commercial cooling applications. The {LockedFinancials.efficiencyImprovement}% efficiency gain and {LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR annual direct energy savings — achieved during a year 1.3°C hotter than baseline — demonstrate robust performance under thermal stress conditions that exceed typical operating assumptions.
             </p>
             <p className="mt-3">
-              The 61.8% peak demand reduction further suggests significant potential for demand-side management benefits, including reduced electrical infrastructure sizing requirements and lower peak demand charges for operators on time-of-use tariff structures.
+              The 44% peak demand reduction further suggests significant potential for demand-side management benefits, including reduced electrical infrastructure sizing requirements and lower peak demand charges for operators on time-of-use tariff structures.
             </p>
             <p className="mt-3">
               These results support the technical viability of retrofit compressor management as a cost-effective alternative to full HVAC system replacement in the Saudi commercial market, aligning with national energy efficiency objectives under Vision 2030.

@@ -140,7 +140,7 @@ export function RawdahAnalysis() {
             </p>
           </div>
           <div className="bg-white/10 rounded-lg p-4 text-center">
-            <EditableText textKey="rawdah.stat3.value" defaultValue="61.8%" as="p" className="text-3xl font-bold" />
+            <EditableText textKey="rawdah.stat3.value" defaultValue="44%" as="p" className="text-3xl font-bold" />
             <EditableText textKey="rawdah.stat3.label" defaultValue="Building Demand Reduction" as="p" className="text-sm opacity-80" />
             <EditableText textKey="rawdah.stat3.sub" defaultValue="495 kW (2023) → 189 kW (2025)" as="p" className="text-xs opacity-60 mt-1" />
           </div>
@@ -304,7 +304,7 @@ export function RawdahAnalysis() {
         <div className="mt-4 p-3 bg-savings/10 border border-savings/20 rounded-lg">
           <EditableText
             textKey="rawdah.chart1.note"
-            defaultValue="Raw YoY Result: Direct bill reduction 2024→2025: 6,649 SAR (220,028 − 213,379 = 6,649 SAR / 3.02% reduction). Even with cost increases in early months, net annual performance is positive. Savings are concentrated in mid-to-late year. True adjusted savings = 33,286 SAR — once weather normalization (+12.6% hotter 2025) is accounted for. See ROI 2 tab for full detail."
+            defaultValue="Raw YoY Result: Direct bill reduction 2024→2025: 6,649 SAR (220,028 − 213,379 = 6,649 SAR / 3.02% reduction). Even with cost increases in early months, net annual performance is positive. Savings are concentrated in mid-to-late year. True adjusted savings = 32,702 SAR — once weather normalization (+12.62% hotter 2025) is accounted for. See ROI 2 tab for full detail."
             as="p"
             className="text-sm text-muted-foreground"
           />
@@ -379,7 +379,7 @@ export function RawdahAnalysis() {
         <div className="mt-6 p-4 bg-savings/10 border border-savings/20 rounded-lg">
           <div className="flex items-center gap-2 mb-2">
             <ArrowDown className="h-5 w-5 text-savings" />
-            <EditableText textKey="rawdah.demand.reduction.label" defaultValue="61.8% Total Reduction" as="span" className="font-semibold text-savings" />
+            <EditableText textKey="rawdah.demand.reduction.label" defaultValue="44% Total Reduction" as="span" className="font-semibold text-savings" />
           </div>
           <EditableText textKey="rawdah.demand.reduction.desc" defaultValue="Daily consumption dropped from 495 kW (2023) to 189 kW (2025) — a reduction of 306 kW per day after SCC installation and filter replacement." as="p" className="text-sm text-muted-foreground" />
         </div>

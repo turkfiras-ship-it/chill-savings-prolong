@@ -9,7 +9,7 @@
 //     G8 = SCECO_bill_total_kWh − (G1+G2+G3+F1+F2+F3+F4 metered kWh)
 // G8 therefore captures ALL non-SCC loads on site (cassettes, ducted
 // splits, lighting, plug loads, office HVAC) plus any meter drift.
-// All SCC savings figures (102,000 kWh / 33,286 SAR / 17.3%) are
+// All SCC savings figures (102,194 kWh / 32,702 SAR / 17.3%) are
 // computed on the 7 metered SCC panels ONLY and exclude G8.
 
 export interface UnitMonthlyData {
