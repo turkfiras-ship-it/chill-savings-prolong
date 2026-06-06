@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { sites, monthlyTrends } from "@/data/mockData";
 import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Activity, Zap, DollarSign, TrendingDown, Clock, Gauge, Upload, FileSpreadsheet, RotateCcw, Radio, Copy } from "lucide-react";
+import { Activity, Zap, DollarSign, TrendingDown, Clock, Gauge, Upload, FileSpreadsheet, RotateCcw, Radio, Copy, RefreshCw } from "lucide-react";
 import { AnimatedKpiCard } from "@/components/platform/AnimatedKpiCard";
 import { PageTransition } from "@/components/platform/PageTransition";
 import { useToast } from "@/hooks/use-toast";
@@ -136,6 +136,7 @@ export default function MonitoringPage() {
   const [lastLiveAt, setLastLiveAt] = useState<Date | null>(null);
   const [deviceLive, setDeviceLive] = useState<Record<string, { ts: string; power_kw: number; energy_kwh: number | null; history: number[] }>>({});
   const [selectedDevice, setSelectedDevice] = useState<EyedroDevice | null>(null);
+  const [syncingSheet, setSyncingSheet] = useState(false);
 
   const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eyedro-ingest`;
 
@@ -259,6 +260,26 @@ export default function MonitoringPage() {
     toast({ title: "Webhook URL copied", description: "Paste it into Zapier / Make as a POST endpoint." });
   };
 
+  const syncGoogleSheet = async () => {
+    setSyncingSheet(true);
+    const { data, error } = await supabase.functions.invoke("sync-gsheet", { method: "POST" });
+    setSyncingSheet(false);
+
+    if (error || !data?.ok) {
+      toast({
+        title: "Google Sheet sync failed",
+        description: error?.message ?? data?.error ?? "Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Google Sheet synced",
+      description: `${data.synced?.daily_unit_readings ?? 0} daily rows · ${data.synced?.sceco_monthly_bills ?? 0} bills`,
+    });
+  };
+
   return (
     <PageTransition>
       <div className="space-y-6">
@@ -269,6 +290,10 @@ export default function MonitoringPage() {
           </div>
           <div className="flex items-center gap-2">
             <UnitHistorySidebar />
+            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={syncGoogleSheet} disabled={syncingSheet}>
+              <RefreshCw className={`mr-1.5 h-3.5 w-3.5 text-energy ${syncingSheet ? "animate-spin" : ""}`} />
+              {syncingSheet ? "Syncing…" : "Sync now"}
+            </Button>
             <Button size="sm" variant="outline" className="h-8 text-xs" onClick={copyWebhook}>
               <Radio className="mr-1.5 h-3.5 w-3.5 text-savings" />
               Webhook URL
