@@ -59,17 +59,6 @@ const navGroups = [
     ],
   },
   {
-    label: "INVESTOR",
-    items: [
-      { title: "Portfolio Value", url: "/portfolio-value", icon: Landmark },
-      { title: "Value Engine", url: "/energy-value-engine", icon: DollarSign },
-      { title: "Contract Lab", url: "/contract-lab", icon: Contract },
-      { title: "Savings & ROI", url: "/savings", icon: TrendingUp },
-      { title: "Billing", url: "/billing", icon: Receipt },
-      { title: "Reports", url: "/reports", icon: FileText },
-    ],
-  },
-  {
     label: "SYSTEM",
     items: [
       { title: "Devices", url: "/devices", icon: Cpu },
