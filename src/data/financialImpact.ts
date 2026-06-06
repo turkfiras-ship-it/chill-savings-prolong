@@ -3,8 +3,8 @@
 export const overallFinancialImpact = {
   totalCostSavings2025: 6649, // SAR — actual YoY bill reduction (220,028 − 213,379 = 6,649)
   trueAdjustedSavings2025: 33286, // SAR — weather-normalised true savings (factor 1.126, bill-verified)
-  trueAdjustedSavingsKwh: 91621, // kWh — true adjusted kWh saved (7 SCC panels, weather-normalised)
-  trueAdjustedSavingsPct: 16.4, // % of 2024 baseline (574,713 kWh)
+  trueAdjustedSavingsKwh: 102000, // kWh — true adjusted kWh saved (7 SCC panels, weather-normalised)
+  trueAdjustedSavingsPct: 17.3, // % of 2024 baseline (574,713 kWh) — per tdeksa.com
   netAnnualPerformance: 'positive',
   savingsConcentration: 'mid-to-late year',
   savingsConcentrationReason: 'when tariffs and HVAC load hurt the most',
@@ -45,7 +45,7 @@ export const managementConclusion = {
   apparentHeadline: 'Direct bill reduction: 6,649 SAR (220,028 → 213,379 SAR) — understates true value',
   details: [
     'True adjusted savings: 33,286 SAR — bill-verified + weather-normalized at 1.126',
-    'True adjusted kWh saved: 91,621 kWh (16.4% of 2024 baseline) — from the 7 SCC-controlled panels only',
+    'True adjusted kWh saved: 102,000 kWh (17.3% of 2024 baseline) — from the 7 SCC-controlled panels only',
     'In a ~12.6% hotter year, electricity cost decreased. All values derived from actual SCECO invoices (VAT included)',
     'Additional savings potential through early-season optimization',
   ],
@@ -57,6 +57,6 @@ export const energyCostComparison = {
   year2025: { totalBill: 213379, label: '2025 Total Bill', changePercent: -3.02, changeSAR: -6649, direction: 'decrease' as const },
   expected2025WithoutSCC: 246665, // SAR — 220,028 × 1.126 (weather-normalised)
   trueSavings: 33286, // SAR — 246,665 − 213,379
-  trueAdjustedKwh: 91621, // kWh saved (weather-normalised at 1.126, 7 SCC panels)
-  anomalyNote: 'During 2025, two months (March and April) experienced operational issues that temporarily inflated consumption. Weather-normalised avoided cost: 33,286 SAR. Efficiency improvement: 16.4% of 2024 baseline.',
+  trueAdjustedKwh: 102000, // kWh saved (weather-normalised at 1.126, 7 SCC panels)
+  anomalyNote: 'During 2025, two months (March and April) experienced operational issues that temporarily inflated consumption. Weather-normalised avoided cost: 33,286 SAR. Efficiency improvement: 17.3% of 2024 baseline.',
 };

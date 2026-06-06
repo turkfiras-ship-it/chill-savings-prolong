@@ -42,11 +42,11 @@ export const LockedFinancials = Object.freeze({
 
   // Direct Energy Savings (Invoice-Backed)
   directEnergySavingsSAR: 33286, // SAR/year — bill-verified + weather-normalized (factor 1.126)
-  weatherAdjustedEnergyAvoided: 91621, // kWh — true adjusted kWh saved (7 SCC panels)
-  efficiencyImprovement: 16.4, // % of 2024 baseline (574,713 kWh)
+  weatherAdjustedEnergyAvoided: 102000, // kWh — true adjusted kWh saved (7 SCC panels)
+  efficiencyImprovement: 17.3, // % of 2024 baseline (574,713 kWh) — per tdeksa.com case study
 
   // Conservative presentation kWh (for monthly alignment)
-  conservativePresentationKwh: 91621, // kWh — true adjusted kWh saved
+  conservativePresentationKwh: 102000, // kWh — true adjusted kWh saved
 
   // Bill-based all-in avoided rate
   get avoidedRateSarPerKwh() {
