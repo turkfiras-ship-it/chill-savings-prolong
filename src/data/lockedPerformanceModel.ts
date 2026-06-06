@@ -3,6 +3,8 @@
 // ═══════════════════════════════════════════════════════════════════════════
 // ALL modules must read from this object only.
 // No tab may perform independent math.
+// Source: TDE Audit "Rawdah_Bills_Savings_2024_to_26_TDE_Audited" — sheet 11MAY26
+// Period basis: rolling 12-month billing cycle (May → Apr), not calendar year.
 // ═══════════════════════════════════════════════════════════════════════════
 
 // ─── SECTION 2: External Weather Data Source ──────────────────────────────
@@ -19,8 +21,8 @@ export const WeatherSource = Object.freeze({
 export const ClimateConstants = Object.freeze({
   avgTemperatureIncrease: 1.3, // °C
   coolingLoadImpactRange: '8–12%' as const,
-  adoptedNormalizationPct: 12.6, // %
-  weatherNormalizationFactor: 1.126, // READ ONLY — bill-verified
+  adoptedNormalizationPct: 12.62, // % — IPMVP CDD-derived (TDE audit)
+  weatherNormalizationFactor: 1.1262, // READ ONLY — TDE-audited (CDD-derived)
 });
 
 // ─── SECTION 4: Weather Normalization Engine ──────────────────────────────
@@ -30,31 +32,41 @@ export const ClimateConstants = Object.freeze({
 
 // ─── SECTION 6: Financial Model Lock ──────────────────────────────────────
 export const LockedFinancials = Object.freeze({
-  // Invoice-backed values
-  actualBill2023: 203246, // SAR
-  actualBill2024: 220028, // SAR
-  actualBill2025: 213379, // SAR
-  
-  // Weather-adjusted expected bill
-  get expectedBill2025WithoutSCC() {
-    return this.actualBill2025 + this.directEnergySavingsSAR;
-  }, // 246,665 SAR — locked to direct energy savings, not re-derived in UI
+  // ─── TDE-Audited Billing Totals (12-month rolling, May → Apr, w/o VAT) ───
+  baselineYearLabel: 'May-2024 → Apr-2025',
+  performanceYearLabel: 'May-2025 → Apr-2026',
+  actualBill2024: 177550, // SAR — baseline year (w/o VAT)
+  actualBill2025: 181913, // SAR — performance year (w/o VAT, tariff +10%)
+  baselineKwh: 613832, // kWh — TDE-audited baseline (May-24 → Apr-25)
+  performanceKwh: 589104, // kWh — TDE-audited actual (May-25 → Apr-26)
+  expectedKwhWithoutSCC: 691298, // kWh — weather-adjusted expected (613,832 × 1.1262)
 
-  // Direct Energy Savings (Invoice-Backed)
-  directEnergySavingsSAR: 33286, // SAR/year — bill-verified + weather-normalized (factor 1.126)
-  weatherAdjustedEnergyAvoided: 102000, // kWh — true adjusted kWh saved (7 SCC panels)
-  efficiencyImprovement: 17.3, // % of 2024 baseline (574,713 kWh) — per tdeksa.com case study
+  // Weather-adjusted expected bill (locked, not re-derived in UI)
+  get expectedBillWithoutSCC() {
+    return this.actualBill2025 + this.directEnergySavingsSAR;
+  }, // ~214,615 SAR
+  // Back-compat alias
+  get expectedBill2025WithoutSCC() {
+    return this.expectedBillWithoutSCC;
+  },
+
+  // ─── Direct Energy Savings (TDE-Verified, IPMVP Option C) ───────────────
+  directEnergySavingsSAR: 32702, // SAR/year — TDE-verified avoided cost (w/o VAT)
+  weatherAdjustedEnergyAvoided: 102194, // kWh — TDE-verified avoided (7 SCC panels)
+  efficiencyImprovement: 17.3, // % of 613,832 kWh baseline
 
   // Conservative presentation kWh (for monthly alignment)
-  conservativePresentationKwh: 102000, // kWh — true adjusted kWh saved
+  conservativePresentationKwh: 102194,
 
   // Bill-based all-in avoided rate
   get avoidedRateSarPerKwh() {
     return this.directEnergySavingsSAR / this.conservativePresentationKwh;
-  }, // ~0.4093 SAR/kWh
+  }, // ~0.32 SAR/kWh (w/o VAT, tariff-blended)
 
-  // Apparent (raw) YoY savings
-  apparentYoYSavingsSAR: 6649, // SAR — direct bill reduction
+  // Apparent (raw) YoY bill movement — note: bills rose +4,363 SAR due to tariff hike
+  apparentYoYSavingsSAR: -4363, // SAR — raw bill delta (181,913 − 177,550); negative = bill increase
+  sameTariffSavingsSAR: 7913, // SAR — if-same-tariff savings (TDE audit row)
+  sameTariffSavingsKwh: 24729, // kWh — gross consumed-kWh savings YoY
 
   // System Investment
   systemInvestment: 175000, // SAR
@@ -62,18 +74,19 @@ export const LockedFinancials = Object.freeze({
   costPerUnit: 25000, // SAR
   unitCapacity: 25, // tons
 
-  // Indirect Operational Benefits
-  maintenanceSavings: 15160, // SAR/year
-  downtimeAvoidance: 7500, // SAR/year
+  // ─── Indirect Operational Benefits (TDE A.1 + B.2) ──────────────────────
+  maintenanceSavings: 10440, // SAR/year — TDE R&M table (7 line items)
+  capitalDeferralSavings: 12833, // SAR/year — annualised 10→15 yr lifespan extension
+  downtimeAvoidance: 0, // folded into R&M
 
-  // Total recurring
+  // Total recurring indirect
   get indirectTotal() {
-    return this.maintenanceSavings + this.downtimeAvoidance;
-  }, // 22,660 SAR
+    return this.maintenanceSavings + this.capitalDeferralSavings + this.downtimeAvoidance;
+  }, // 23,273 SAR
 
   get annualRecurringSavings() {
     return this.directEnergySavingsSAR + this.indirectTotal;
-  }, // 58,117 SAR
+  }, // 55,975 SAR (32,702 + 23,273)
 
   // Payback — energy only
   get paybackYearsEnergyOnly() {
@@ -112,8 +125,25 @@ export const LockedFinancials = Object.freeze({
   extendedLifespan: 15, // years
   replacementCostAvg: 385000, // SAR — 7 units × 55,000 SAR
 
-  // Demand reduction
-  peakDemandReduction: 61.8, // % — 495 kW → 189 kW
+  // Demand reduction (TDE audit band)
+  peakDemandReductionMin: 33, // %
+  peakDemandReductionMax: 55, // %
+  peakDemandReduction: 44, // % — midpoint of audited 33–55% band
+
+  // CO₂ & qualitative (TDE B.1)
+  co2AvoidedTons: 64.1, // tCO₂/year
+  treeEquivalent: 2914, // trees
+  complaintReductionPct: 90, // % — non-F1 units
+
+  // Network roll-out (TDE C.1)
+  network: Object.freeze({
+    showroomsInScope: 20,
+    capexPerSite: 175000,
+    totalCapex: 3500000,
+    annualSavingsPerSite: 43142, // SAR (32,702 energy + 10,440 R&M)
+    networkAnnualSavings: 862840,
+    networkCo2Tons: 1282,
+  }),
 });
 
 // ─── SECTION 5: Conservative Mode Default ─────────────────────────────────
@@ -157,8 +187,8 @@ export function runAuditValidation(monthlyDisplaySAR: number[]): {
       detail: `Sum: ${annualSARSum.toLocaleString()} vs Locked: ${LockedFinancials.directEnergySavingsSAR.toLocaleString()}`,
     },
     {
-      name: 'WeatherNormalizationFactor = 1.126',
-      passed: ClimateConstants.weatherNormalizationFactor === 1.126,
+      name: 'WeatherNormalizationFactor = 1.1262 (TDE-audited)',
+      passed: ClimateConstants.weatherNormalizationFactor === 1.1262,
       detail: `Factor: ${ClimateConstants.weatherNormalizationFactor}`,
     },
   ];
