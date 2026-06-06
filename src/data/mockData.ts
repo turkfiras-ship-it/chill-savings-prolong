@@ -92,7 +92,8 @@ export interface Alert {
 // SINGLE-SITE DEPLOYMENT — Jarir Bookstore, Rawdah Showroom
 // 7 packaged HVAC units (G1–G3 ground, F1–F4 first floor) monitored via Eyedro meters.
 // G8 = DERIVED residual (SCECO bill total − 7 metered SCC panels), not a metered asset.
-// Locked Performance Model: 33,286 SAR direct savings, 102,000 kWh avoided (7 SCC panels only).
+// Locked Performance Model (TDE Audit 11-MAY-2026): 32,702 SAR direct savings (w/o VAT),
+// 102,194 kWh avoided, 17.3% efficiency, baseline 613,832 kWh (May-24 → Apr-25).
 // ─────────────────────────────────────────────────────────────────
 export const sites: Site[] = [
   {
@@ -105,15 +106,15 @@ export const sites: Site[] = [
     status: 'active',
     devices: 7,
     assets: LockedFinancials.numberOfUnits,
-    consumption_kwh: 561308,
-    cost_sar: 213379,
+    consumption_kwh: LockedFinancials.performanceKwh, // 589,104 kWh (May-25 → Apr-26)
+    cost_sar: LockedFinancials.actualBill2025, // 181,913 SAR w/o VAT
     savings_pct: LockedFinancials.efficiencyImprovement,
     savings_sar: LockedFinancials.directEnergySavingsSAR,
     demand_kw: 189,
     peak_kw: 495,
     tariff: 'Commercial',
     operating_hours: '09:00–23:00',
-    baseline_kwh: 574713,
+    baseline_kwh: LockedFinancials.baselineKwh, // 613,832 kWh (May-24 → Apr-25)
     solutions: ['SCC/VMF'],
     projectStage: 'Monitoring Live',
     lat: 24.7136,
@@ -184,7 +185,7 @@ export const projects: Project[] = sites.map((s, i) => ({
   assigned: ['Eng. Ahmed', 'Eng. Khalid', 'Eng. Omar', 'Eng. Faisal'][i % 4],
   startDate: `202${4 + Math.floor(i / 8)}-${String((i % 12) + 1).padStart(2, '0')}-01`,
   roi_pct: s.savings_pct > 0 ? Math.round((s.savings_sar * 5 - 175000) / 175000 * 100) : 0,
-  payback_years: s.savings_pct > 0 ? Math.round(175000 / (s.savings_sar + 22660) * 10) / 10 : 0,
+  payback_years: s.savings_pct > 0 ? Math.round(175000 / (s.savings_sar + 23273) * 10) / 10 : 0,
 }));
 
 const alertTypes = ['Demand Threshold', 'Communication Loss', 'Abnormal Load', 'After-Hours Usage', 'Maintenance Risk', 'Outage Detected', 'Asset Anomaly'];

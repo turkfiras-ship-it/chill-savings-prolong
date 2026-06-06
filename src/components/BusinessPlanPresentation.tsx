@@ -466,7 +466,7 @@ function SlideRiskModel() {
 function SlideCompetitiveAdvantage() {
   const advantages = [
     { title: "Extreme-Climate Specialization", desc: "Purpose-built for GCC high-ambient environments where standard solutions underperform" },
-    { title: "Invoice-Backed Validation", desc: "Performance proven through real utility billing data — 33,286 SAR savings, 102,000 kWh, 17.3% efficiency gain" },
+    { title: "Invoice-Backed Validation", desc: "Performance proven through real utility billing data — 32,702 SAR savings, 102,194 kWh, 17.3% efficiency gain" },
     { title: "Monitoring Revenue Layer", desc: "Recurring subscription model creates predictable cash flow and long-term client retention" },
     { title: "Engineering Precision", desc: "Deep technical thermodynamics expertise in HVAC optimization separates us from generalist competitors" },
     { title: "Selective Client Strategy", desc: "Focus on high-value commercial accounts ensures premium positioning and margin protection" },

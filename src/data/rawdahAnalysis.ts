@@ -118,13 +118,13 @@ export const summaryStats = {
   totalAnnualSavings: 17671.82, // From Excel summary: total annual savings SAR (Rawdah vs Ruben)
   trueAdjustedSavingsSAR: LockedFinancials.directEnergySavingsSAR, // Weather-normalised true savings (bill-verified)
   trueAdjustedSavingsKwh: LockedFinancials.weatherAdjustedEnergyAvoided, // True kWh saved (weather-normalised, 7 SCC panels only, without G8)
-  trueAdjustedSavingsPct: LockedFinancials.efficiencyImprovement, // % of 574,713 kWh 2024 baseline
-  apparentYoYSavingsSAR: 6649, // Direct bill reduction (220,028 − 213,379)
+  trueAdjustedSavingsPct: LockedFinancials.efficiencyImprovement, // % of 613,832 kWh baseline (May-24 → Apr-25)
+  apparentYoYSavingsSAR: -4363, // Raw bill movement (177,550 → 181,913 w/o VAT) — bill rose due to +10% tariff hike
   mostEfficientShowroom: 'Rawdah', // Rawdah won 9 of 12 months
   monthsWonByRawdah: 9,
   monthsWonByRuben: 3, // Only March, April, and September
   totalMonths: 12,
-  demandReductionPercent: 61.8, // 495 kW (Oct 2023) → 189 kW (Oct 2025) = 61.8% reduction
+  demandReductionPercent: 44, // TDE-audited 33–55% band midpoint
 };
 
 // Rawdah-specific insights (standalone performance)

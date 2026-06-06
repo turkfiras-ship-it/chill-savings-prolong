@@ -19,7 +19,7 @@ const fromSheetUnit = (u: string) => (u.startsWith("FF") ? `F${u.slice(2)}` : u)
 type DailyRow = { reading_date: string; unit: string; kwh: number | null; status: string | null };
 
 const DAILY_START = "2026-05-14";
-const AVOIDED_RATE = LockedFinancials.directEnergySavingsSAR / 102000; // ~0.409 SAR/kWh
+const AVOIDED_RATE = LockedFinancials.directEnergySavingsSAR / 102194; // ~0.409 SAR/kWh
 
 export default function MonitoringPage() {
   const { toast } = useToast();
@@ -238,18 +238,17 @@ export default function MonitoringPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <KpiTile label="2024 baseline" value="220,028 SAR" sub="Pre-install bill (annual)" />
               <KpiTile label="2025 with smart system" value="−17.3%" sub="Verified efficiency vs 2024 baseline" tone="good" />
-              <KpiTile label="Direct energy savings" value="33,286 SAR" sub="Weather-normalized · LockedPerformanceModel" tone="good" />
+              <KpiTile label="Direct energy savings" value="32,702 SAR" sub="Weather-normalized · LockedPerformanceModel" tone="good" />
             </div>
 
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Annual bill — 2023 / 2024 / 2025</CardTitle></CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Annual bill — Baseline vs Performance year (TDE-audited, w/o VAT)</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart
                     data={[
-                      { year: "2023", bill: LockedFinancials.actualBill2023 },
-                      { year: "2024 (baseline)", bill: LockedFinancials.actualBill2024 },
-                      { year: "2025 (smart system)", bill: LockedFinancials.actualBill2025 },
+                      { year: "May-24 → Apr-25 (baseline)", bill: LockedFinancials.actualBill2024 },
+                      { year: "May-25 → Apr-26 (smart system)", bill: LockedFinancials.actualBill2025 },
                     ]}
                     margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
                   >

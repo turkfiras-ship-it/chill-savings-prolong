@@ -118,7 +118,7 @@ export function PrintBooklet() {
               <p className="text-xs opacity-80">True Savings (SAR)</p>
             </div>
             <div className="bg-white/10 rounded-lg p-4 text-center">
-              <p className="text-2xl font-bold">61.8%</p>
+              <p className="text-2xl font-bold">44%</p>
               <p className="text-xs opacity-80">Demand Reduction</p>
             </div>
             <div className="bg-white/10 rounded-lg p-4 text-center">
@@ -138,8 +138,8 @@ export function PrintBooklet() {
             {[
               { v: `${summaryStats.avgSavingsPercent}%`, l: "vs Ruben Rate", s: "9/12 months won" },
               { v: `${energyCostSummary.yearlySavings2024vs2025.toLocaleString()}`, l: "Apparent YoY Saving (SAR)", s: "Raw bill difference" },
-              { v: `${LockedFinancials.directEnergySavingsSAR.toLocaleString()}`, l: "True Adj. Savings (SAR)", s: "Expected 2025 without SCC: 246,665 SAR" },
-              { v: `61.8%`, l: "Demand Reduction", s: "495 → 189 kW (2023→2025)" },
+              { v: `${LockedFinancials.directEnergySavingsSAR.toLocaleString()}`, l: "True Adj. Savings (SAR)", s: "Expected 2025 without SCC: 214,615 SAR" },
+              { v: `44%`, l: "Demand Reduction", s: "495 → 189 kW (2023→2025)" },
             ].map(c => (
               <div key={c.l} className="bg-muted/30 rounded-lg p-3 text-center">
                 <p className="text-xl font-bold">{c.v}</p>
@@ -164,7 +164,7 @@ export function PrintBooklet() {
               <div className="p-2 rounded border border-red-200 bg-red-50/50 text-center">
                 <p className="text-muted-foreground">Expected Without SCC</p>
                 <p className="font-bold text-red-600">{LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR</p>
-                <p className="text-xs text-muted-foreground">weather-adjusted only, +12.6%</p>
+                <p className="text-xs text-muted-foreground">weather-adjusted only, +12.62%</p>
               </div>
               <div className="p-2 rounded border-2 border-teal-300 bg-teal-50 text-center">
                 <p className="text-muted-foreground">True Savings</p>
@@ -330,7 +330,7 @@ export function PrintBooklet() {
             ))}
           </div>
           <div className="p-3 bg-teal-500/10 border border-teal-500/20 rounded-lg mb-4">
-            <p className="font-bold text-teal-700 text-xs">61.8% Total Reduction — 495 kW (2023) → 189 kW (2025), saving 306 kW per day</p>
+            <p className="font-bold text-teal-700 text-xs">44% Total Reduction — 495 kW (2023) → 189 kW (2025), saving 306 kW per day</p>
           </div>
 
           <h3 className="font-semibold mb-2">Unit-Level Performance (2024 vs 2025)</h3>
@@ -536,8 +536,8 @@ export function PrintBooklet() {
           <div className="grid grid-cols-4 gap-3 mb-4">
             <div className="p-3 rounded-lg border bg-muted/20 text-center"><p className="text-xs text-muted-foreground">Actual 2024 Bill</p><p className="text-lg font-bold">220,028 SAR</p></div>
             <div className="p-3 rounded-lg border border-teal-200 bg-teal-50/50 text-center"><p className="text-xs text-muted-foreground">Actual 2025 Bill</p><p className="text-lg font-bold text-teal-700">213,379 SAR</p></div>
-            <div className="p-3 rounded-lg border border-red-200 bg-red-50/50 text-center"><p className="text-xs text-muted-foreground">Expected Without SCC</p><p className="text-lg font-bold text-red-600">{LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR</p><p className="text-xs text-muted-foreground">weather-adjusted only, +12.6%</p></div>
-            <div className="p-3 rounded-lg border-2 border-teal-300 bg-teal-50 text-center"><p className="text-xs text-muted-foreground">True Adjusted Savings</p><p className="text-xl font-bold text-teal-700">{LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR</p><p className="text-xs text-teal-600">246,665 − 213,379</p></div>
+            <div className="p-3 rounded-lg border border-red-200 bg-red-50/50 text-center"><p className="text-xs text-muted-foreground">Expected Without SCC</p><p className="text-lg font-bold text-red-600">{LockedFinancials.expectedBill2025WithoutSCC.toLocaleString()} SAR</p><p className="text-xs text-muted-foreground">weather-adjusted only, +12.62%</p></div>
+            <div className="p-3 rounded-lg border-2 border-teal-300 bg-teal-50 text-center"><p className="text-xs text-muted-foreground">True Adjusted Savings</p><p className="text-xl font-bold text-teal-700">{LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR</p><p className="text-xs text-teal-600">214,615 − 213,379</p></div>
           </div>
 
           {/* SCECO Rate Table */}
@@ -554,7 +554,7 @@ export function PrintBooklet() {
           {/* Apparent vs True */}
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="p-3 rounded-lg border text-center"><p className="text-xs text-muted-foreground">Apparent YoY Saving</p><p className="text-lg font-bold">6,649 SAR</p><p className="text-xs text-muted-foreground">Raw bill diff — understates value</p></div>
-            <div className="p-3 rounded-lg border-2 border-teal-300 bg-teal-50 text-center"><p className="text-xs text-muted-foreground">True Adjusted Savings</p><p className="text-lg font-bold text-teal-700">{LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR</p><p className="text-xs text-teal-600">vs expected 246,665 SAR</p></div>
+            <div className="p-3 rounded-lg border-2 border-teal-300 bg-teal-50 text-center"><p className="text-xs text-muted-foreground">True Adjusted Savings</p><p className="text-lg font-bold text-teal-700">{LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR</p><p className="text-xs text-teal-600">vs expected 214,615 SAR</p></div>
             <div className="p-3 rounded-lg border border-amber-200 bg-amber-50/50 text-center"><p className="text-xs text-muted-foreground">Hidden Value (Gap)</p><p className="text-lg font-bold text-amber-700">26,637 SAR</p><p className="text-xs text-amber-600">Masked by G8 + heat</p></div>
           </div>
 
@@ -566,7 +566,7 @@ export function PrintBooklet() {
                 <th className="text-left py-1 px-2">Month</th>
                 <th className="text-right py-1 px-2">2024 kWh</th>
                 <th className="text-right py-1 px-2">2025 kWh</th>
-                <th className="text-right py-1 px-2">Adj 2025 (×1.126)</th>
+                <th className="text-right py-1 px-2">Adj 2025 (×1.1262)</th>
                 <th className="text-right py-1 px-2">Raw Δ kWh</th>
                 <th className="text-right py-1 px-2">Weather +kWh</th>
                 <th className="text-right py-1 px-2">True Savings kWh</th>
@@ -637,7 +637,7 @@ export function PrintBooklet() {
 
           {/* Conclusion */}
           <div className="p-3 bg-slate-800 text-white rounded-lg">
-            <p className="text-xs"><strong className="text-teal-400">Key Message:</strong> The apparent YoY bill saving of 6,649 SAR massively understates the real value. 2025 should have cost 246,665 SAR (weather-adjusted only, +12.6%) — the SCC system delivered <strong>33,286 SAR in true savings</strong>, all from the 81.8% of the bill it controls (7 units × 25 tons inverter). Building demand: 495 kW → 218 kW → 189 kW = 61.8% reduction.</p>
+            <p className="text-xs"><strong className="text-teal-400">Key Message:</strong> The apparent YoY bill saving of 6,649 SAR massively understates the real value. 2025 should have cost 214,615 SAR (weather-adjusted only, +12.62%) — the SCC system delivered <strong>32,702 SAR in true savings</strong>, all from the 81.8% of the bill it controls (7 units × 25 tons inverter). Building demand: 495 kW → 218 kW → 189 kW = 44% reduction.</p>
           </div>
         </div>
 

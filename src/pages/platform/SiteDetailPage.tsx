@@ -292,7 +292,7 @@ export default function SiteDetailPage() {
                     <Badge variant="outline" className="text-[9px] mb-2">{d.label}</Badge>
                     <p className="text-2xl font-bold">{d.totalDailyConsumption} kW</p>
                     <p className="text-xs text-muted-foreground">Avg: {d.avgKwh} kWh · {d.date}</p>
-                    {d.status === 'optimized' && <p className="text-xs text-savings mt-1 font-medium">61.8% reduction from baseline</p>}
+                    {d.status === 'optimized' && <p className="text-xs text-savings mt-1 font-medium">44% reduction from baseline</p>}
                   </CardContent>
                 </Card>
               ))}
