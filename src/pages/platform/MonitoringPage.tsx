@@ -242,14 +242,13 @@ export default function MonitoringPage() {
             </div>
 
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Annual bill — 2023 / 2024 / 2025</CardTitle></CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Annual bill — Baseline vs Performance year (TDE-audited, w/o VAT)</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart
                     data={[
-                      { year: "2023", bill: LockedFinancials.actualBill2023 },
-                      { year: "2024 (baseline)", bill: LockedFinancials.actualBill2024 },
-                      { year: "2025 (smart system)", bill: LockedFinancials.actualBill2025 },
+                      { year: "May-24 → Apr-25 (baseline)", bill: LockedFinancials.actualBill2024 },
+                      { year: "May-25 → Apr-26 (smart system)", bill: LockedFinancials.actualBill2025 },
                     ]}
                     margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
                   >
