@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      daily_unit_readings: {
+        Row: {
+          cdd: number | null
+          condition: string | null
+          created_at: string
+          fleet_sar: number | null
+          fleet_total: number | null
+          id: string
+          kwh: number | null
+          max_temp_c: number | null
+          mean_temp_c: number | null
+          min_temp_c: number | null
+          notes: string | null
+          reading_date: string
+          status: string | null
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          cdd?: number | null
+          condition?: string | null
+          created_at?: string
+          fleet_sar?: number | null
+          fleet_total?: number | null
+          id?: string
+          kwh?: number | null
+          max_temp_c?: number | null
+          mean_temp_c?: number | null
+          min_temp_c?: number | null
+          notes?: string | null
+          reading_date: string
+          status?: string | null
+          unit: string
+          updated_at?: string
+        }
+        Update: {
+          cdd?: number | null
+          condition?: string | null
+          created_at?: string
+          fleet_sar?: number | null
+          fleet_total?: number | null
+          id?: string
+          kwh?: number | null
+          max_temp_c?: number | null
+          mean_temp_c?: number | null
+          min_temp_c?: number | null
+          notes?: string | null
+          reading_date?: string
+          status?: string | null
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       eyedro_readings: {
         Row: {
           created_at: string
@@ -77,6 +131,72 @@ export type Database = {
           published_at?: string | null
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sceco_monthly_bills: {
+        Row: {
+          base_cost: number | null
+          bill_sar: number | null
+          created_at: string
+          id: string
+          kwh: number | null
+          month: string
+          updated_at: string
+          vat: number | null
+          year: number
+        }
+        Insert: {
+          base_cost?: number | null
+          bill_sar?: number | null
+          created_at?: string
+          id?: string
+          kwh?: number | null
+          month: string
+          updated_at?: string
+          vat?: number | null
+          year: number
+        }
+        Update: {
+          base_cost?: number | null
+          bill_sar?: number | null
+          created_at?: string
+          id?: string
+          kwh?: number | null
+          month?: string
+          updated_at?: string
+          vat?: number | null
+          year?: number
+        }
+        Relationships: []
+      }
+      unit_alerts: {
+        Row: {
+          action: string | null
+          created_at: string
+          id: string
+          level: string | null
+          message: string | null
+          ts: string
+          unit: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string
+          id?: string
+          level?: string | null
+          message?: string | null
+          ts: string
+          unit?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string
+          id?: string
+          level?: string | null
+          message?: string | null
+          ts?: string
+          unit?: string | null
         }
         Relationships: []
       }

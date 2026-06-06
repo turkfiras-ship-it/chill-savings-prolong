@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { History, TrendingDown, TrendingUp } from "lucide-react";
+import { History, TrendingDown, TrendingUp, RefreshCw } from "lucide-react";
 import { unitMonthlyData2025, unitInfo, unitAnnualTotals } from "@/data/unitMonthlyData";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 type UnitKey = "G1" | "G2" | "G3" | "F1" | "F2" | "F3" | "F4" | "G8";
 const UNITS: UnitKey[] = ["G1", "G2", "G3", "F1", "F2", "F3", "F4", "G8"];
@@ -18,6 +20,45 @@ interface Props {
 export function UnitHistorySidebar({ trigger }: Props) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<UnitKey>("G1");
+  const [daily, setDaily] = useState<{ reading_date: string; kwh: number | null; status: string | null }[]>([]);
+  const [loadingDaily, setLoadingDaily] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const [lastSync, setLastSync] = useState<string | null>(null);
+
+  // Sidebar unit -> sheet unit (F1 <-> FF1)
+  const sheetUnit = (u: UnitKey) => (u.startsWith("F") && u !== "G8" ? `F${u.slice(1)}` : u).replace(/^F(\d)$/, "FF$1");
+
+  const loadDaily = useCallback(async (u: UnitKey) => {
+    setLoadingDaily(true);
+    const { data, error } = await supabase
+      .from("daily_unit_readings")
+      .select("reading_date,kwh,status")
+      .eq("unit", sheetUnit(u))
+      .order("reading_date", { ascending: false })
+      .limit(60);
+    if (error) console.error(error);
+    setDaily(data ?? []);
+    setLoadingDaily(false);
+  }, []);
+
+  useEffect(() => {
+    if (open) loadDaily(active);
+  }, [open, active, loadDaily]);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    const { data, error } = await supabase.functions.invoke("sync-gsheet", { method: "POST" });
+    setSyncing(false);
+    if (error || !data?.ok) {
+      toast.error("Sync failed", { description: error?.message ?? data?.error });
+      return;
+    }
+    setLastSync(new Date().toLocaleTimeString());
+    toast.success("Synced from Google Sheet", {
+      description: `${data.synced?.daily_unit_readings ?? 0} daily rows · ${data.synced?.sceco_monthly_bills ?? 0} bills`,
+    });
+    loadDaily(active);
+  };
 
   const series = unitMonthlyData2025.map(m => ({
     month: m.month.replace(" 2024", " '24").replace(" 2026", " '26"),
@@ -57,6 +98,17 @@ export function UnitHistorySidebar({ trigger }: Props) {
             Dec 2024 – Feb 2026 · kWh per billing cycle · Jarir Bookstore Rawdah
           </p>
         </SheetHeader>
+
+        <div className="mt-3 flex items-center justify-between gap-2 rounded-md border border-border bg-secondary/30 px-3 py-2">
+          <div className="text-[10px] text-muted-foreground">
+            Live sync · Google Sheet
+            {lastSync && <span className="ml-2 font-mono">last: {lastSync}</span>}
+          </div>
+          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={handleSync} disabled={syncing}>
+            <RefreshCw className={`mr-1.5 h-3 w-3 ${syncing ? "animate-spin" : ""}`} />
+            {syncing ? "Syncing…" : "Sync now"}
+          </Button>
+        </div>
 
         <Tabs value={active} onValueChange={v => setActive(v as UnitKey)} className="mt-4">
           <TabsList className="grid grid-cols-8 h-8">
@@ -183,6 +235,51 @@ export function UnitHistorySidebar({ trigger }: Props) {
                   Derived value — excluded from SCC savings
                 </Badge>
               )}
+
+              <div className="rounded-md border border-border bg-card p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Daily History (Live · last 60 days)
+                  </div>
+                  <Badge variant="outline" className="text-[9px]">{daily.length} rows</Badge>
+                </div>
+                <ScrollArea className="h-[220px]">
+                  {loadingDaily ? (
+                    <div className="text-[11px] text-muted-foreground py-6 text-center">Loading…</div>
+                  ) : daily.length === 0 ? (
+                    <div className="text-[11px] text-muted-foreground py-6 text-center">
+                      No data yet. Click "Sync now".
+                    </div>
+                  ) : (
+                    <table className="w-full text-xs">
+                      <thead className="sticky top-0 bg-secondary/80 backdrop-blur">
+                        <tr className="border-b border-border">
+                          <th className="text-left px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">Date</th>
+                          <th className="text-right px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">kWh</th>
+                          <th className="text-right px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {daily.map(row => (
+                          <tr key={row.reading_date} className="border-b border-border/50 hover:bg-secondary/40">
+                            <td className="px-3 py-1.5 font-mono text-[11px]">{row.reading_date}</td>
+                            <td className="px-3 py-1.5 text-right font-mono">
+                              {row.kwh != null ? Number(row.kwh).toFixed(2) : "—"}
+                            </td>
+                            <td className="px-3 py-1.5 text-right">
+                              {row.status === "ALERT" ? (
+                                <span className="text-warning text-[10px]">ALERT</span>
+                              ) : (
+                                <span className="text-savings text-[10px]">{row.status ?? "—"}</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </ScrollArea>
+              </div>
             </TabsContent>
           ))}
         </Tabs>
