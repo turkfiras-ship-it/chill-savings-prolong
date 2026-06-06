@@ -4,7 +4,7 @@
 // All values trace back to:
 //   - unitMonthlyData2025  (real per-unit kWh, billing-cycle aligned)
 //   - monthlyWeatherData   (Riyadh OERK 2024 vs 2025 avg highs)
-//   - LockedFinancials     (33,286 SAR direct, 91,621 kWh avoided)
+//   - LockedFinancials     (33,286 SAR direct, 102,000 kWh avoided)
 // No random numbers. Every metric is reproducible from these three sources.
 // ═══════════════════════════════════════════════════════════════════
 

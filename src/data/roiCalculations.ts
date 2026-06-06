@@ -127,7 +127,7 @@ export const calculateReplacementSavings = () => {
 // Energy Savings (from LockedPerformanceModel)
 export const energySavings = {
   annualSavingsRawdah: LockedFinancials.directEnergySavingsSAR, // 33,286 SAR/year
-  annualSavingsPercent: LockedFinancials.efficiencyImprovement, // 16.4%
+  annualSavingsPercent: LockedFinancials.efficiencyImprovement, // 17.3%
   apparentYoYSavings: LockedFinancials.apparentYoYSavingsSAR, // 6,649 SAR
   apparentYoYSavingsSum: 13003, // SAR — sum of positive-saving months only
   rawdahVsRubenSavings: 17671.82, // SAR/year — Rawdah vs Ruben comparison (Without G8)

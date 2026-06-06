@@ -19,7 +19,7 @@ const fromSheetUnit = (u: string) => (u.startsWith("FF") ? `F${u.slice(2)}` : u)
 type DailyRow = { reading_date: string; unit: string; kwh: number | null; status: string | null };
 
 const DAILY_START = "2026-05-14";
-const AVOIDED_RATE = LockedFinancials.directEnergySavingsSAR / 91621; // ~0.409 SAR/kWh
+const AVOIDED_RATE = LockedFinancials.directEnergySavingsSAR / 102000; // ~0.409 SAR/kWh
 
 export default function MonitoringPage() {
   const { toast } = useToast();
