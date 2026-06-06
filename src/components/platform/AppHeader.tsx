@@ -1,17 +1,15 @@
-import { Bell, Search, User, SidebarIcon, Monitor, Briefcase } from "lucide-react";
+import { Bell, Search, User, SidebarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSidebar } from "@/components/ui/sidebar";
 import { alerts } from "@/data/mockData";
 import { CommandPalette } from "./CommandPalette";
-import { useViewMode } from "@/context/ViewModeContext";
 
 export function AppHeader() {
   const { toggleSidebar } = useSidebar();
   const navigate = useNavigate();
   const unackAlerts = alerts.filter(a => !a.acknowledged).length;
-  const { viewMode, setViewMode } = useViewMode();
 
   return (
     <>
@@ -33,30 +31,6 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-1.5">
-          {/* View Mode Toggle */}
-          <div className="hidden sm:flex items-center bg-secondary/40 rounded-md border border-border/30 p-0.5 mr-2">
-            <button
-              onClick={() => setViewMode("command")}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all ${
-                viewMode === "command"
-                  ? "bg-primary/15 text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Monitor className="h-3 w-3" /> Command
-            </button>
-            <button
-              onClick={() => setViewMode("executive")}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-all ${
-                viewMode === "executive"
-                  ? "bg-primary/15 text-primary shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Briefcase className="h-3 w-3" /> Executive
-            </button>
-          </div>
-
           <div className="hidden sm:flex items-center gap-1.5 mr-1">
             <div className="h-1.5 w-1.5 rounded-full bg-accent pulse-dot" />
             <span className="text-[10px] text-muted-foreground/60 font-mono uppercase tracking-wider">Live</span>
