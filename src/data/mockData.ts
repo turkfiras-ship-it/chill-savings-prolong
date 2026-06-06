@@ -92,7 +92,7 @@ export interface Alert {
 // SINGLE-SITE DEPLOYMENT — Jarir Bookstore, Rawdah Showroom
 // 7 packaged HVAC units (G1–G3 ground, F1–F4 first floor) monitored via Eyedro meters.
 // G8 = DERIVED residual (SCECO bill total − 7 metered SCC panels), not a metered asset.
-// Locked Performance Model: 33,286 SAR direct savings, 91,621 kWh avoided (7 SCC panels only).
+// Locked Performance Model: 33,286 SAR direct savings, 102,000 kWh avoided (7 SCC panels only).
 // ─────────────────────────────────────────────────────────────────
 export const sites: Site[] = [
   {
