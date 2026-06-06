@@ -54,6 +54,8 @@ export const managementConclusion = {
 };
 
 export const energyCostComparison = {
+  // Legacy 2023 entry kept for back-compat with older charts (TDE audit drops it).
+  year2023: { totalBill: 203246, label: '2023 Total Bill (legacy, w/ VAT)' },
   year2024: { totalBill: 177550, label: 'May-24 → Apr-25 (Baseline, w/o VAT)' },
   year2025: { totalBill: 181913, label: 'May-25 → Apr-26 (Performance, w/o VAT)', changePercent: 2.46, changeSAR: 4363, direction: 'increase' as const },
   expected2025WithoutSCC: 214615, // SAR — 181,913 + 32,702 (avoided)
