@@ -294,22 +294,6 @@ export default function MonitoringPage() {
               <RefreshCw className={`mr-1.5 h-3.5 w-3.5 text-energy ${syncingSheet ? "animate-spin" : ""}`} />
               {syncingSheet ? "Syncing…" : "Sync now"}
             </Button>
-            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={copyWebhook}>
-              <Radio className="mr-1.5 h-3.5 w-3.5 text-savings" />
-              Webhook URL
-              <Copy className="ml-1.5 h-3 w-3" />
-            </Button>
-            <label className="inline-flex h-8 cursor-pointer items-center gap-2 rounded-md border border-border bg-card px-3 text-xs font-medium hover:bg-muted">
-              <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImportFile} />
-              <Upload className="h-3.5 w-3.5 text-energy" />
-              Import Export
-            </label>
-            {hasImportedData && (
-              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={clearImportedData}>
-                <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
-                Reset
-              </Button>
-            )}
             <Select value={selectedSite} onValueChange={setSelectedSite}>
               <SelectTrigger className="w-48 h-8 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
