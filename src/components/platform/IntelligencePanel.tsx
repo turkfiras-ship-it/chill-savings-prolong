@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Brain, AlertTriangle, TrendingUp, Zap, X, ChevronRight, Activity } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { sites, alerts } from "@/data/mockData";
+import { Brain, AlertTriangle, TrendingUp, Zap, X, ChevronRight, Activity, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 
 interface Insight {
   id: string;
@@ -16,58 +16,119 @@ interface Insight {
   timestamp: string;
 }
 
-const generateInsights = (): Insight[] => [
-  {
-    id: "INS-001",
-    type: "anomaly",
-    title: "G3 compressor cycling anomaly",
-    description: "G3 cycling increased 31% without corresponding demand. Possible valve degradation — open work order recommended.",
-    metric: "3,120 SAR/mo",
-    metricLabel: "Est. cost impact",
-    severity: "warning",
-    timestamp: "2 min ago",
-  },
-  {
-    id: "INS-002",
-    type: "prediction",
-    title: "Cooling load surge predicted",
-    description: "Riyadh forecast shows 47°C Thursday. Showroom cooling load expected +22% above baseline across G1–F4.",
-    metric: "+22%",
-    metricLabel: "Load increase",
-    severity: "critical",
-    timestamp: "5 min ago",
-  },
-  {
-    id: "INS-003",
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
+}
+
+const MONTH_ORDER = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+async function loadLiveInsights(): Promise<Insight[]> {
+  const out: Insight[] = [];
+
+  // 1) Real alerts from synced sheet
+  const { data: alertsRows } = await supabase
+    .from("unit_alerts")
+    .select("id, ts, level, unit, message, action")
+    .order("ts", { ascending: false })
+    .limit(5);
+  (alertsRows ?? []).forEach((a) => {
+    const lvl = (a.level ?? "info").toLowerCase();
+    const severity: Insight["severity"] =
+      lvl.includes("crit") ? "critical" : lvl.includes("warn") ? "warning" : "info";
+    out.push({
+      id: `ALERT-${a.id}`,
+      type: "alert",
+      title: `${a.unit ?? "Site"} — ${a.message ?? "Alert"}`,
+      description: a.action ?? "Review event log for context.",
+      severity,
+      timestamp: timeAgo(a.ts),
+    });
+  });
+
+  // 2) Per-unit consumption spike detection (last reading vs 30-day median)
+  const { data: readings } = await supabase
+    .from("daily_unit_readings")
+    .select("reading_date, unit, kwh")
+    .order("reading_date", { ascending: false })
+    .limit(500);
+  if (readings && readings.length) {
+    const byUnit = new Map<string, { date: string; kwh: number }[]>();
+    readings.forEach((r) => {
+      if (r.kwh == null) return;
+      const arr = byUnit.get(r.unit) ?? [];
+      arr.push({ date: r.reading_date, kwh: Number(r.kwh) });
+      byUnit.set(r.unit, arr);
+    });
+    byUnit.forEach((arr, unit) => {
+      if (arr.length < 5) return;
+      const latest = arr[0];
+      const history = arr.slice(1, 31).map((r) => r.kwh).sort((a, b) => a - b);
+      if (!history.length) return;
+      const median = history[Math.floor(history.length / 2)];
+      if (median <= 0) return;
+      const delta = (latest.kwh - median) / median;
+      if (delta >= 0.15) {
+        out.push({
+          id: `SPIKE-${unit}`,
+          type: "anomaly",
+          title: `${unit} consumption spike`,
+          description: `${unit} drew ${latest.kwh.toFixed(1)} kWh on ${latest.date} vs ${median.toFixed(1)} kWh median (last 30d).`,
+          metric: `+${(delta * 100).toFixed(0)}%`,
+          metricLabel: "vs 30-day median",
+          severity: delta >= 0.3 ? "critical" : "warning",
+          timestamp: latest.date,
+        });
+      }
+    });
+  }
+
+  // 3) SCECO month-over-month variance
+  const { data: bills } = await supabase
+    .from("sceco_monthly_bills")
+    .select("year, month, kwh, bill_sar");
+  if (bills && bills.length >= 2) {
+    const sorted = [...bills].sort((a, b) => {
+      const ay = a.year * 12 + MONTH_ORDER.indexOf(a.month);
+      const by = b.year * 12 + MONTH_ORDER.indexOf(b.month);
+      return by - ay;
+    });
+    const cur = sorted[0];
+    const prev = sorted[1];
+    if (cur.kwh && prev.kwh && prev.kwh > 0) {
+      const delta = (Number(cur.kwh) - Number(prev.kwh)) / Number(prev.kwh);
+      out.push({
+        id: "SCECO-MOM",
+        type: "prediction",
+        title: `${cur.month}-${cur.year} SCECO bill posted`,
+        description: `${Number(cur.kwh).toLocaleString()} kWh / ${Number(cur.bill_sar).toLocaleString()} SAR vs prior month ${Number(prev.kwh).toLocaleString()} kWh.`,
+        metric: `${delta >= 0 ? "+" : ""}${(delta * 100).toFixed(1)}%`,
+        metricLabel: "MoM kWh",
+        severity: Math.abs(delta) >= 0.2 ? "warning" : "info",
+        timestamp: `${cur.month} ${cur.year}`,
+      });
+    }
+  }
+
+  // 4) Always-on audited savings reference (locked model)
+  out.push({
+    id: "TDE-LOCKED",
     type: "recommendation",
-    title: "Pre-cooling opportunity",
-    description: "Stage G1, F1, F4 between 04:00–06:00 to reduce 14:00 peak demand charge. Estimated monthly saving: 1,820 SAR.",
-    metric: "1,820 SAR",
-    metricLabel: "Potential savings",
+    title: "TDE-audited savings on track",
+    description: `Rolling 12-mo: ${LockedFinancials.weatherAdjustedEnergyAvoided.toLocaleString()} kWh avoided across 7 SCC panels (weather-normalized).`,
+    metric: `${LockedFinancials.directEnergySavingsSAR.toLocaleString()} SAR`,
+    metricLabel: "Direct savings (w/o VAT)",
     severity: "info",
-    timestamp: "12 min ago",
-  },
-  {
-    id: "INS-004",
-    type: "anomaly",
-    title: "G2 efficiency drop",
-    description: "G2 showing 8% efficiency decline over past 72 hours. Evaporator coil inspection recommended.",
-    metric: "-8%",
-    metricLabel: "Efficiency delta",
-    severity: "warning",
-    timestamp: "18 min ago",
-  },
-  {
-    id: "INS-005",
-    type: "prediction",
-    title: "F3 maintenance window",
-    description: "F3 approaching 4,200 run hours. Schedule filter + belt service within 14 days to maintain SCC/VMF gains.",
-    metric: "14 days",
-    metricLabel: "Time to service",
-    severity: "info",
-    timestamp: "25 min ago",
-  },
-];
+    timestamp: "TDE 11-MAY-26",
+  });
+
+  return out;
+}
 
 const severityStyles: Record<string, { border: string; icon: string; dot: string }> = {
   info: {
@@ -94,18 +155,43 @@ const typeIcons: Record<string, React.ElementType> = {
   alert: Activity,
 };
 
-const insightRoutes: Record<string, string> = {
-  "INS-001": "/anomaly-detection",
-  "INS-002": "/cooling-forecast",
-  "INS-003": "/ai-optimization",
-  "INS-004": "/anomaly-detection",
-  "INS-005": "/predictive-maintenance",
-};
+function routeFor(insight: Insight): string {
+  if (insight.id.startsWith("SPIKE-")) return "/anomaly-detection";
+  if (insight.id === "SCECO-MOM") return "/monitoring";
+  if (insight.id === "TDE-LOCKED") return "/savings";
+  if (insight.id.startsWith("ALERT-")) return "/alerts";
+  return "/anomaly-detection";
+}
 
 export function IntelligencePanel() {
-  const [insights] = useState<Insight[]>(generateInsights);
+  const [insights, setInsights] = useState<Insight[]>([]);
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [unitCount, setUnitCount] = useState(0);
+  const [lastSync, setLastSync] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const live = await loadLiveInsights();
+        const { data: units } = await supabase
+          .from("daily_unit_readings")
+          .select("unit, reading_date")
+          .order("reading_date", { ascending: false })
+          .limit(200);
+        if (!alive) return;
+        setInsights(live);
+        const u = new Set((units ?? []).map((r) => r.unit));
+        setUnitCount(u.size);
+        setLastSync(units?.[0]?.reading_date ?? null);
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const visible = insights.filter(i => !dismissed.has(i.id));
 
@@ -121,6 +207,16 @@ export function IntelligencePanel() {
 
       {/* Insights stream */}
       <div className="flex-1 overflow-y-auto no-scrollbar p-3 space-y-2">
+        {!loading && visible.length === 0 && (
+          <div className="flex flex-col items-center justify-center text-center py-10 px-3 text-muted-foreground">
+            <CheckCircle2 className="h-5 w-5 text-primary/70 mb-2" />
+            <p className="text-[11px] font-semibold">All systems nominal</p>
+            <p className="text-[10px] mt-1 opacity-70">No active alerts from live data.</p>
+          </div>
+        )}
+        {loading && (
+          <div className="text-[10px] text-muted-foreground/60 px-2 py-4">Loading live signals…</div>
+        )}
         <AnimatePresence>
           {visible.map((insight, i) => {
             const style = severityStyles[insight.severity];
@@ -162,7 +258,7 @@ export function IntelligencePanel() {
                 <div className="mt-1.5 flex items-center justify-between">
                   <span className="text-[9px] text-muted-foreground/40">{insight.timestamp}</span>
                   <button
-                    onClick={() => navigate(insightRoutes[insight.id] || "/anomaly-detection")}
+                    onClick={() => navigate(routeFor(insight))}
                     className="text-[9px] text-primary/60 hover:text-primary flex items-center gap-0.5 transition-colors"
                   >
                     Details <ChevronRight className="h-2.5 w-2.5" />
@@ -177,8 +273,10 @@ export function IntelligencePanel() {
       {/* Footer summary */}
       <div className="p-3 border-t border-border/30">
         <div className="flex items-center justify-between text-[9px] text-muted-foreground/50">
-          <span className="uppercase tracking-wider">Active alerts: {alerts.filter(a => !a.acknowledged).length}</span>
-          <span className="uppercase tracking-wider">7 units · 1 site online</span>
+          <span className="uppercase tracking-wider">Active signals: {visible.length}</span>
+          <span className="uppercase tracking-wider">
+            {unitCount} units · sync {lastSync ?? "—"}
+          </span>
         </div>
       </div>
     </div>
