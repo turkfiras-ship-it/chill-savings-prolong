@@ -1,10 +1,12 @@
-// Overall Financial Impact Data — from Excel Summary Analysis tab
+// Overall Financial Impact Data — TDE Audit 11-MAY-2026 (sheet 11MAY26)
+// Period basis: rolling May→Apr (not calendar year). w/o VAT.
 
 export const overallFinancialImpact = {
-  totalCostSavings2025: 6649, // SAR — actual YoY bill reduction (220,028 − 213,379 = 6,649)
-  trueAdjustedSavings2025: 33286, // SAR — weather-normalised true savings (factor 1.126, bill-verified)
-  trueAdjustedSavingsKwh: 102000, // kWh — true adjusted kWh saved (7 SCC panels, weather-normalised)
-  trueAdjustedSavingsPct: 17.3, // % of 2024 baseline (574,713 kWh) — per tdeksa.com
+  totalCostSavings2025: -4363, // SAR — raw YoY bill movement (177,550 → 181,913, w/o VAT) — bill rose due to +10% tariff
+  sameTariffSavingsSAR: 7913, // SAR — if-same-tariff savings (TDE audit)
+  trueAdjustedSavings2025: 32702, // SAR/year — TDE-verified avoided cost (w/o VAT, IPMVP Option C)
+  trueAdjustedSavingsKwh: 102194, // kWh — TDE-verified avoided (7 SCC panels, weather-normalised)
+  trueAdjustedSavingsPct: 17.3, // % of 613,832 kWh baseline (May-24 → Apr-25)
   netAnnualPerformance: 'positive',
   savingsConcentration: 'mid-to-late year',
   savingsConcentrationReason: 'when tariffs and HVAC load hurt the most',
@@ -41,22 +43,21 @@ export const seasonalCostBehavior = {
 };
 
 export const managementConclusion = {
-  headline: 'Rawdah achieved 33,286 SAR in true energy savings in 2025 (weather-normalized, factor 1.126)',
-  apparentHeadline: 'Direct bill reduction: 6,649 SAR (220,028 → 213,379 SAR) — understates true value',
+  headline: 'Rawdah achieved 32,702 SAR in TDE-verified energy savings (May-25 → Apr-26, weather-normalized at 1.1262, w/o VAT)',
+  apparentHeadline: 'Raw bill movement: +4,363 SAR (177,550 → 181,913 SAR w/o VAT) — masked by +10% SCECO tariff hike in May-25',
   details: [
-    'True adjusted savings: 33,286 SAR — bill-verified + weather-normalized at 1.126',
-    'True adjusted kWh saved: 102,000 kWh (17.3% of 2024 baseline) — from the 7 SCC-controlled panels only',
-    'In a ~12.6% hotter year, electricity cost decreased. All values derived from actual SCECO invoices (VAT included)',
+    'TDE-verified avoided cost: 32,702 SAR/yr — IPMVP Option C, weather-normalized at factor 1.1262',
+    'Verified kWh avoided: 102,194 kWh (17.3% of 613,832 kWh baseline) — from the 7 SCC-controlled panels only',
+    'In a +1.3°C hotter year (12.62% more cooling demand), the SCC system absorbed the load and reduced bills vs the same-tariff counterfactual by 7,913 SAR',
     'Additional savings potential through early-season optimization',
   ],
 };
 
 export const energyCostComparison = {
-  year2023: { totalBill: 203246, label: '2023 Total Bill' },
-  year2024: { totalBill: 220028, label: '2024 Total Bill', changePercent: 8.25, changeSAR: 16782, direction: 'increase' as const },
-  year2025: { totalBill: 213379, label: '2025 Total Bill', changePercent: -3.02, changeSAR: -6649, direction: 'decrease' as const },
-  expected2025WithoutSCC: 246665, // SAR — 220,028 × 1.126 (weather-normalised)
-  trueSavings: 33286, // SAR — 246,665 − 213,379
-  trueAdjustedKwh: 102000, // kWh saved (weather-normalised at 1.126, 7 SCC panels)
-  anomalyNote: 'During 2025, two months (March and April) experienced operational issues that temporarily inflated consumption. Weather-normalised avoided cost: 33,286 SAR. Efficiency improvement: 17.3% of 2024 baseline.',
+  year2024: { totalBill: 177550, label: 'May-24 → Apr-25 (Baseline, w/o VAT)' },
+  year2025: { totalBill: 181913, label: 'May-25 → Apr-26 (Performance, w/o VAT)', changePercent: 2.46, changeSAR: 4363, direction: 'increase' as const },
+  expected2025WithoutSCC: 214615, // SAR — 181,913 + 32,702 (avoided)
+  trueSavings: 32702, // SAR/yr — TDE-verified
+  trueAdjustedKwh: 102194, // kWh saved (TDE-audited, factor 1.1262)
+  anomalyNote: 'Bills rose +4,363 SAR YoY due to the +10% SCECO tariff hike (May-25). On a like-for-like tariff basis, savings were 7,913 SAR. IPMVP-normalized avoided cost: 32,702 SAR. Efficiency improvement: 17.3% of 613,832 kWh baseline.',
 };
