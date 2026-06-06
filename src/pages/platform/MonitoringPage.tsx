@@ -1,487 +1,287 @@
-import { useState, useMemo, useEffect } from "react";
-import readXlsxFile from "read-excel-file/browser";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { sites, monthlyTrends } from "@/data/mockData";
-import { AreaChart, Area, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Activity, Zap, DollarSign, TrendingDown, Clock, Gauge, Upload, FileSpreadsheet, RotateCcw, Radio, Copy, RefreshCw } from "lucide-react";
-import { AnimatedKpiCard } from "@/components/platform/AnimatedKpiCard";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
+import { RefreshCw, CalendarDays, TrendingDown, Database } from "lucide-react";
 import { PageTransition } from "@/components/platform/PageTransition";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
-import { EYEDRO_DEVICES } from "@/data/eyedroDevices";
-import type { EyedroDevice } from "@/data/eyedroDevices";
-import { DeviceDetailDialog } from "@/components/platform/DeviceDetailDialog";
 import { UnitHistorySidebar } from "@/components/platform/UnitHistorySidebar";
+import { unitMonthlyData2025 } from "@/data/unitMonthlyData";
+import { LockedFinancials } from "@/data/lockedPerformanceModel";
 
-const timeRanges = ['Live', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
+// Sheet uses FF1..FF4 for first-floor units. UI uses F1..F4.
+const UI_UNITS = ["G1", "G2", "G3", "F1", "F2", "F3", "F4"] as const;
+const fromSheetUnit = (u: string) => (u.startsWith("FF") ? `F${u.slice(2)}` : u);
 
-// Generate more realistic live data with smooth sine waves
-const liveData = Array.from({ length: 60 }, (_, i) => ({
-  time: `${String(Math.floor(i / 60)).padStart(2, '0')}:${String(i % 60).padStart(2, '0')}`,
-  power: 280 + Math.sin(i / 5) * 40 + Math.random() * 30,
-  demand: 300 + Math.cos(i / 8) * 50 + Math.random() * 20,
-  baseline: 310,
-}));
+type DailyRow = { reading_date: string; unit: string; kwh: number | null; status: string | null };
 
-type SheetCell = string | number | boolean | Date | null | undefined;
-type MonitorPoint = { time: string; power: number; demand: number; baseline: number; consumption?: number };
-type ImportedDataset = { fileName: string; points: MonitorPoint[]; hasConsumption: boolean };
-
-const IMPORT_STORAGE_KEY = "dc-evolve-eyedro-export";
-
-const cellText = (cell: SheetCell) => (cell instanceof Date ? cell.toISOString() : String(cell ?? "")).trim();
-const cleanLabel = (cell: SheetCell) => cellText(cell).toLowerCase().replace(/[^a-z0-9/%]+/g, " ").trim();
-
-const toNumber = (cell: SheetCell) => {
-  if (typeof cell === "number" && Number.isFinite(cell)) return cell;
-  const value = cellText(cell).replace(/,/g, "").match(/-?\d+(\.\d+)?/);
-  return value ? Number(value[0]) : null;
-};
-
-const excelSerialToDate = (value: number) => new Date(Math.round((value - 25569) * 86400 * 1000));
-
-const formatTimestamp = (value: SheetCell, index: number, fallback?: SheetCell) => {
-  const primary = value instanceof Date ? value : typeof value === "number" && value > 20000 ? excelSerialToDate(value) : null;
-  if (primary) return primary.toLocaleString([], { month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-  const joined = [cellText(value), cellText(fallback)].filter(Boolean).join(" ").trim();
-  return joined || `Row ${index + 1}`;
-};
-
-const parseCsvRows = (text: string): SheetCell[][] => {
-  const rows: SheetCell[][] = [];
-  let row: string[] = [];
-  let value = "";
-  let quoted = false;
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-    const next = text[i + 1];
-    if (char === '"' && quoted && next === '"') {
-      value += '"';
-      i++;
-    } else if (char === '"') {
-      quoted = !quoted;
-    } else if (char === "," && !quoted) {
-      row.push(value);
-      value = "";
-    } else if ((char === "\n" || char === "\r") && !quoted) {
-      if (char === "\r" && next === "\n") i++;
-      row.push(value);
-      if (row.some(Boolean)) rows.push(row);
-      row = [];
-      value = "";
-    } else {
-      value += char;
-    }
-  }
-  row.push(value);
-  if (row.some(Boolean)) rows.push(row);
-  return rows;
-};
-
-const parseEyedroRows = (rows: SheetCell[][]): ImportedDataset["points"] => {
-  const headerIndex = rows.slice(0, 25).findIndex(row => {
-    const labels = row.map(cleanLabel);
-    return labels.some(label => /date|time|timestamp/.test(label)) && labels.some(label => /kw|kwh|power|demand|energy|usage|consumption/.test(label));
-  });
-  const headers = rows[Math.max(headerIndex, 0)]?.map(cleanLabel) ?? [];
-  const findCol = (test: (label: string) => boolean) => headers.findIndex(test);
-  const timestampCol = findCol(label => /timestamp|date time|datetime/.test(label));
-  const dateCol = timestampCol >= 0 ? timestampCol : findCol(label => /date/.test(label));
-  const timeCol = findCol(label => /time/.test(label) && !/runtime|uptime/.test(label));
-  const energyCol = findCol(label => /kwh|energy|consumption|usage/.test(label));
-  const demandCol = findCol(label => /demand|peak/.test(label));
-  const powerCol = findCol(label => (/\bkw\b|power|load/.test(label) && !/kwh|factor|cost/.test(label))) >= 0
-    ? findCol(label => (/\bkw\b|power|load/.test(label) && !/kwh|factor|cost/.test(label)))
-    : demandCol;
-  const valueCol = powerCol >= 0 ? powerCol : energyCol;
-  if (valueCol < 0) return [];
-
-  const dataRows = rows.slice(Math.max(headerIndex, 0) + 1);
-  const points = dataRows.map((row, index) => {
-    const power = toNumber(row[valueCol]);
-    const consumption = energyCol >= 0 ? toNumber(row[energyCol]) : null;
-    const demand = demandCol >= 0 ? toNumber(row[demandCol]) : power;
-    if (power === null) return null;
-    return {
-      time: formatTimestamp(dateCol >= 0 ? row[dateCol] : null, index, timeCol >= 0 && timeCol !== dateCol ? row[timeCol] : null),
-      power,
-      demand: demand ?? power,
-      baseline: Math.max(power, demand ?? power) * 1.08,
-      consumption: consumption ?? undefined,
-    };
-  }).filter(Boolean) as MonitorPoint[];
-
-  return points.slice(-500);
-};
+const DAILY_START = "2026-05-14";
+const AVOIDED_RATE = LockedFinancials.directEnergySavingsSAR / 91621; // ~0.409 SAR/kWh
 
 export default function MonitoringPage() {
-  const [range, setRange] = useState('Live');
-  const [selectedSite, setSelectedSite] = useState('all');
-  const [importedData, setImportedData] = useState<ImportedDataset | null>(() => {
-    try {
-      const stored = localStorage.getItem(IMPORT_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  });
   const { toast } = useToast();
-  const activeSites = sites.filter(s => s.status === 'active');
-  const site = selectedSite !== 'all' ? sites.find(s => s.id === selectedSite) : null;
+  const [syncing, setSyncing] = useState(false);
+  const [rows, setRows] = useState<DailyRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const [livePoints, setLivePoints] = useState<MonitorPoint[]>([]);
-  const [lastLiveAt, setLastLiveAt] = useState<Date | null>(null);
-  const [deviceLive, setDeviceLive] = useState<Record<string, { ts: string; power_kw: number; energy_kwh: number | null; history: number[] }>>({});
-  const [selectedDevice, setSelectedDevice] = useState<EyedroDevice | null>(null);
-  const [syncingSheet, setSyncingSheet] = useState(false);
-
-  const webhookUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/eyedro-ingest`;
-
-  useEffect(() => {
-    const mapRow = (r: any): MonitorPoint => {
-      const power = Number(r.power_kw ?? 0);
-      return {
-        time: new Date(r.ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
-        power,
-        demand: power,
-        baseline: 310,
-        consumption: r.energy_kwh != null ? Number(r.energy_kwh) : undefined,
-      };
-    };
-    const ingestDevice = (r: any) => {
-      const serial: string | null = r.device_serial ?? null;
-      if (!serial) return;
-      setDeviceLive(prev => {
-        const prevDev = prev[serial] ?? { ts: r.ts, power_kw: 0, energy_kwh: null, history: [] };
-        const power = Number(r.power_kw ?? 0);
-        return {
-          ...prev,
-          [serial]: {
-            ts: r.ts,
-            power_kw: power,
-            energy_kwh: r.energy_kwh != null ? Number(r.energy_kwh) : prevDev.energy_kwh,
-            history: [...prevDev.history.slice(-29), power],
-          },
-        };
-      });
-    };
-    supabase
-      .from("eyedro_readings")
-      .select("ts,power_kw,energy_kwh,device_serial")
-      .order("ts", { ascending: false })
-      .limit(240)
-      .then(({ data }) => {
-        if (data && data.length) {
-          const sorted = [...data].reverse().map(mapRow);
-          setLivePoints(sorted);
-          setLastLiveAt(new Date(data[0].ts));
-          // Build per-device latest + sparkline history
-          const grouped: Record<string, any[]> = {};
-          for (const r of [...data].reverse()) {
-            const s = (r as any).device_serial;
-            if (!s) continue;
-            (grouped[s] ||= []).push(r);
-          }
-          const next: Record<string, any> = {};
-          for (const [serial, rows] of Object.entries(grouped)) {
-            const last = rows[rows.length - 1];
-            next[serial] = {
-              ts: last.ts,
-              power_kw: Number(last.power_kw ?? 0),
-              energy_kwh: last.energy_kwh != null ? Number(last.energy_kwh) : null,
-              history: rows.slice(-30).map(r => Number(r.power_kw ?? 0)),
-            };
-          }
-          setDeviceLive(next);
-        }
-      });
-    const channel = supabase
-      .channel("eyedro-live")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "eyedro_readings" }, (payload) => {
-        const row = payload.new as any;
-        setLivePoints(prev => [...prev.slice(-239), mapRow(row)]);
-        setLastLiveAt(new Date(row.ts));
-        ingestDevice(row);
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+  const load = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("daily_unit_readings")
+      .select("reading_date,unit,kwh,status")
+      .gte("reading_date", DAILY_START)
+      .order("reading_date", { ascending: true });
+    if (error) console.error(error);
+    setRows((data ?? []).map((r: any) => ({ ...r, unit: fromSheetUnit(r.unit) })));
+    setLoading(false);
   }, []);
 
-  const hasLiveStream = livePoints.length > 0;
-  const importedPoints = hasLiveStream ? livePoints : (importedData?.points ?? []);
-  const hasImportedData = importedPoints.length > 0;
-  const chartData = hasImportedData ? importedPoints.slice(-120) : liveData;
-  const latestImported = importedPoints.at(-1);
-  const importedPeak = hasImportedData ? Math.max(...importedPoints.map(d => Math.max(d.power, d.demand))) : 0;
-  const currentPower = hasImportedData ? Math.round(latestImported?.power ?? 0) : site ? site.demand_kw : activeSites.reduce((a, s) => a + s.demand_kw, 0);
-  const peakPower = hasImportedData ? Math.round(importedPeak) : site ? site.peak_kw : activeSites.reduce((a, s) => a + s.peak_kw, 0);
-  const utilization = peakPower > 0 ? Math.round((currentPower / peakPower) * 100) : 0;
-  const importedUsage = hasImportedData
-    ? importedPoints.reduce((sum, point) => sum + (point.consumption ?? 0), 0)
-    : null;
-  const usageValue = hasImportedData && importedUsage ? Math.round(importedUsage) : Math.round(currentPower * 14);
-  const consumptionTrend = hasImportedData && importedData?.hasConsumption ? chartData : monthlyTrends;
-  const trendTimeKey = hasImportedData ? "time" : "month";
+  useEffect(() => { load(); }, [load]);
 
-  const powerSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.power })), [chartData]);
-  const demandSpark = useMemo(() => chartData.slice(-20).map(d => ({ value: d.demand })), [chartData]);
-
-  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    try {
-      const rows = file.name.match(/\.csv$/i)
-        ? parseCsvRows(await file.text())
-        : (await readXlsxFile(file) as unknown as SheetCell[][]);
-      const points = parseEyedroRows(rows);
-      if (points.length < 2) throw new Error("No usable kW/kWh columns found");
-      const dataset = { fileName: file.name, points, hasConsumption: points.some(point => point.consumption !== undefined) };
-      localStorage.setItem(IMPORT_STORAGE_KEY, JSON.stringify(dataset));
-      setImportedData(dataset);
-      toast({ title: "Eyedro export loaded", description: `${points.length} monitoring rows extracted from ${file.name}.` });
-    } catch (error) {
-      toast({ title: "Could not read file", description: error instanceof Error ? error.message : "Upload the CSV/XLSX export from Eyedro.", variant: "destructive" });
-    } finally {
-      event.target.value = "";
-    }
-  };
-
-  const clearImportedData = () => {
-    localStorage.removeItem(IMPORT_STORAGE_KEY);
-    setImportedData(null);
-    toast({ title: "Live model restored", description: "Monitoring is back to the built-in live simulation." });
-  };
-
-  const copyWebhook = async () => {
-    await navigator.clipboard.writeText(webhookUrl);
-    toast({ title: "Webhook URL copied", description: "Paste it into Zapier / Make as a POST endpoint." });
-  };
-
-  const syncGoogleSheet = async () => {
-    setSyncingSheet(true);
+  const syncNow = async () => {
+    setSyncing(true);
     const { data, error } = await supabase.functions.invoke("sync-gsheet", { method: "POST" });
-    setSyncingSheet(false);
-
+    setSyncing(false);
     if (error || !data?.ok) {
-      toast({
-        title: "Google Sheet sync failed",
-        description: error?.message ?? data?.error ?? "Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "Sync failed", description: error?.message ?? data?.error, variant: "destructive" });
       return;
     }
-
-    toast({
-      title: "Google Sheet synced",
-      description: `${data.synced?.daily_unit_readings ?? 0} daily rows · ${data.synced?.sceco_monthly_bills ?? 0} bills`,
-    });
+    toast({ title: "Sheet synced", description: `${data.synced?.daily_unit_readings ?? 0} daily rows pulled` });
+    load();
   };
+
+  const dailyByDate = useMemo(() => {
+    const map = new Map<string, Record<string, number>>();
+    for (const r of rows) {
+      if (r.kwh == null) continue;
+      if (!map.has(r.reading_date)) map.set(r.reading_date, {});
+      map.get(r.reading_date)![r.unit] = Number(r.kwh);
+    }
+    return Array.from(map.entries())
+      .map(([date, units]) => {
+        const total = UI_UNITS.reduce((s, u) => s + (units[u] ?? 0), 0);
+        return { date, total, ...units } as any;
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
+  }, [rows]);
+
+  const alertCount = rows.filter(r => r.status === "ALERT").length;
+  const latest = dailyByDate.at(-1);
+  const prev = dailyByDate.at(-2);
+  const last7 = dailyByDate.slice(-7);
+  const avg7 = last7.length ? last7.reduce((s, d) => s + d.total, 0) / last7.length : 0;
+  const mtd = dailyByDate.filter(d => d.date.startsWith(latest?.date.slice(0, 7) ?? "")).reduce((s, d) => s + d.total, 0);
+
+  // Operational benchmark: 2025 (post-install) May/Jun daily avg.
+  const may2025 = unitMonthlyData2025.find(m => m.month === "May")?.total ?? 0;
+  const jun2025 = unitMonthlyData2025.find(m => m.month === "June")?.total ?? 0;
+  const baseDailyMay = may2025 / 31;
+  const baseDailyJun = jun2025 / 30;
+  const latestVsBaseline = latest
+    ? ((latest.total - (latest.date.slice(5, 7) === "05" ? baseDailyMay : baseDailyJun)) /
+        (latest.date.slice(5, 7) === "05" ? baseDailyMay : baseDailyJun)) * 100
+    : 0;
 
   return (
     <PageTransition>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Real-Time Monitoring</h1>
-            <p className="text-sm text-muted-foreground mt-1">Live power usage and historical data</p>
+            <h1 className="text-2xl font-bold tracking-tight">Operations Monitoring</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Daily per-unit consumption · Synced from metering sheet · Window: {DAILY_START} → today
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <UnitHistorySidebar />
-            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={syncGoogleSheet} disabled={syncingSheet}>
-              <RefreshCw className={`mr-1.5 h-3.5 w-3.5 text-energy ${syncingSheet ? "animate-spin" : ""}`} />
-              {syncingSheet ? "Syncing…" : "Sync now"}
+            <Button size="sm" variant="outline" className="h-8 text-xs" onClick={syncNow} disabled={syncing}>
+              <RefreshCw className={`mr-1.5 h-3.5 w-3.5 text-energy ${syncing ? "animate-spin" : ""}`} />
+              {syncing ? "Syncing…" : "Sync now"}
             </Button>
-            <Select value={selectedSite} onValueChange={setSelectedSite}>
-              <SelectTrigger className="w-48 h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Sites</SelectItem>
-                {activeSites.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <div className="flex gap-1 bg-secondary rounded-md p-0.5">
-              {timeRanges.map(r => (
-                <Button key={r} size="sm" variant={range === r ? 'default' : 'ghost'} className="h-7 text-xs px-2.5" onClick={() => setRange(r)}>
-                  {r}
-                </Button>
-              ))}
-            </div>
           </div>
         </div>
 
-        {hasLiveStream && (
-          <Card className="border-savings/30 bg-savings/5">
-            <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-xs">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-savings opacity-75" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-savings" />
-                </span>
-                <span className="font-medium text-foreground">Live webhook stream active</span>
-                <span className="text-muted-foreground">{livePoints.length} readings · last {lastLiveAt ? lastLiveAt.toLocaleTimeString() : "—"}</span>
-              </div>
-              <span className="font-mono text-[10px] text-muted-foreground">Auto-updating in real time</span>
-            </CardContent>
-          </Card>
-        )}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          <KpiTile label="Latest day kWh" value={latest ? Math.round(latest.total).toLocaleString() : "—"} sub={latest?.date ?? "no data"} />
+          <KpiTile
+            label="vs Previous day"
+            value={latest && prev ? `${(((latest.total - prev.total) / prev.total) * 100).toFixed(1)}%` : "—"}
+            sub={prev?.date ?? "—"}
+            tone={latest && prev ? (latest.total < prev.total ? "good" : "bad") : "neutral"}
+          />
+          <KpiTile label="7-day avg" value={`${Math.round(avg7).toLocaleString()} kWh`} sub={`${last7.length} days`} />
+          <KpiTile label="MTD total" value={`${Math.round(mtd).toLocaleString()} kWh`} sub={`SAR ${Math.round(mtd * AVOIDED_RATE).toLocaleString()} avoided-rate`} />
+          <KpiTile
+            label="vs 2025 daily avg"
+            value={latest ? `${latestVsBaseline >= 0 ? "+" : ""}${latestVsBaseline.toFixed(1)}%` : "—"}
+            sub="post-install benchmark"
+            tone={latestVsBaseline < 0 ? "good" : "bad"}
+          />
+        </div>
 
-        <Card className="bg-card border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Radio className="h-3.5 w-3.5 text-savings" />
-              Per-Device Live Readings
-              <span className="ml-auto text-[10px] text-muted-foreground font-normal">
-                {EYEDRO_DEVICES.length} Eyedro devices · Jarir Bookstore — Rawdah
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
-              {EYEDRO_DEVICES.map((dev) => {
-                const live = deviceLive[dev.serialHex];
-                const isLive = !!live && (Date.now() - new Date(live.ts).getTime()) < 5 * 60 * 1000;
-                const power = live?.power_kw ?? 0;
-                const max = Math.max(1, ...(live?.history ?? [1]));
-                const points = (live?.history ?? []).map((v, i, arr) => {
-                  const x = arr.length > 1 ? (i / (arr.length - 1)) * 100 : 0;
-                  const y = 28 - (v / max) * 24;
-                  return `${x.toFixed(1)},${y.toFixed(1)}`;
-                }).join(" ");
-                return (
-                  <button
-                    key={dev.serialHex}
-                    type="button"
-                    onClick={() => setSelectedDevice(dev)}
-                    className="text-left rounded-md border border-border bg-secondary/40 p-2.5 flex flex-col gap-1.5 hover:border-savings/60 hover:bg-secondary/70 transition-colors cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between text-[10px]">
-                      <span className="font-mono font-semibold text-foreground">{dev.unit}</span>
-                      <span className={`flex items-center gap-1 ${isLive ? "text-savings" : "text-muted-foreground"}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-savings animate-pulse" : "bg-muted-foreground/40"}`} />
-                        {isLive ? "LIVE" : "—"}
-                      </span>
-                    </div>
-                    <div className="font-mono text-lg font-bold tracking-tight text-foreground tabular-nums">
-                      {power.toFixed(2)}<span className="text-[10px] text-muted-foreground ml-1">kW</span>
-                    </div>
-                    <svg viewBox="0 0 100 30" className="w-full h-7" preserveAspectRatio="none">
-                      {points && (
-                        <polyline
-                          fill="none"
-                          stroke="hsl(var(--savings, 152 60% 48%))"
-                          strokeWidth="1.5"
-                          points={points}
-                        />
-                      )}
-                    </svg>
-                    <div className="flex items-center justify-between text-[9px] text-muted-foreground font-mono">
-                      <span>{dev.serialHex}</span>
-                      <span>{live?.energy_kwh != null ? `${live.energy_kwh.toFixed(1)} kWh` : "—"}</span>
-                    </div>
-                  </button>
-                );
-              })}
+        <Tabs defaultValue="daily" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="daily" className="text-xs"><CalendarDays className="h-3.5 w-3.5 mr-1.5" />Daily operations</TabsTrigger>
+            <TabsTrigger value="monthly" className="text-xs"><Database className="h-3.5 w-3.5 mr-1.5" />Monthly history</TabsTrigger>
+            <TabsTrigger value="savings" className="text-xs"><TrendingDown className="h-3.5 w-3.5 mr-1.5" />Baseline vs performance</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="daily" className="space-y-4">
+            <Card>
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium">Daily total — all 7 SCC panels</CardTitle>
+                <Badge variant="outline" className="text-[10px]">{dailyByDate.length} days · {alertCount} alerts</Badge>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground">Loading…</div>
+                ) : dailyByDate.length === 0 ? (
+                  <div className="h-[260px] flex items-center justify-center text-xs text-muted-foreground">
+                    No daily data yet — click "Sync now".
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <BarChart data={dailyByDate} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} />
+                      <YAxis tick={{ fontSize: 9 }} />
+                      <Tooltip
+                        contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 11 }}
+                        formatter={(v: number) => [`${Math.round(v).toLocaleString()} kWh`, "Total"]}
+                      />
+                      <Bar dataKey="total" fill="hsl(var(--energy))" radius={[2, 2, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Per-unit daily kWh</CardTitle></CardHeader>
+              <CardContent>
+                {!loading && (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <LineChart data={dailyByDate} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" tick={{ fontSize: 9 }} />
+                      <YAxis tick={{ fontSize: 9 }} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 11 }} />
+                      <Legend wrapperStyle={{ fontSize: 10 }} />
+                      {UI_UNITS.map((u, i) => (
+                        <Line key={u} type="monotone" dataKey={u} stroke={`hsl(${(i * 50) % 360} 70% 55%)`} strokeWidth={1.5} dot={false} />
+                      ))}
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Daily readings table</CardTitle></CardHeader>
+              <CardContent>
+                <div className="max-h-[360px] overflow-auto rounded-md border border-border">
+                  <table className="w-full text-xs">
+                    <thead className="sticky top-0 bg-secondary/80 backdrop-blur">
+                      <tr className="border-b border-border">
+                        <th className="text-left px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">Date</th>
+                        {UI_UNITS.map(u => (
+                          <th key={u} className="text-right px-2 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">{u}</th>
+                        ))}
+                        <th className="text-right px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...dailyByDate].reverse().map(d => (
+                        <tr key={d.date} className="border-b border-border/40 hover:bg-secondary/40">
+                          <td className="px-3 py-1.5 font-mono">{d.date}</td>
+                          {UI_UNITS.map(u => (
+                            <td key={u} className="px-2 py-1.5 text-right font-mono">
+                              {(d as any)[u] != null ? Math.round((d as any)[u]).toLocaleString() : "—"}
+                            </td>
+                          ))}
+                          <td className="px-3 py-1.5 text-right font-mono font-semibold">{Math.round(d.total).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="monthly" className="space-y-4">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Monthly history · Dec 2024 → Feb 2026</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={unitMonthlyData2025} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="month" tick={{ fontSize: 9 }} angle={-25} textAnchor="end" height={60} />
+                    <YAxis tick={{ fontSize: 9 }} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 11 }} />
+                    <Legend wrapperStyle={{ fontSize: 10 }} />
+                    <Bar dataKey="total" fill="hsl(var(--energy))" name="7 SCC panels" />
+                    <Bar dataKey="G8" fill="hsl(var(--warning))" name="G8 derived" />
+                  </BarChart>
+                </ResponsiveContainer>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  G8 = SCECO bill total minus the 7 metered SCC panels (uncontrolled loads). Daily granularity only available from {DAILY_START}.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="savings" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <KpiTile label="2024 baseline" value="220,028 SAR" sub="Pre-install bill (annual)" />
+              <KpiTile label="2025 with smart system" value="−17.3%" sub="Verified efficiency vs 2024 baseline" tone="good" />
+              <KpiTile label="Direct energy savings" value="33,286 SAR" sub="Weather-normalized · LockedPerformanceModel" tone="good" />
             </div>
-            {Object.keys(deviceLive).length === 0 && (
-              <p className="text-[11px] text-muted-foreground mt-3">
-                Waiting for the Eyedro pusher to send readings tagged with each device serial (G1=00C004EC, G2=00C003A3, G3=B1400AA4, F1=B1400AA5, F2=B1400AA2, F3=B1400AA6, F4=B1400AA3).
-              </p>
-            )}
-          </CardContent>
-        </Card>
 
-        <DeviceDetailDialog
-          device={selectedDevice}
-          open={!!selectedDevice}
-          onOpenChange={(o) => { if (!o) setSelectedDevice(null); }}
-        />
-
-        {!hasLiveStream && hasImportedData && (
-          <Card className="border-energy/30 bg-energy-light/40">
-            <CardContent className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2 text-xs">
-                <FileSpreadsheet className="h-4 w-4 text-energy" />
-                <span className="font-medium text-foreground">{importedData?.fileName}</span>
-                <span className="text-muted-foreground">{importedPoints.length} rows extracted locally</span>
-              </div>
-              <span className="font-mono text-[10px] text-muted-foreground">Eyedro export mode</span>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          <AnimatedKpiCard title="Current Power" value={currentPower} suffix=" kW" icon={Activity} variant="energy" delay={0} sparkline={powerSpark} />
-          <AnimatedKpiCard title="Peak Demand" value={peakPower} suffix=" kW" icon={Zap} variant="warning" delay={100} sparkline={demandSpark} />
-          <AnimatedKpiCard title={hasImportedData ? "Imported Usage" : "Today's Usage"} value={usageValue} suffix=" kWh" icon={TrendingDown} delay={200} />
-          <AnimatedKpiCard title="Est. Cost" value={Math.round(usageValue * 0.30)} suffix=" SAR" icon={DollarSign} variant="savings" delay={300} />
-          <AnimatedKpiCard title="Utilization" value={utilization} suffix="%" icon={Gauge} variant={utilization > 85 ? 'danger' : utilization > 70 ? 'warning' : 'savings'} delay={400} />
-          <AnimatedKpiCard title="Uptime" value={99.7} suffix="%" decimals={1} icon={Clock} variant="savings" delay={500} />
-        </div>
-
-        <Card className="bg-card border-border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-savings pulse-dot" />
-              Power Demand — {range}
-              <span className="ml-auto text-[10px] text-muted-foreground font-normal">
-                {hasImportedData ? "Uploaded Eyedro Export" : selectedSite === 'all' ? 'All Sites Aggregated' : site?.name}
-              </span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={350}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="pGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(192, 70%, 50%)" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="hsl(192, 70%, 50%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 20%, 16%)" />
-                <XAxis dataKey="time" tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} unit=" kW" />
-                <Tooltip contentStyle={{ background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 }} />
-                <Area type="monotone" dataKey="power" stroke="hsl(192, 70%, 50%)" fill="url(#pGrad)" strokeWidth={2} name="Power (kW)" />
-                <Area type="monotone" dataKey="demand" stroke="hsl(152, 60%, 48%)" fill="none" strokeWidth={1.5} strokeDasharray="5 5" name="Demand (kW)" />
-                <Area type="monotone" dataKey="baseline" stroke="hsl(38, 92%, 50%)" fill="none" strokeWidth={1} strokeDasharray="2 4" name="Baseline (kW)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Consumption Trend</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={consumptionTrend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 20%, 16%)" />
-                  <XAxis dataKey={trendTimeKey} tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} tickFormatter={v => `${(v / 1e6).toFixed(1)}M`} />
-                  <Tooltip contentStyle={{ background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="consumption" stroke="hsl(210, 80%, 55%)" strokeWidth={2} dot={false} name="kWh" />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          <Card className="bg-card border-border">
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Demand Trend</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={220}>
-                <LineChart data={hasImportedData ? chartData : monthlyTrends}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(215, 20%, 16%)" />
-                  <XAxis dataKey={trendTimeKey} tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
-                  <YAxis tick={{ fontSize: 10, fill: 'hsl(215, 15%, 55%)' }} axisLine={false} tickLine={false} />
-                  <Tooltip contentStyle={{ background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 }} />
-                  <Line type="monotone" dataKey="demand" stroke="hsl(38, 92%, 50%)" strokeWidth={2} dot={false} name="kW" />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Annual bill — 2023 / 2024 / 2025</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart
+                    data={[
+                      { year: "2023", bill: LockedFinancials.actualBill2023 },
+                      { year: "2024 (baseline)", bill: LockedFinancials.actualBill2024 },
+                      { year: "2025 (smart system)", bill: LockedFinancials.actualBill2025 },
+                    ]}
+                    margin={{ top: 8, right: 8, left: -16, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="year" tick={{ fontSize: 10 }} />
+                    <YAxis tick={{ fontSize: 9 }} />
+                    <Tooltip
+                      contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", fontSize: 11 }}
+                      formatter={(v: number) => [`${v.toLocaleString()} SAR`, "Annual bill"]}
+                    />
+                    <Bar dataKey="bill" fill="hsl(var(--energy))" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+                <p className="text-[10px] text-muted-foreground mt-2">
+                  2025 savings of 17.3% (weather-normalized) reflect the smart cooling-control system deployed across the 7 SCC panels. 2026 daily ingestion (from {DAILY_START}) extends this verification into the current operating year.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </PageTransition>
+  );
+}
+
+function KpiTile({ label, value, sub, tone = "neutral" }: { label: string; value: string; sub?: string; tone?: "good" | "bad" | "neutral" }) {
+  const color = tone === "good" ? "text-savings" : tone === "bad" ? "text-warning" : "text-foreground";
+  return (
+    <div className="rounded-md border border-border bg-card p-3">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`font-mono text-lg font-bold tabular-nums mt-1 ${color}`}>{value}</div>
+      {sub && <div className="text-[10px] text-muted-foreground mt-0.5">{sub}</div>}
+    </div>
   );
 }
