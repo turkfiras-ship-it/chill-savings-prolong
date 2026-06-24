@@ -1,5 +1,23 @@
-// Riyadh Monthly Average Temperatures (°C) — 2024 vs 2025
-// 2025 was notably hotter, which directly impacts AC load and energy consumption
+// ─────────────────────────────────────────────────────────────────────────────
+// LOCKED STUDY REFERENCE — TDE Audit 11-MAY-2026
+// ─────────────────────────────────────────────────────────────────────────────
+// This file is the STUDY REFERENCE for the May-2024 → Apr-2026 measurement
+// period. It now derives its summary numbers from `LockedFinancials` and
+// `ClimateConstants` (the single source of truth), so any consumer that still
+// imports `weatherSummary` automatically reconciles with the locked 1.1262
+// / +1.3 °C / 32,702 SAR / 102,194 kWh figures.
+//
+// The LIVE data-derived figures (cooling-season basis, +1.20 °C / ~1.117 for
+// 2025, in-progress 2026) come from `useWeatherNormalization()` which reads
+// `daily_weather_rawdah`. UI surfaces should display the locked study figure
+// as the headline and the live data-derived figure as secondary context.
+//
+// The monthly temperature table below is the locked study monthly profile
+// (OERK observations from WeatherSpark) used by historical comparison charts.
+// It is NOT the live engine input and should not be edited without a study
+// re-issue.
+// ─────────────────────────────────────────────────────────────────────────────
+import { ClimateConstants, LockedFinancials, WeatherSource } from "@/data/lockedPerformanceModel";
 
 export interface MonthlyWeather {
   month: string;
@@ -27,18 +45,34 @@ export const monthlyWeatherData: MonthlyWeather[] = [
   { month: 'December',  avgTemp2024: 21.8, avgTemp2025: 22.6, tempDiff: 0.8 },
 ];
 
-export const weatherSummary = {
-  avgTempDiff: 1.3, // °C — average increase across all months
+// Derived from the locked engine (do NOT hardcode numbers here).
+// - avgTempDiff: ClimateConstants.avgTemperatureIncrease (1.3 °C, locked study)
+// - coolingDegreeIncrease: ClimateConstants.coolingLoadImpactRange ("8–12%")
+// - additionalCoolingCostLow/High: derived from locked baseline bill × low/high
+//   bound of the cooling-load impact range.
+// - actualSavings: LockedFinancials.directEnergySavingsSAR (32,702 SAR)
+// - adjustedSavingsLow/High: actualSavings + additionalCost range
+const COOLING_LOW_PCT = 0.08;  // low bound of ClimateConstants.coolingLoadImpactRange
+const COOLING_HIGH_PCT = ClimateConstants.adoptedNormalizationPct / 100; // 0.1262 (TDE-adopted)
+const _baselineBill = LockedFinancials.actualBill2024;
+const _additionalLow = Math.round(_baselineBill * COOLING_LOW_PCT);
+const _additionalHigh = Math.round(_baselineBill * COOLING_HIGH_PCT);
+const _actual = LockedFinancials.directEnergySavingsSAR;
+
+export const weatherSummary = Object.freeze({
+  avgTempDiff: ClimateConstants.avgTemperatureIncrease, // 1.3 °C — locked study
   hottestMonth2025: 'July',
   hottestTemp2025: 45.8,
-  peakMonths: ['May', 'June', 'July', 'August', 'September'], // months above 40°C in 2025
-  insight: 'Despite 2025 being 1.3°C hotter on average than 2024, Rawdah achieved 13,003 SAR in energy cost savings — proving the system delivers real efficiency gains even under increased thermal load.',
-  coolingDegreeIncrease: '~8-12%', // approximate increase in cooling degree days
-  // Estimated additional cooling cost due to hotter 2025 temperatures
-  // Based on 2024 total bill of 220,028 SAR × 8-12%
-  additionalCoolingCostLow: 17602, // 8% of 220,028
-  additionalCoolingCostHigh: 26403, // 12% of 220,028
-  actualSavings: 13003, // SAR saved despite the heat
-  adjustedSavingsLow: 30605, // 13,003 + 17,602
-  adjustedSavingsHigh: 39406, // 13,003 + 26,403
-};
+  peakMonths: ['May', 'June', 'July', 'August', 'September'],
+  insight: `Despite 2025 being ${ClimateConstants.avgTemperatureIncrease}°C hotter on average than 2024 (locked study basis), the SCC system delivered ${_actual.toLocaleString()} SAR in TDE-verified direct energy savings — proving real efficiency gains under increased thermal load.`,
+  coolingDegreeIncrease: ClimateConstants.coolingLoadImpactRange, // "8–12%"
+  additionalCoolingCostLow: _additionalLow,
+  additionalCoolingCostHigh: _additionalHigh,
+  actualSavings: _actual,
+  adjustedSavingsLow: _actual + _additionalLow,
+  adjustedSavingsHigh: _actual + _additionalHigh,
+  // Provenance
+  source: WeatherSource.citation,
+  weatherNormalizationFactor: ClimateConstants.weatherNormalizationFactor, // 1.1262 (locked study)
+  basis: 'TDE Audit 11-MAY-2026 — cooling-season normalization, locked study reference. See useWeatherNormalization() for live data-derived figures.' as const,
+});

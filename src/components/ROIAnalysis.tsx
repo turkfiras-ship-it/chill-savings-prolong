@@ -6,6 +6,7 @@ import { lifespanExtension, environmentalImpact, technologySummary } from "@/dat
 import { weatherSummary } from "@/data/weatherData";
 import { useEditableData } from "@/context/EditableDataContext";
 import { EditableField } from "@/components/EditableField";
+import { useWeatherFactor } from "@/hooks/useWeatherFactor";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   TrendingUp, DollarSign, Calendar, Target, Wrench, Shield,
@@ -14,6 +15,7 @@ import {
 
 export function ROIAnalysis() {
   const { data, derived, updateNested, updateMaintenanceItem, isEditMode } = useEditableData();
+  const wf = useWeatherFactor();
   const {
     totalSystemCost, annualOperationalSavings, paybackYears, paybackMonths,
     fiveYearROI, fiveYearNet, fiveYearTotal, fiveYearOp,
@@ -118,6 +120,20 @@ export function ROIAnalysis() {
             <p className="text-sm text-muted-foreground mb-4">
               2025 was {weatherSummary.avgTempDiff}°C hotter than 2024, adding {weatherSummary.coolingDegreeIncrease} cooling load.
             </p>
+            <div className="mb-4 rounded-md border border-border bg-muted/20 px-3 py-2 text-[11px] text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
+              <span>
+                <strong className="text-foreground">Locked study factor:</strong> ×{wf.locked.factor.toFixed(4)} (+{wf.locked.deltaC}°C)
+              </span>
+              <span>
+                <strong className="text-foreground">Live data-derived (Rawdah cooling-season):</strong>{" "}
+                {wf.live?.factor != null
+                  ? `×${wf.live.factor.toFixed(4)} (+${wf.live.deltaC?.toFixed(2)}°C, ${wf.live.days} days${wf.live.inProgress ? " — in progress" : ""})`
+                  : wf.live2025?.factor != null
+                    ? `2025 full season ×${wf.live2025.factor.toFixed(4)} (+${wf.live2025.deltaC?.toFixed(2)}°C)`
+                    : "loading…"}
+              </span>
+              <span className="italic">Headline uses locked study; live figure is reconciliation context.</span>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
               <div className="p-4 bg-muted/30 rounded-lg text-center">
                 <p className="text-xs text-muted-foreground mb-1">Adjusted Energy Savings</p>
