@@ -12,6 +12,7 @@ import { ClimateConstants, LockedFinancials } from "@/data/lockedPerformanceMode
 import { Thermometer, Droplets, Wind, Sun, AlertTriangle, Activity, Zap, Gauge, CloudSun, TrendingUp, MapPin } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend, ComposedChart, Scatter } from "recharts";
 import { YtdWeatherSavings } from "@/components/platform/YtdWeatherSavings";
+import { WeatherNormalizationPanel } from "@/components/platform/WeatherNormalizationPanel";
 
 const chartTooltipStyle = { background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(215, 20%, 16%)";
@@ -246,6 +247,9 @@ export default function WeatherPage() {
       {isRawdah && (
         <YtdWeatherSavings />
       )}
+
+      {/* Persistent daily-weather normalization engine (CDD + temp-delta vs 2024) */}
+      {isRawdah && <WeatherNormalizationPanel />}
 
       {/* Weather Normalization Reference */}
       {isRawdah && (
