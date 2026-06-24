@@ -12,9 +12,14 @@ const DAILY_BASELINE_KWH = Math.round(portfolioKPIs.totalConsumption / 30);
 const COST_PER_KWH = 0.30; // SAR
 
 export function CoolingForecast() {
-  const { weather, loading } = useGlobalWeather();
+  const { weather, loading, error, refresh } = useGlobalWeather();
 
-  if (loading || !weather) {
+  if (loading || error || !weather || !weather.daily?.length) {
+    const message = error
+      ? `Forecast unavailable: ${error}`
+      : loading
+      ? "Loading weather forecast…"
+      : "Forecast unavailable — no data returned from weather service.";
     return (
       <Card className="bg-card border-border">
         <CardHeader className="pb-2">
@@ -24,8 +29,16 @@ export function CoolingForecast() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-[260px] flex items-center justify-center text-sm text-muted-foreground">
-            Loading weather forecast…
+          <div className="h-[260px] flex flex-col items-center justify-center gap-3 text-sm text-muted-foreground">
+            <span>{message}</span>
+            {!loading && (
+              <button
+                onClick={() => refresh()}
+                className="text-xs px-3 py-1 rounded border border-border hover:bg-secondary/50 transition-colors"
+              >
+                Retry
+              </button>
+            )}
           </div>
         </CardContent>
       </Card>
