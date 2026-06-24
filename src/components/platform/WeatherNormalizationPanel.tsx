@@ -58,7 +58,9 @@ function PeriodCard({ p, icon: Icon, accent }: { p: WeatherFactorPeriod; icon: a
 }
 
 export function WeatherNormalizationPanel() {
-  const { loading, error, rows, today, mtd, ytd, annual2025, coolingSeason2025, coolingSeasonCurrent, series, refresh } = useWeatherNormalization();
+  const { loading, error, rows, today, mtd, ytd, annual2025, coolingSeason2025, coolingSeasonCurrent, series, refresh, lockedFactors } = useWeatherNormalization();
+  const currentYear = new Date().getUTCFullYear();
+  const currentLocked = lockedFactors[currentYear];
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
@@ -204,7 +206,25 @@ export function WeatherNormalizationPanel() {
             </div>
           )}
           {coolingSeasonCurrent && (
-            <PeriodCard p={coolingSeasonCurrent} icon={Snowflake} accent="progress" />
+            currentLocked ? (
+              <div className="bg-secondary rounded-lg p-3 border border-energy/30 ring-1 ring-energy/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <Snowflake className="h-3 w-3 text-energy" /> Official {currentYear} factor — cooling season
+                  </span>
+                  <Badge variant="outline" className="text-[9px] border-energy/40 text-energy flex items-center gap-1">
+                    <Lock className="h-2.5 w-2.5" /> Final
+                  </Badge>
+                </div>
+                <p className="text-2xl font-bold text-energy">×{currentLocked.factor.toFixed(4)}</p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  ΔT {fmtDelta(currentLocked.delta_c)} · finalized {currentLocked.finalized_at.slice(0,10)}
+                </p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">Source: {currentLocked.source}</p>
+              </div>
+            ) : (
+              <PeriodCard p={coolingSeasonCurrent} icon={Snowflake} accent="progress" />
+            )
           )}
         </div>
 
