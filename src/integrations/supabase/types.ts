@@ -101,6 +101,36 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_weather_rawdah: {
+        Row: {
+          cdd: number | null
+          created_at: string
+          date: string
+          max_temp_c: number | null
+          mean_temp_c: number | null
+          min_temp_c: number | null
+          source: string
+        }
+        Insert: {
+          cdd?: number | null
+          created_at?: string
+          date: string
+          max_temp_c?: number | null
+          mean_temp_c?: number | null
+          min_temp_c?: number | null
+          source?: string
+        }
+        Update: {
+          cdd?: number | null
+          created_at?: string
+          date?: string
+          max_temp_c?: number | null
+          mean_temp_c?: number | null
+          min_temp_c?: number | null
+          source?: string
+        }
+        Relationships: []
+      }
       eyedro_readings: {
         Row: {
           created_at: string
