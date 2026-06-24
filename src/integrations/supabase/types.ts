@@ -109,6 +109,8 @@ export type Database = {
           max_temp_c: number | null
           mean_temp_c: number | null
           min_temp_c: number | null
+          sol_air_mean_c: number | null
+          solar_rad_mj: number | null
           source: string
         }
         Insert: {
@@ -118,6 +120,8 @@ export type Database = {
           max_temp_c?: number | null
           mean_temp_c?: number | null
           min_temp_c?: number | null
+          sol_air_mean_c?: number | null
+          solar_rad_mj?: number | null
           source?: string
         }
         Update: {
@@ -127,6 +131,8 @@ export type Database = {
           max_temp_c?: number | null
           mean_temp_c?: number | null
           min_temp_c?: number | null
+          sol_air_mean_c?: number | null
+          solar_rad_mj?: number | null
           source?: string
         }
         Relationships: []
