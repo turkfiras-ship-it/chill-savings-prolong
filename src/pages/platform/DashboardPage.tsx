@@ -1,6 +1,6 @@
 import { Zap, MapPin, Cpu, TrendingUp, DollarSign, Leaf, Bell, FolderKanban, Box, Activity, Shield } from "lucide-react";
 import { AnimatedKpiCard } from "@/components/platform/AnimatedKpiCard";
-import { portfolioKPIs, monthlyTrends, sites, alerts, projects } from "@/data/mockData";
+import { portfolioKPIs, monthlyTrends, sites, projects } from "@/data/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from "recharts";
