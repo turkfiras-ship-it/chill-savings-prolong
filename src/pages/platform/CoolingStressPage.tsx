@@ -1,76 +1,15 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { sites } from "@/data/mockData";
-import { useGlobalWeather } from "@/context/WeatherContext";
-import { Thermometer, Droplets, Wind, Gauge, AlertTriangle, TrendingUp, Building2, Info } from "lucide-react";
-import { ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip } from "recharts";
+import { Gauge, AlertTriangle, TrendingUp, Info, Thermometer, Activity } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as ReTooltip, Bar, BarChart } from "recharts";
 import { PageTransition } from "@/components/platform/PageTransition";
-
-// ── Cooling Stress Algorithm ──────────────────────────────
-interface StressFactors {
-  temperature: number;    // 0-100
-  humidity: number;       // 0-100
-  thermalInertia: number; // 0-100
-  compressorCycling: number; // 0-100
-  loadIntensity: number;  // 0-100
-  weatherVolatility: number; // 0-100
-}
-
-function computeCoolingStressIndex(factors: StressFactors): number {
-  const weights = {
-    temperature: 0.30,
-    humidity: 0.15,
-    thermalInertia: 0.15,
-    compressorCycling: 0.20,
-    loadIntensity: 0.12,
-    weatherVolatility: 0.08,
-  };
-  const raw =
-    factors.temperature * weights.temperature +
-    factors.humidity * weights.humidity +
-    factors.thermalInertia * weights.thermalInertia +
-    factors.compressorCycling * weights.compressorCycling +
-    factors.loadIntensity * weights.loadIntensity +
-    factors.weatherVolatility * weights.weatherVolatility;
-  return Math.min(100, Math.max(0, Math.round(raw)));
-}
-
-function getStressLevel(score: number) {
-  if (score >= 80) return { label: "Critical", color: "hsl(var(--destructive))", bg: "bg-destructive/10", text: "text-destructive", border: "border-destructive/30" };
-  if (score >= 60) return { label: "High", color: "hsl(var(--warning))", bg: "bg-warning/10", text: "text-warning", border: "border-warning/30" };
-  if (score >= 40) return { label: "Moderate", color: "hsl(var(--chart-blue))", bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/30" };
-  return { label: "Low", color: "hsl(var(--primary))", bg: "bg-primary/10", text: "text-primary", border: "border-primary/30" };
-}
-
-// ── Simulated per-site stress data ──────────────────────────
-function generateSiteStress(site: typeof sites[0], ambientTemp: number, humidity: number) {
-  const tempScore = Math.min(100, Math.max(0, (ambientTemp - 20) * 3.3));
-  const humidScore = Math.min(100, Math.max(0, humidity * 1.2));
-  const loadRatio = site.demand_kw / site.peak_kw;
-  const thermalInertia = site.type === "Healthcare" || site.type === "Hospitality" ? 65 + Math.random() * 20 : 30 + Math.random() * 40;
-  const compCycling = loadRatio > 0.7 ? 60 + Math.random() * 30 : 20 + Math.random() * 40;
-  const loadIntensity = loadRatio * 100;
-  const weatherVol = ambientTemp > 42 ? 70 + Math.random() * 20 : 20 + Math.random() * 30;
-
-  const factors: StressFactors = {
-    temperature: tempScore,
-    humidity: humidScore,
-    thermalInertia,
-    compressorCycling: compCycling,
-    loadIntensity,
-    weatherVolatility: weatherVol,
-  };
-
-  return { factors, score: computeCoolingStressIndex(factors) };
-}
+import { useCoolingIntel, stressScore, stressLevel } from "@/hooks/useCoolingIntel";
 
 // ── Gauge Component ──────────────────────────────────────
 function StressGauge({ score, size = 200 }: { score: number; size?: number }) {
-  const level = getStressLevel(score);
+  const level = stressLevel(score);
   const angle = (score / 100) * 270 - 135;
   const r = size / 2 - 20;
   const cx = size / 2;
@@ -123,230 +62,148 @@ function StressGauge({ score, size = 200 }: { score: number; size?: number }) {
   );
 }
 
-// ── Hourly Forecast Mock ──────────────────────────────────
-function generateHourlyForecast(baseScore: number) {
-  return Array.from({ length: 24 }, (_, i) => {
-    const peakFactor = i >= 11 && i <= 16 ? 1.3 : i >= 8 && i <= 20 ? 1.1 : 0.7;
-    const noise = (Math.random() - 0.5) * 10;
-    return {
-      hour: `${String(i).padStart(2, "0")}:00`,
-      stress: Math.min(100, Math.max(0, Math.round(baseScore * peakFactor + noise))),
-    };
-  });
-}
-
 // ═══════════════════════════════════════════════════════════
 export default function CoolingStressPage() {
-  const { weather } = useGlobalWeather();
-  const ambientTemp = weather?.current?.temperature ?? 38;
-  const humidity = weather?.current?.humidity ?? 45;
-  const [selectedSiteId, setSelectedSiteId] = useState(sites[0].id);
-  const activeSites = sites.filter(s => s.status === "active");
+  const intel = useCoolingIntel();
 
-  const allStress = useMemo(
-    () => activeSites.map(s => ({ site: s, ...generateSiteStress(s, ambientTemp, humidity) })),
-    [ambientTemp, humidity]
-  );
+  // Build a kWh-by-date map then compute trailing 30-day stress
+  const trend = useMemo(() => {
+    if (!intel.baseline2024 || !intel.weather.length) return [];
+    const kwhMap = new Map(intel.readings.map(r => [r.reading_date, Number(r.fleet_total) || null]));
+    return intel.weather.slice(-30).map(w => {
+      const kwh = kwhMap.get(w.date) ?? null;
+      const s = stressScore(w.max_temp_c, kwh, w.cdd, intel.baseline2024, intel.kwhPerCdd);
+      return {
+        date: w.date,
+        short: w.date.slice(5),
+        score: s?.score ?? 0,
+        maxTemp: w.max_temp_c != null ? Number(w.max_temp_c) : null,
+        kwh,
+      };
+    });
+  }, [intel]);
 
-  const selectedData = allStress.find(d => d.site.id === selectedSiteId) ?? allStress[0];
-  const level = getStressLevel(selectedData.score);
-  const forecast = useMemo(() => generateHourlyForecast(selectedData.score), [selectedData.score]);
+  const today = trend[trend.length - 1];
+  const todayScore = today?.score ?? 0;
+  const level = stressLevel(todayScore);
+  const topStressed = [...trend].filter(t => t.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
 
-  const radarData = [
-    { factor: "Temperature", value: selectedData.factors.temperature, fullMark: 100 },
-    { factor: "Humidity", value: selectedData.factors.humidity, fullMark: 100 },
-    { factor: "Thermal Inertia", value: selectedData.factors.thermalInertia, fullMark: 100 },
-    { factor: "Compressor Cycling", value: selectedData.factors.compressorCycling, fullMark: 100 },
-    { factor: "Load Intensity", value: selectedData.factors.loadIntensity, fullMark: 100 },
-    { factor: "Weather Volatility", value: selectedData.factors.weatherVolatility, fullMark: 100 },
-  ];
-
-  // Sort portfolio by stress descending
-  const portfolioRanked = [...allStress].sort((a, b) => b.score - a.score);
+  if (intel.loading) {
+    return <PageTransition><div className="p-8 text-sm text-muted-foreground">Loading real cooling data…</div></PageTransition>;
+  }
+  if (intel.error || !intel.baseline2024) {
+    return <PageTransition><div className="p-8 text-sm text-destructive">No data — {intel.error ?? "missing 2024 baseline"}.</div></PageTransition>;
+  }
 
   return (
     <PageTransition>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Gauge className="h-6 w-6 text-accent" />
-              Cooling Stress Index™
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Proprietary 0–100 score predicting HVAC stress levels • Real-time weather + load analysis
-            </p>
-          </div>
-          <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
-            <SelectTrigger className="w-[280px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {activeSites.map(s => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+            <Gauge className="h-6 w-6 text-accent" />
+            Cooling Stress Index
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Jarir Rawdah — derived from live <code>daily_weather_rawdah</code> + <code>daily_unit_readings</code>
+          </p>
         </div>
 
-        {/* Main Score + Radar */}
+        {/* Today + KPIs */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Score Gauge */}
           <Card className={`border ${level.border} ${level.bg}`}>
-            <CardContent className="pt-6 flex flex-col items-center">
+            <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Today's Stress ({today?.date ?? "n/a"})</CardTitle></CardHeader>
+            <CardContent className="flex flex-col items-center pt-2">
               <AnimatePresence mode="wait">
-                <motion.div key={selectedData.score} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring" }}>
-                  <StressGauge score={selectedData.score} size={220} />
+                <motion.div key={todayScore} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: "spring" }}>
+                  <StressGauge score={todayScore} size={200} />
                 </motion.div>
               </AnimatePresence>
-              <Badge className={`mt-2 ${level.bg} ${level.text} border-0 text-sm px-4 py-1`}>
-                {level.label} Stress
-              </Badge>
-              <p className="text-xs text-muted-foreground mt-3 text-center max-w-[260px]">
-                {selectedData.score >= 80
-                  ? "Immediate action required — compressors are near capacity under extreme conditions."
-                  : selectedData.score >= 60
-                  ? "Elevated risk — consider load reduction or pre-cooling strategies."
-                  : selectedData.score >= 40
-                  ? "Manageable stress — systems operating within normal parameters."
-                  : "Optimal conditions — low thermal and mechanical stress."}
-              </p>
+              <Badge className={`mt-2 ${level.bg} ${level.text} border-0`}>{level.label} Stress</Badge>
+              <div className="mt-3 text-xs text-muted-foreground text-center">
+                Max {today?.maxTemp != null ? `${today.maxTemp.toFixed(1)}°C` : "—"} • Fleet {today?.kwh != null ? `${Math.round(today.kwh).toLocaleString()} kWh` : "no reading"}
+              </div>
             </CardContent>
           </Card>
 
-          {/* Radar Chart */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-accent" />
-                Stress Factor Breakdown
-              </CardTitle>
-              <CardDescription>Six weighted factors composing the CSI score</CardDescription>
+              <CardTitle className="text-base flex items-center gap-2"><Activity className="h-4 w-4 text-accent" />30-Day Stress Trend</CardTitle>
+              <CardDescription>Daily score combining max-temp percentile (2024 baseline) and kWh/CDD ratio</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={280}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="hsl(var(--border))" />
-                  <PolarAngleAxis dataKey="factor" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
-                  <Radar name="Stress" dataKey="value" stroke={level.color} fill={level.color} fillOpacity={0.2} strokeWidth={2} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Factor Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-          {[
-            { icon: Thermometer, label: "Temperature", value: selectedData.factors.temperature, unit: "%" },
-            { icon: Droplets, label: "Humidity", value: selectedData.factors.humidity, unit: "%" },
-            { icon: Building2, label: "Thermal Inertia", value: selectedData.factors.thermalInertia, unit: "%" },
-            { icon: Wind, label: "Compressor Cycling", value: selectedData.factors.compressorCycling, unit: "%" },
-            { icon: Gauge, label: "Load Intensity", value: selectedData.factors.loadIntensity, unit: "%" },
-            { icon: AlertTriangle, label: "Weather Vol.", value: selectedData.factors.weatherVolatility, unit: "%" },
-          ].map((f, i) => {
-            const fLevel = getStressLevel(f.value);
-            return (
-              <motion.div key={f.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-                <Card className="relative overflow-hidden">
-                  <div className={`absolute inset-x-0 top-0 h-1 ${fLevel.bg}`} style={{ background: fLevel.color }} />
-                  <CardContent className="pt-5 pb-4 px-4 text-center">
-                    <f.icon className="h-4 w-4 mx-auto mb-1" style={{ color: fLevel.color }} />
-                    <p className="text-xs text-muted-foreground mb-1">{f.label}</p>
-                    <p className="text-xl font-bold text-foreground">{Math.round(f.value)}</p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        {/* 24h Forecast + Portfolio Ranking */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* 24h Forecast */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">24-Hour Stress Forecast</CardTitle>
-              <CardDescription>Predicted CSI trajectory for {selectedData.site.name}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={240}>
-                <AreaChart data={forecast}>
+              <ResponsiveContainer width="100%" height={260}>
+                <AreaChart data={trend}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="hour" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} interval={3} />
+                  <XAxis dataKey="short" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} interval={2} />
                   <YAxis domain={[0, 100]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
-                  <ReTooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--foreground))" }} />
+                  <ReTooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
                   <defs>
                     <linearGradient id="stressGrad" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor={level.color} stopOpacity={0.4} />
                       <stop offset="100%" stopColor={level.color} stopOpacity={0.05} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="stress" stroke={level.color} fill="url(#stressGrad)" strokeWidth={2} name="CSI Score" />
+                  <Area type="monotone" dataKey="score" stroke={level.color} fill="url(#stressGrad)" strokeWidth={2} name="Stress" />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
-
-          {/* Portfolio Ranking */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Portfolio Stress Ranking</CardTitle>
-              <CardDescription>All active sites ranked by CSI score</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-2 max-h-[300px] overflow-y-auto">
-              {portfolioRanked.map((d, i) => {
-                const l = getStressLevel(d.score);
-                return (
-                  <motion.div
-                    key={d.site.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
-                      d.site.id === selectedSiteId ? "bg-secondary" : "hover:bg-secondary/50"
-                    }`}
-                    onClick={() => setSelectedSiteId(d.site.id)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-muted-foreground w-5">#{i + 1}</span>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{d.site.name}</p>
-                        <p className="text-xs text-muted-foreground">{d.site.city} • {d.site.type}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 h-2 rounded-full bg-muted overflow-hidden">
-                        <motion.div
-                          className="h-full rounded-full"
-                          style={{ background: l.color }}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${d.score}%` }}
-                          transition={{ duration: 0.8, delay: i * 0.05 }}
-                        />
-                      </div>
-                      <span className="text-sm font-bold w-8 text-right" style={{ color: l.color }}>
-                        {d.score}
-                      </span>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </CardContent>
-          </Card>
         </div>
 
-        {/* Methodology note */}
+        {/* Baseline + ratio readouts */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: "2024 Baseline avg max", value: `${intel.baseline2024.avgMax.toFixed(1)}°C`, icon: Thermometer },
+            { label: "2024 Baseline P90 max", value: `${intel.baseline2024.p90Max.toFixed(1)}°C`, icon: AlertTriangle },
+            { label: "Site kWh / CDD (hist.)", value: `${intel.kwhPerCdd.toFixed(1)}`, icon: Activity },
+            { label: "Baseline sample (May–Oct '24)", value: `${intel.baseline2024.n} days`, icon: TrendingUp },
+          ].map((k, i) => (
+            <motion.div key={k.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <Card>
+                <CardContent className="pt-5 pb-4">
+                  <k.icon className="h-4 w-4 text-muted-foreground mb-1" />
+                  <p className="text-xs text-muted-foreground">{k.label}</p>
+                  <p className="text-xl font-bold font-mono text-foreground mt-1">{k.value}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Top stressed days */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Most Stressed Days (last 30)</CardTitle>
+            <CardDescription>Ranked by computed stress score</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {topStressed.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No data</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={topStressed}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                  <ReTooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                  <Bar dataKey="score" fill={level.color} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Methodology */}
         <Card className="glass-card">
           <CardContent className="pt-4 pb-4 flex items-start gap-3">
             <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">CSI™ Methodology:</strong> The Cooling Stress Index is a proprietary composite score
-              weighted across six factors — ambient temperature (30%), compressor cycling behavior (20%),
-              humidity load (15%), thermal inertia (15%), demand-to-capacity ratio (12%), and weather
-              volatility (8%). Scores refresh with live weather data every 5 minutes. Patent pending.
+              <strong className="text-foreground">Formula:</strong> stress = average of (A) temperature
+              percentile — today's max relative to the 2024 May–Oct distribution at site coords,
+              mapped <em>avg − 5°C → 0</em> and <em>P90 + 2°C → 100</em>; and (B) load ratio —
+              today's <code>kWh / CDD(18°C)</code> vs the historical site average
+              ({intel.kwhPerCdd.toFixed(1)} kWh per CDD-day from <code>daily_unit_readings</code>),
+              mapped 0.5× → 0, 1.5× → 100. No demo values — all inputs come from the database.
             </p>
           </CardContent>
         </Card>
