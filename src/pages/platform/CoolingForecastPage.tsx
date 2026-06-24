@@ -1,45 +1,64 @@
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { coolingForecast7Day } from "@/data/autonomousMockData";
-import { useGlobalWeather } from "@/context/WeatherContext";
-import { CloudSun, Thermometer, Droplets, TrendingUp } from "lucide-react";
-import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Cell, Area, AreaChart } from "recharts";
+import { CloudSun, Thermometer, Zap, Banknote, Info } from "lucide-react";
+import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "recharts";
 import { PageTransition } from "@/components/platform/PageTransition";
-import { useCountUp } from "@/hooks/useCountUp";
+import { useCoolingIntel, SAR_PER_KWH, CDD_BASE_C } from "@/hooks/useCoolingIntel";
 
 export default function CoolingForecastPage() {
-  const { weather } = useGlobalWeather();
-  const avgConfidence = Math.round(coolingForecast7Day.reduce((a, d) => a + d.confidence, 0) / coolingForecast7Day.length);
-  const peakLoad = Math.max(...coolingForecast7Day.map(d => d.predicted));
-  const countPeak = useCountUp({ end: peakLoad, duration: 1500 });
-  const countConf = useCountUp({ end: avgConfidence, duration: 1500 });
+  const intel = useCoolingIntel();
+
+  if (intel.loading) {
+    return <PageTransition><div className="p-8 text-sm text-muted-foreground">Loading forecast…</div></PageTransition>;
+  }
+  if (!intel.forecast.length) {
+    return <PageTransition><div className="p-8 text-sm text-destructive">No forecast data — Open-Meteo unreachable.</div></PageTransition>;
+  }
+
+  const totalKwh = intel.forecast.reduce((s, d) => s + d.projectedKwh, 0);
+  const totalSar = intel.forecast.reduce((s, d) => s + d.projectedSar, 0);
+  const peakKwh = Math.max(...intel.forecast.map(d => d.projectedKwh));
+  const peakDay = intel.forecast.find(d => d.projectedKwh === peakKwh);
+  const chartData = intel.forecast.map(d => ({
+    day: d.date.slice(5),
+    tMax: d.tMax,
+    tMean: d.tMean,
+    cdd: Number(d.cdd.toFixed(1)),
+    kwh: Math.round(d.projectedKwh),
+    sar: Math.round(d.projectedSar),
+  }));
 
   return (
     <PageTransition>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <CloudSun className="h-6 w-6 text-accent" />
-            Cooling Demand Forecast AI
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">7-day cooling load prediction combining weather + historical patterns</p>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <CloudSun className="h-6 w-6 text-accent" />
+              Cooling Demand Forecast
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              7-day projection — Open-Meteo forecast at Rawdah coords × site historical {intel.kwhPerCdd.toFixed(1)} kWh per CDD-day
+            </p>
+          </div>
+          <Badge variant="outline" className="text-xs">Forecast / projection — not actual</Badge>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Peak Predicted Load", value: `${countPeak} kW`, icon: TrendingUp, gradient: "gradient-energy" },
-            { label: "Forecast Confidence", value: `${countConf}%`, icon: CloudSun, gradient: "gradient-savings" },
-            { label: "Current Temp", value: `${weather?.current?.temperature ? Math.round(weather.current.temperature) : 38}°C`, icon: Thermometer, gradient: "gradient-warning" },
-            { label: "Humidity", value: `${weather?.current?.humidity ?? 45}%`, icon: Droplets, gradient: "gradient-energy" },
+            { label: "Peak Projected Day", value: peakDay ? `${Math.round(peakKwh).toLocaleString()} kWh` : "—", sub: peakDay?.date ?? "", icon: Zap },
+            { label: "7-Day Total kWh", value: Math.round(totalKwh).toLocaleString(), sub: "Projected fleet load", icon: CloudSun },
+            { label: "7-Day Total SAR", value: `﷼ ${Math.round(totalSar).toLocaleString()}`, sub: `@ ${SAR_PER_KWH} SAR/kWh`, icon: Banknote },
+            { label: "Avg Forecast Mean Temp", value: `${(intel.forecast.reduce((s, d) => s + d.tMean, 0) / intel.forecast.length).toFixed(1)}°C`, sub: `CDD base ${CDD_BASE_C}°C`, icon: Thermometer },
           ].map((kpi, i) => (
             <motion.div key={kpi.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
               <Card className="relative overflow-hidden">
-                <div className={`absolute inset-0 opacity-10 ${kpi.gradient}`} />
                 <CardContent className="pt-5 pb-4 relative">
                   <kpi.icon className="h-4 w-4 text-muted-foreground mb-1" />
                   <p className="text-xs text-muted-foreground">{kpi.label}</p>
-                  <p className="text-2xl font-bold text-foreground mt-1">{kpi.value}</p>
+                  <p className="text-2xl font-bold font-mono text-foreground mt-1">{kpi.value}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{kpi.sub}</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -48,66 +67,76 @@ export default function CoolingForecastPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">7-Day Cooling Demand Forecast</CardTitle>
-            <CardDescription>Predicted vs actual kW load with temperature correlation</CardDescription>
+            <CardTitle className="text-base">7-Day Projected kWh vs Max Temperature</CardTitle>
+            <CardDescription>Bars: projected fleet kWh • Line: forecast max °C</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={320}>
-              <ComposedChart data={coolingForecast7Day}>
+              <ComposedChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="day" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
                 <YAxis yAxisId="kw" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
                 <YAxis yAxisId="temp" orientation="right" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
                 <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--foreground))" }} />
-                <Bar yAxisId="kw" dataKey="predicted" radius={[4, 4, 0, 0]} name="Predicted kW" opacity={0.8}>
-                  {coolingForecast7Day.map((d, i) => (
-                    <Cell key={i} fill={d.predicted > 4500 ? "hsl(var(--destructive))" : d.predicted > 3800 ? "hsl(var(--warning))" : "hsl(var(--primary))"} />
+                <Bar yAxisId="kw" dataKey="kwh" radius={[4, 4, 0, 0]} name="Projected kWh" opacity={0.85}>
+                  {chartData.map((d, i) => (
+                    <Cell key={i} fill={d.tMax >= (intel.baseline2024?.p90Max ?? 45) ? "hsl(var(--destructive))" : d.tMax >= 42 ? "hsl(var(--warning))" : "hsl(var(--primary))"} />
                   ))}
                 </Bar>
-                {coolingForecast7Day.some(d => d.actual !== null) && (
-                  <Bar yAxisId="kw" dataKey="actual" radius={[4, 4, 0, 0]} name="Actual kW" fill="hsl(var(--accent))" opacity={0.5} />
-                )}
-                <Line yAxisId="temp" type="monotone" dataKey="temp" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} name="Temp °C" />
+                <Line yAxisId="temp" type="monotone" dataKey="tMax" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 4 }} name="Max °C" />
               </ComposedChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card>
-            <CardHeader><CardTitle className="text-base">Temperature Correlation</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={240}>
-                <AreaChart data={coolingForecast7Day}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="day" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
-                  <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, color: "hsl(var(--foreground))" }} />
-                  <defs>
-                    <linearGradient id="tempGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.3} /><stop offset="100%" stopColor="hsl(var(--destructive))" stopOpacity={0.02} /></linearGradient>
-                  </defs>
-                  <Area type="monotone" dataKey="temp" stroke="hsl(var(--destructive))" fill="url(#tempGrad)" strokeWidth={2} name="Temperature °C" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader><CardTitle className="text-base">Confidence Levels</CardTitle></CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {coolingForecast7Day.map((d, i) => (
-                  <motion.div key={d.day} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.08 }} className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-foreground w-8">{d.day}</span>
-                    <div className="flex-1 h-3 rounded-full bg-muted overflow-hidden">
-                      <motion.div className="h-full rounded-full bg-primary" initial={{ width: 0 }} animate={{ width: `${d.confidence}%` }} transition={{ duration: 0.8, delay: i * 0.1 }} />
-                    </div>
-                    <span className="text-sm font-bold text-primary w-10 text-right">{d.confidence}%</span>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Daily Breakdown</CardTitle>
+            <CardDescription>Forecast temps → CDD → projected fleet kWh & cost</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-muted-foreground border-b border-border">
+                    <th className="py-2 pr-3">Date</th>
+                    <th className="py-2 pr-3">Max °C</th>
+                    <th className="py-2 pr-3">Mean °C</th>
+                    <th className="py-2 pr-3">CDD (base {CDD_BASE_C})</th>
+                    <th className="py-2 pr-3">Projected kWh</th>
+                    <th className="py-2 pr-3">Projected SAR</th>
+                  </tr>
+                </thead>
+                <tbody className="font-mono">
+                  {intel.forecast.map(d => (
+                    <tr key={d.date} className="border-b border-border/40">
+                      <td className="py-2 pr-3">{d.date}</td>
+                      <td className="py-2 pr-3">{d.tMax.toFixed(1)}</td>
+                      <td className="py-2 pr-3">{d.tMean.toFixed(1)}</td>
+                      <td className="py-2 pr-3">{d.cdd.toFixed(1)}</td>
+                      <td className="py-2 pr-3">{Math.round(d.projectedKwh).toLocaleString()}</td>
+                      <td className="py-2 pr-3">﷼ {Math.round(d.projectedSar).toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card">
+          <CardContent className="pt-4 pb-4 flex items-start gap-3">
+            <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">Method:</strong> daily forecast from Open-Meteo
+              (<code>api.open-meteo.com/v1/forecast</code>) at {`24.7316, 46.7545`}.
+              <code> CDD = max(0, mean − 18°C)</code>.
+              Projected kWh = CDD × historical site ratio {intel.kwhPerCdd.toFixed(1)} kWh per CDD-day
+              (derived from <code>daily_unit_readings</code> joined to <code>daily_weather_rawdah</code>).
+              SAR uses {SAR_PER_KWH} SAR/kWh avg observed tariff. This is a projection — actuals will differ.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </PageTransition>
   );
