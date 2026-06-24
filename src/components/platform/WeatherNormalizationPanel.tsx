@@ -2,10 +2,10 @@ import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useWeatherNormalization, WeatherFactorPeriod } from "@/hooks/useWeatherNormalization";
+import { useWeatherNormalization, WeatherFactorPeriod, LOCKED_STUDY_FACTOR, LOCKED_STUDY_DELTA_C } from "@/hooks/useWeatherNormalization";
 import { supabase } from "@/integrations/supabase/client";
 import { ComposedChart, Area, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend, ResponsiveContainer } from "recharts";
-import { Thermometer, Flame, RefreshCw, Calendar, TrendingUp } from "lucide-react";
+import { Thermometer, Flame, RefreshCw, Calendar, TrendingUp, Snowflake, Lock } from "lucide-react";
 
 const chartTooltipStyle = { background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(215, 20%, 16%)";
@@ -23,17 +23,22 @@ function fmtFactor(v: number | null | undefined) {
   return v == null ? "—" : `×${v.toFixed(4)}`;
 }
 
-function PeriodCard({ p, icon: Icon }: { p: WeatherFactorPeriod; icon: any }) {
+function PeriodCard({ p, icon: Icon, accent }: { p: WeatherFactorPeriod; icon: any; accent?: "official" | "progress" | "context" }) {
   const positive = (p.tempDelta ?? 0) >= 0;
+  const ring = accent === "official"
+    ? "ring-1 ring-energy/40"
+    : accent === "progress"
+      ? "ring-1 ring-warning/40"
+      : "";
   return (
-    <div className="bg-secondary rounded-lg p-3 border border-border">
+    <div className={`bg-secondary rounded-lg p-3 border border-border ${ring}`}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-[10px] text-muted-foreground flex items-center gap-1">
           <Icon className="h-3 w-3" /> {p.label}
         </span>
-        <Badge variant="outline" className="text-[9px]">
-          {p.currentDays}d vs {p.baselineDays}d
-        </Badge>
+        {accent === "official" && <Badge variant="outline" className="text-[9px] border-energy/40 text-energy">Official</Badge>}
+        {accent === "progress" && <Badge variant="outline" className="text-[9px] border-warning/40 text-warning">In progress</Badge>}
+        {!accent && <Badge variant="outline" className="text-[9px]">{p.currentDays}d vs {p.baselineDays}d</Badge>}
       </div>
       <p className={`text-xl font-bold ${positive ? 'text-warning' : 'text-energy'}`}>{fmtFactor(p.weatherFactor)}</p>
       <p className="text-[10px] text-muted-foreground mt-1">
@@ -42,12 +47,18 @@ function PeriodCard({ p, icon: Icon }: { p: WeatherFactorPeriod; icon: any }) {
       <p className={`text-[10px] mt-0.5 font-medium ${positive ? 'text-warning' : 'text-energy'}`}>
         ΔT {fmtDelta(p.tempDelta)} · CDD {Math.round(p.currentCdd)} vs {Math.round(p.baselineCdd)}
       </p>
+      {p.inProgress && p.throughDate && (
+        <p className="text-[9px] text-warning/80 mt-1">Through {p.throughDate} · finalizes after Oct 31</p>
+      )}
+      {accent !== "official" && accent !== "progress" && (
+        <p className="text-[9px] text-muted-foreground mt-1">{p.currentDays}d vs {p.baselineDays}d</p>
+      )}
     </div>
   );
 }
 
 export function WeatherNormalizationPanel() {
-  const { loading, error, rows, today, mtd, ytd, annual2025, refresh } = useWeatherNormalization();
+  const { loading, error, rows, today, mtd, ytd, annual2025, coolingSeason2025, coolingSeasonCurrent, series, refresh } = useWeatherNormalization();
   const [syncing, setSyncing] = useState(false);
   const [syncMsg, setSyncMsg] = useState<string | null>(null);
 
@@ -142,9 +153,10 @@ export function WeatherNormalizationPanel() {
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
         <CardTitle className="text-sm font-medium flex items-center gap-2">
           <Thermometer className="h-4 w-4 text-energy" />
-          Weather Normalization Engine — 2024 Baseline (CDD base 18°C · sensitivity 9.7%/°C)
+          Weather Normalization Engine — Cooling-Season Basis (May–Oct vs 2024 · 9.7%/°C)
         </CardTitle>
         <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-[9px]">Source: {series === "rawdah" ? "Rawdah site (24.7316, 46.7545)" : "Airport"}</Badge>
           {syncMsg && <span className="text-[10px] text-muted-foreground">{syncMsg}</span>}
           <Button size="sm" variant="outline" className="h-7 text-xs" disabled={syncing} onClick={() => handleSync("daily")}>
             <RefreshCw className={`h-3 w-3 mr-1 ${syncing ? 'animate-spin' : ''}`} />
@@ -159,7 +171,44 @@ export function WeatherNormalizationPanel() {
         {loading && <p className="text-xs text-muted-foreground">Loading daily weather history…</p>}
         {error && <p className="text-xs text-destructive">Error: {error}</p>}
 
-        {/* Factor cards */}
+        {/* Methodology line */}
+        <div className="rounded-md border border-energy/20 bg-energy/5 p-2.5 text-[10px] leading-relaxed text-muted-foreground">
+          <span className="font-semibold text-foreground">Official normalization basis:</span> cooling season (May–Oct)
+          mean-temperature delta vs 2024 baseline at site coordinates, × 9.7%/°C sensitivity. Full-year shown for
+          context only. 2026 finalizes after the cooling season completes (Oct 31, 2026).
+        </div>
+
+        {/* OFFICIAL cooling-season cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {coolingSeason2025 && (
+            <div className="bg-secondary rounded-lg p-3 border border-energy/30 ring-1 ring-energy/20">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <Snowflake className="h-3 w-3 text-energy" /> Official 2025 factor — cooling season
+                </span>
+                <Badge variant="outline" className="text-[9px] border-energy/40 text-energy flex items-center gap-1">
+                  <Lock className="h-2.5 w-2.5" /> Study locked
+                </Badge>
+              </div>
+              <div className="flex items-baseline gap-3">
+                <p className="text-2xl font-bold text-energy">×{LOCKED_STUDY_FACTOR.toFixed(4)}</p>
+                <p className="text-[10px] text-muted-foreground">study: ΔT +{LOCKED_STUDY_DELTA_C.toFixed(2)}°C</p>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Data-derived (Rawdah ERA5): {fmtFactor(coolingSeason2025.weatherFactor)} · ΔT {fmtDelta(coolingSeason2025.tempDelta)}
+                ({coolingSeason2025.currentDays}d vs {coolingSeason2025.baselineDays}d)
+              </p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                2025 {fmtTemp(coolingSeason2025.currentAvg)} vs 2024 {fmtTemp(coolingSeason2025.baselineAvg)} · reconciles to locked ~1.1262.
+              </p>
+            </div>
+          )}
+          {coolingSeasonCurrent && (
+            <PeriodCard p={coolingSeasonCurrent} icon={Snowflake} accent="progress" />
+          )}
+        </div>
+
+        {/* Secondary / context cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-secondary rounded-lg p-3 border border-border">
             <div className="flex items-center justify-between mb-2">
@@ -176,9 +225,9 @@ export function WeatherNormalizationPanel() {
               ΔT vs 2024 same-day: {fmtDelta(todayDelta)}
             </p>
           </div>
-          {mtd && <PeriodCard p={mtd} icon={Calendar} />}
-          {ytd && <PeriodCard p={ytd} icon={TrendingUp} />}
-          {annual2025 && <PeriodCard p={annual2025} icon={Flame} />}
+          {mtd && <PeriodCard p={mtd} icon={Calendar} accent="context" />}
+          {ytd && <PeriodCard p={ytd} icon={TrendingUp} accent="context" />}
+          {annual2025 && <PeriodCard p={annual2025} icon={Flame} accent="context" />}
         </div>
 
         {/* Daily temp + CDD chart */}
@@ -219,8 +268,9 @@ export function WeatherNormalizationPanel() {
         </div>
 
         <p className="text-[10px] text-muted-foreground">
-          Formula: weather_factor = 1 + (current_avg_mean_temp − 2024_avg_mean_temp) × 0.097.
-          Locked savings KPIs (17.3% / 102,194 kWh / 33,286 SAR) are unaffected — this engine only feeds normalization comparisons.
+          Formula: weather_factor = 1 + (current_cooling-season_avg_mean_temp − 2024_cooling-season_avg_mean_temp) × 0.097.
+          MTD / YTD / Annual cards are full-period rollups shown for context — not the official basis.
+          Locked savings KPIs (17.3% / 102,194 kWh / 33,286 SAR) are unaffected; this engine only feeds normalization comparisons.
         </p>
       </CardContent>
     </Card>
