@@ -173,6 +173,48 @@ export type Database = {
         }
         Relationships: []
       }
+      locked_factors: {
+        Row: {
+          baseline_avg_c: number | null
+          baseline_days: number | null
+          basis: string
+          current_avg_c: number | null
+          current_days: number | null
+          delta_c: number
+          factor: number
+          finalized_at: string
+          id: string
+          source: string
+          year: number
+        }
+        Insert: {
+          baseline_avg_c?: number | null
+          baseline_days?: number | null
+          basis?: string
+          current_avg_c?: number | null
+          current_days?: number | null
+          delta_c: number
+          factor: number
+          finalized_at?: string
+          id?: string
+          source?: string
+          year: number
+        }
+        Update: {
+          baseline_avg_c?: number | null
+          baseline_days?: number | null
+          basis?: string
+          current_avg_c?: number | null
+          current_days?: number | null
+          delta_c?: number
+          factor?: number
+          finalized_at?: string
+          id?: string
+          source?: string
+          year?: number
+        }
+        Relationships: []
+      }
       page_layouts: {
         Row: {
           created_at: string
