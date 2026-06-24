@@ -66,6 +66,10 @@ export interface UseWeatherNormalizationResult {
   coolingSeasonCurrent: WeatherFactorPeriod | null;
   /** Source tag: which underlying series these factors came from. */
   series: "rawdah" | "airport";
+  /** Frozen factors per year, keyed by year. */
+  lockedFactors: Record<number, { factor: number; delta_c: number; finalized_at: string; source: string }>;
+  /** True once Oct 31 of the current year has passed AND a locked row exists for the current year. */
+  currentYearFinalized: boolean;
   refresh: () => Promise<void>;
 }
 
@@ -103,6 +107,7 @@ function inMonths(date: string, months: number[]) {
 
 export function useWeatherNormalization(): UseWeatherNormalizationResult {
   const [rows, setRows] = useState<DailyWeatherRow[]>([]);
+  const [lockedFactors, setLockedFactors] = useState<Record<number, { factor: number; delta_c: number; finalized_at: string; source: string }>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -110,16 +115,27 @@ export function useWeatherNormalization(): UseWeatherNormalizationResult {
     setLoading(true);
     setError(null);
     // OFFICIAL series of record: Rawdah site coordinates (24.7316, 46.7545)
-    const { data, error } = await supabase
-      .from("daily_weather_rawdah" as any)
-      .select("date,max_temp_c,min_temp_c,mean_temp_c,cdd,source")
-      .order("date", { ascending: true });
-    if (error) {
-      setError(error.message);
+    const [w, lf] = await Promise.all([
+      supabase
+        .from("daily_weather_rawdah" as any)
+        .select("date,max_temp_c,min_temp_c,mean_temp_c,cdd,source")
+        .order("date", { ascending: true }),
+      supabase
+        .from("locked_factors" as any)
+        .select("year,basis,delta_c,factor,finalized_at,source")
+        .eq("basis", "cooling_season_may_oct"),
+    ]);
+    if (w.error) {
+      setError(w.error.message);
       setLoading(false);
       return;
     }
-    setRows((data as any) || []);
+    setRows((w.data as any) || []);
+    const map: Record<number, any> = {};
+    ((lf.data as any[]) || []).forEach((r: any) => {
+      map[r.year] = { factor: Number(r.factor), delta_c: Number(r.delta_c), finalized_at: r.finalized_at, source: r.source };
+    });
+    setLockedFactors(map);
     setLoading(false);
   };
 
@@ -198,12 +214,20 @@ export function useWeatherNormalization(): UseWeatherNormalizationResult {
     return { today: todayRow, mtd, ytd, annual2025, coolingSeason2025, coolingSeasonCurrent };
   }, [rows]);
 
+  const currentYearFinalized = useMemo(() => {
+    const y = new Date().getUTCFullYear();
+    const pastOct31 = new Date() > new Date(Date.UTC(y, 9, 31, 23, 59, 59));
+    return pastOct31 && !!lockedFactors[y];
+  }, [lockedFactors]);
+
   return {
     loading,
     error,
     rows,
     ...computed,
     series: "rawdah",
+    lockedFactors,
+    currentYearFinalized,
     refresh: load,
   };
 }
