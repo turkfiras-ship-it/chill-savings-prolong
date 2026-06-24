@@ -11,6 +11,8 @@ import { PageTransition } from "@/components/platform/PageTransition";
 import { LockedFinancials } from "@/data/lockedPerformanceModel";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useUnitIntel } from "@/hooks/useUnitIntel";
+import { useMemo } from "react";
 
 // Generate sparkline data from monthly trends
 const consumptionSpark = monthlyTrends.map(m => ({ value: m.consumption }));
@@ -34,7 +36,23 @@ export default function DashboardPage() {
   const kpis = portfolioKPIs;
   const topSites = [...sites].filter(s => s.savings_sar > 0).sort((a, b) => b.savings_sar - a.savings_sar).slice(0, 5);
   const topConsuming = [...sites].sort((a, b) => b.consumption_kwh - a.consumption_kwh).slice(0, 5);
-  const recentAlerts = [...alerts].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 5);
+  const intel = useUnitIntel();
+
+  // Live alerts derived from the real statistical anomaly engine (|z| >= 2 on daily_unit_readings).
+  const liveAlerts = useMemo(() => {
+    return [...intel.anomalies]
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 5)
+      .map(a => ({
+        id: `${a.unit}-${a.date}`,
+        severity: a.severity === "Critical" ? "critical" : a.severity === "High" ? "warning" : "info",
+        message: `${a.unit}: ${a.kwh.toFixed(0)} kWh vs expected ${a.expected.toFixed(0)} (${a.sigma.toFixed(1)}σ) — ${a.reason}`,
+        siteName: "Jarir — Rawdah",
+        timestamp: `${a.date}T12:00:00Z`,
+      }));
+  }, [intel.anomalies]);
+  const activeAlertsCount = intel.anomalies.length;
+  const criticalAlertsCount = intel.anomalies.filter(a => a.severity === "Critical").length;
 
   return (
     <PageTransition>
@@ -56,7 +74,7 @@ export default function DashboardPage() {
           <AnimatedKpiCard title="Total Cost" value={Number((kpis.totalCost / 1e6).toFixed(2))} suffix="M SAR" decimals={2} icon={DollarSign} subtitle="Annual portfolio cost" delay={100} sparkline={costSpark} />
           <AnimatedKpiCard title="Total Savings" value={Number((kpis.totalSavings / 1000).toFixed(0))} suffix="K SAR" icon={TrendingUp} variant="savings" trend={{ value: `${LockedFinancials.efficiencyImprovement}% savings`, positive: true }} delay={200} sparkline={savingsSpark} />
           <AnimatedKpiCard title="Active Sites" value={kpis.activeSites} suffix={` / ${kpis.totalSites}`} icon={MapPin} subtitle={`${kpis.totalSites - kpis.activeSites} pending`} delay={300} />
-          <AnimatedKpiCard title="Active Alerts" value={kpis.activeAlerts} icon={Bell} variant={kpis.criticalAlerts > 0 ? 'danger' : 'warning'} subtitle={`${kpis.criticalAlerts} critical`} delay={400} />
+          <AnimatedKpiCard title="Active Alerts" value={activeAlertsCount} icon={Bell} variant={criticalAlertsCount > 0 ? 'danger' : 'warning'} subtitle={intel.loading ? 'scanning…' : `${criticalAlertsCount} critical`} delay={400} />
         </div>
 
         {/* Animated KPI row 2 */}
