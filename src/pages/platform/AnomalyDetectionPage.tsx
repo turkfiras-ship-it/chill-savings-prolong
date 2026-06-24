@@ -1,221 +1,171 @@
-import { useState, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Brain, Loader2, RefreshCw, Zap, AlertTriangle, Thermometer, DollarSign, Activity } from "lucide-react";
-import { sites, alerts, assets } from "@/data/mockData";
-import { useGlobalWeather } from "@/context/WeatherContext";
-import { toast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Brain, AlertTriangle, Info, CheckCircle2 } from "lucide-react";
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine } from "recharts";
+import { PageTransition } from "@/components/platform/PageTransition";
+import { useUnitIntel, UNIT_NAMES, type UnitName } from "@/hooks/useUnitIntel";
 
-const ANALYZE_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-anomalies`;
+const sevColor: Record<string, string> = {
+  Critical: "bg-destructive/20 text-destructive border-destructive/30",
+  High:     "bg-warning/20 text-warning border-warning/30",
+  Medium:   "bg-accent/20 text-accent border-accent/30",
+};
 
 export default function AnomalyDetectionPage() {
-  const [analysis, setAnalysis] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [lastAnalyzed, setLastAnalyzed] = useState<Date | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
-  const { weather } = useGlobalWeather();
+  const intel = useUnitIntel();
+  const [unitFilter, setUnitFilter] = useState<UnitName | "all">("all");
 
-  const runAnalysis = async () => {
-    if (isAnalyzing) {
-      abortRef.current?.abort();
-      setIsAnalyzing(false);
-      return;
-    }
+  const anomalies = useMemo(
+    () => unitFilter === "all" ? intel.anomalies : intel.anomalies.filter(a => a.unit === unitFilter),
+    [intel.anomalies, unitFilter]
+  );
 
-    setIsAnalyzing(true);
-    setAnalysis("");
-    abortRef.current = new AbortController();
+  // Build chart series for selected unit (or fleet average)
+  const chart = useMemo(() => {
+    if (unitFilter === "all" || !intel.byUnit[unitFilter]?.length) return [];
+    const rows = intel.byUnit[unitFilter];
+    const s = intel.stats.find(x => x.unit === unitFilter);
+    return rows.map(r => ({
+      date: r.date.slice(5),
+      kwh: r.kwh,
+      mean: s?.meanKwh ?? 0,
+      upper: (s?.meanKwh ?? 0) + 2 * (s?.sdKwh ?? 0),
+      lower: Math.max(0, (s?.meanKwh ?? 0) - 2 * (s?.sdKwh ?? 0)),
+    }));
+  }, [unitFilter, intel]);
 
-    try {
-      const resp = await fetch(ANALYZE_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          sites,
-          alerts,
-          assets,
-          weather: weather?.current ? {
-            temperature: weather.current.temperature,
-            humidity: weather.current.humidity,
-            feelsLike: weather.current.feelsLike,
-          } : null,
-        }),
-        signal: abortRef.current.signal,
-      });
+  if (intel.loading) return <PageTransition><div className="p-8 text-sm text-muted-foreground">Loading anomaly engine…</div></PageTransition>;
+  if (intel.error)   return <PageTransition><div className="p-8 text-sm text-destructive">No data — {intel.error}</div></PageTransition>;
 
-      if (!resp.ok) {
-        const err = await resp.json().catch(() => ({ error: "Analysis failed" }));
-        toast({ title: "Analysis Error", description: err.error, variant: "destructive" });
-        setIsAnalyzing(false);
-        return;
-      }
-
-      if (!resp.body) throw new Error("No response body");
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-      let fullText = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = buffer.indexOf("\n")) !== -1) {
-          let line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") break;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              fullText += content;
-              setAnalysis(fullText);
-            }
-          } catch {
-            buffer = line + "\n" + buffer;
-            break;
-          }
-        }
-      }
-
-      setLastAnalyzed(new Date());
-    } catch (e: any) {
-      if (e.name !== "AbortError") {
-        toast({ title: "Error", description: "Failed to run AI analysis", variant: "destructive" });
-      }
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
-
-  const stats = [
-    { label: "Sites Monitored", value: sites.filter(s => s.status === "active").length, icon: Activity, color: "text-energy" },
-    { label: "Active Alerts", value: alerts.filter(a => !a.acknowledged).length, icon: AlertTriangle, color: "text-warning" },
-    { label: "Flagged Assets", value: assets.filter(a => a.abnormalFlags > 0).length, icon: Zap, color: "text-destructive" },
-    { label: "Current Temp", value: weather?.current ? `${Math.round(weather.current.temperature)}°C` : "—", icon: Thermometer, color: "text-warning" },
-  ];
+  const totalDays = intel.dateRange ? `${intel.dateRange.min} → ${intel.dateRange.max}` : "—";
+  const sevCounts = { Critical: 0, High: 0, Medium: 0 };
+  for (const a of intel.anomalies) sevCounts[a.severity]++;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-lg gradient-energy flex items-center justify-center">
-              <Brain className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">AI Anomaly Detection</h1>
-              <p className="text-sm text-muted-foreground">AI-powered analysis of your energy portfolio</p>
-            </div>
+    <PageTransition>
+      <div className="space-y-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Brain className="h-6 w-6 text-accent" />
+              Anomaly Detection
+            </h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Statistical z-score detection across {intel.stats[0]?.n ?? 0} days × 7 units •
+              <code className="ml-1">daily_unit_readings</code>
+            </p>
           </div>
+          <Select value={unitFilter} onValueChange={(v) => setUnitFilter(v as any)}>
+            <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All units</SelectItem>
+              {UNIT_NAMES.map(u => <SelectItem key={u} value={u}>Unit {u}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex items-center gap-2">
-          {lastAnalyzed && (
-            <span className="text-[11px] text-muted-foreground">
-              Last: {lastAnalyzed.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit" })}
-            </span>
-          )}
-          <Button
-            onClick={runAnalysis}
-            className={isAnalyzing ? "bg-destructive hover:bg-destructive/90" : "gradient-savings text-primary-foreground"}
-          >
-            {isAnalyzing ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Stop Analysis
-              </>
-            ) : (
-              <>
-                <Brain className="h-4 w-4 mr-2" />
-                Run AI Analysis
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {stats.map(s => (
-          <Card key={s.label} className="bg-card border-border">
-            <CardContent className="p-4 flex items-center gap-3">
-              <s.icon className={`h-5 w-5 ${s.color}`} />
-              <div>
-                <p className="text-lg font-bold">{s.value}</p>
-                <p className="text-[10px] text-muted-foreground">{s.label}</p>
-              </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: "Total Anomalies", value: intel.anomalies.length, sub: `|z| ≥ 2 in ${totalDays}` },
+            { label: "Critical (|z|≥3)", value: sevCounts.Critical, sub: "Severe deviation" },
+            { label: "High (|z|≥2.5)", value: sevCounts.High, sub: "Notable deviation" },
+            { label: "Medium (|z|≥2)", value: sevCounts.Medium, sub: "Threshold flag" },
+          ].map((k, i) => (
+            <motion.div key={k.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+              <Card>
+                <CardContent className="pt-5 pb-4">
+                  <p className="text-xs text-muted-foreground">{k.label}</p>
+                  <p className="text-2xl font-bold font-mono text-foreground mt-1">{k.value}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{k.sub}</p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+
+        {unitFilter !== "all" && chart.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Unit {unitFilter} — Daily kWh vs ±2σ band</CardTitle>
+              <CardDescription>Points outside the band are flagged anomalies</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={chart}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} interval={3} />
+                  <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                  <ReferenceLine y={chart[0]?.upper} stroke="hsl(var(--warning))" strokeDasharray="4 4" label={{ value: "+2σ", fill: "hsl(var(--warning))", fontSize: 10 }} />
+                  <ReferenceLine y={chart[0]?.lower} stroke="hsl(var(--warning))" strokeDasharray="4 4" label={{ value: "-2σ", fill: "hsl(var(--warning))", fontSize: 10 }} />
+                  <ReferenceLine y={chart[0]?.mean} stroke="hsl(var(--muted-foreground))" strokeDasharray="2 2" />
+                  <Line type="monotone" dataKey="kwh" stroke="hsl(var(--accent))" strokeWidth={2} dot={{ r: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        )}
 
-      <Card className="bg-card border-border">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Brain className="h-4 w-4 text-energy" />
-              Analysis Results
-            </CardTitle>
-            {isAnalyzing && (
-              <Badge variant="outline" className="text-energy border-energy/30 bg-energy/5 animate-pulse">
-                <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                Analyzing...
-              </Badge>
-            )}
-          </div>
-        </CardHeader>
-        <CardContent>
-          {!analysis && !isAnalyzing ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="h-16 w-16 rounded-2xl gradient-energy flex items-center justify-center mb-4 opacity-50">
-                <Brain className="h-8 w-8 text-primary-foreground" />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Detected Anomalies</CardTitle>
+            <CardDescription>{unitFilter === "all" ? "All units" : `Unit ${unitFilter}`} — sorted by date</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {anomalies.length === 0 ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
+                No anomalies detected for {unitFilter === "all" ? "the fleet" : `Unit ${unitFilter}`} at |z| ≥ 2.
               </div>
-              <p className="text-muted-foreground text-sm mb-1">No analysis yet</p>
-              <p className="text-muted-foreground text-xs max-w-sm">
-                Click "Run AI Analysis" to scan your entire portfolio for anomalies, inefficiencies, and savings opportunities.
-              </p>
-            </div>
-          ) : (
-            <div className="prose prose-invert prose-sm max-w-none [&_h1]:text-lg [&_h1]:font-bold [&_h1]:text-foreground [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-sm [&_h3]:font-medium [&_h3]:text-foreground [&_p]:text-muted-foreground [&_li]:text-muted-foreground [&_strong]:text-foreground [&_ul]:space-y-1">
-              <MarkdownRenderer content={analysis} />
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left text-xs text-muted-foreground border-b border-border">
+                      <th className="py-2 pr-3">Date</th>
+                      <th className="py-2 pr-3">Unit</th>
+                      <th className="py-2 pr-3">Actual kWh</th>
+                      <th className="py-2 pr-3">Expected (unit mean)</th>
+                      <th className="py-2 pr-3">Deviation</th>
+                      <th className="py-2 pr-3">σ</th>
+                      <th className="py-2 pr-3">Severity</th>
+                    </tr>
+                  </thead>
+                  <tbody className="font-mono">
+                    {anomalies.map((a, i) => (
+                      <tr key={i} className="border-b border-border/40">
+                        <td className="py-2 pr-3">{a.date}</td>
+                        <td className="py-2 pr-3">{a.unit}</td>
+                        <td className="py-2 pr-3">{a.kwh.toFixed(1)}</td>
+                        <td className="py-2 pr-3">{a.expected.toFixed(1)}</td>
+                        <td className={`py-2 pr-3 ${a.deviation < 0 ? "text-warning" : "text-destructive"}`}>{a.deviation >= 0 ? "+" : ""}{a.deviation.toFixed(1)}</td>
+                        <td className="py-2 pr-3">{a.sigma.toFixed(2)}</td>
+                        <td className="py-2 pr-3"><Badge variant="outline" className={sevColor[a.severity]}>{a.severity}</Badge></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-function MarkdownRenderer({ content }: { content: string }) {
-  const lines = content.split("\n");
-  return (
-    <div className="space-y-2">
-      {lines.map((line, i) => {
-        if (line.startsWith("### ")) return <h3 key={i} className="text-sm font-medium text-foreground mt-4">{line.slice(4)}</h3>;
-        if (line.startsWith("## ")) return <h2 key={i} className="text-base font-semibold text-foreground mt-5 pb-1 border-b border-border">{line.slice(3)}</h2>;
-        if (line.startsWith("# ")) return <h1 key={i} className="text-lg font-bold text-foreground mt-6">{line.slice(2)}</h1>;
-        if (line.startsWith("- **") || line.startsWith("* **")) {
-          const text = line.slice(2);
-          return <li key={i} className="text-sm text-muted-foreground list-disc ml-4" dangerouslySetInnerHTML={{ __html: formatBold(text) }} />;
-        }
-        if (line.startsWith("- ") || line.startsWith("* ")) return <li key={i} className="text-sm text-muted-foreground list-disc ml-4">{line.slice(2)}</li>;
-        if (line.match(/^\d+\./)) return <li key={i} className="text-sm text-muted-foreground list-decimal ml-4" dangerouslySetInnerHTML={{ __html: formatBold(line.replace(/^\d+\.\s*/, "")) }} />;
-        if (line.trim() === "") return <div key={i} className="h-1" />;
-        return <p key={i} className="text-sm text-muted-foreground" dangerouslySetInnerHTML={{ __html: formatBold(line) }} />;
-      })}
-    </div>
+        <Card className="glass-card">
+          <CardContent className="pt-4 pb-4 flex items-start gap-3">
+            <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">Method:</strong> for each unit, mean μ and σ
+              are computed across all available daily readings ({intel.stats[0]?.n ?? 0}-day window).
+              A day is flagged when |kWh − μ| ≥ 2σ. Severity = Medium ≥ 2σ, High ≥ 2.5σ, Critical ≥ 3σ.
+              Confidence is limited by sample size — only {intel.stats[0]?.n ?? 0} days available.
+              Bulk same-day low-kWh anomalies often reflect facility closures (e.g. weekly off-day or holiday).
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </PageTransition>
   );
-}
-
-function formatBold(text: string): string {
-  return text.replace(/\*\*(.*?)\*\*/g, '<strong class="text-foreground font-semibold">$1</strong>');
 }

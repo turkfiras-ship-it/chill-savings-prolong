@@ -1,222 +1,149 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo } from "react";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { caseFiles, type CaseFile } from "@/data/advancedMockData";
-import { Shield, AlertTriangle, Clock, DollarSign, FileSearch, ChevronRight, CheckCircle2, Eye } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle2, Info, Banknote } from "lucide-react";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "recharts";
 import { PageTransition } from "@/components/platform/PageTransition";
-
-const severityColors: Record<string, string> = {
-  Critical: "bg-destructive/20 text-destructive border-destructive/30",
-  High: "bg-warning/20 text-warning border-warning/30",
-  Medium: "bg-accent/20 text-accent border-accent/30",
-  Low: "bg-primary/20 text-primary border-primary/30",
-};
-
-const statusIcons: Record<string, any> = {
-  "Active Investigation": AlertTriangle,
-  "Resolved": CheckCircle2,
-  "Under Review": Eye,
-};
-
-function EvidenceTimeline({ evidence }: { evidence: CaseFile["evidence"] }) {
-  return (
-    <div className="relative pl-6 space-y-4">
-      <div className="absolute left-2 top-2 bottom-2 w-px bg-border" />
-      {evidence.map((e, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 + i * 0.15 }}
-          className="relative"
-        >
-          <div className={`absolute -left-4 top-1.5 h-3 w-3 rounded-full border-2 ${
-            e.type === "alert" ? "bg-destructive border-destructive" :
-            e.type === "anomaly" ? "bg-warning border-warning" :
-            "bg-accent border-accent"
-          }`} />
-          <div className="flex items-start gap-3">
-            <span className="text-xs font-mono text-muted-foreground w-12 shrink-0">{e.time}</span>
-            <p className="text-sm text-foreground">{e.event}</p>
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function SuspectBars({ suspects }: { suspects: CaseFile["suspects"] }) {
-  return (
-    <div className="space-y-3">
-      {suspects.map((s, i) => (
-        <motion.div
-          key={s.cause}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 + i * 0.2 }}
-        >
-          <div className="flex justify-between text-sm mb-1">
-            <span className="text-foreground">{s.cause}</span>
-            <span className="font-bold text-foreground">{s.probability}%</span>
-          </div>
-          <div className="h-3 rounded-full bg-muted overflow-hidden">
-            <motion.div
-              className="h-full rounded-full"
-              style={{
-                background: s.probability >= 60 ? "hsl(var(--destructive))" :
-                            s.probability >= 30 ? "hsl(var(--warning))" :
-                            "hsl(var(--accent))",
-              }}
-              initial={{ width: 0 }}
-              animate={{ width: `${s.probability}%` }}
-              transition={{ duration: 1, delay: 0.6 + i * 0.2 }}
-            />
-          </div>
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
-function NarrativeText({ text }: { text: string }) {
-  const [displayed, setDisplayed] = useState("");
-  useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      if (i < text.length) { setDisplayed(text.slice(0, i + 1)); i++; }
-      else clearInterval(interval);
-    }, 15);
-    return () => clearInterval(interval);
-  }, [text]);
-  return (
-    <p className="text-sm text-foreground leading-relaxed italic">
-      "{displayed}<span className="animate-pulse text-primary">|</span>"
-    </p>
-  );
-}
+import { useUnitIntel } from "@/hooks/useUnitIntel";
 
 export default function EnergyProsecutorPage() {
-  const [selectedCase, setSelectedCase] = useState<CaseFile>(caseFiles[0]);
+  const intel = useUnitIntel();
+
+  if (intel.loading) return <PageTransition><div className="p-8 text-sm text-muted-foreground">Building case files…</div></PageTransition>;
+  if (intel.error)   return <PageTransition><div className="p-8 text-sm text-destructive">No data — {intel.error}</div></PageTransition>;
+
+  const wasteful = intel.wasteCases.filter(c => c.excessKwh > 0);
+  const top = wasteful.slice(0, 8);
+  const totalExcessKwh = wasteful.reduce((s, c) => s + c.excessKwh, 0);
+  const totalExcessSar = wasteful.reduce((s, c) => s + c.excessSar, 0);
+  const topCase = wasteful[0];
+
+  const chartData = top.map(c => ({
+    label: `${c.unit} ${c.monthLabel.slice(5)}`,
+    excess: Math.round(c.excessKwh),
+    pct: Number(c.excessPct.toFixed(1)),
+  }));
 
   return (
     <PageTransition>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Shield className="h-6 w-6 text-destructive" />
-            AI Energy Prosecutor
+            <Shield className="h-6 w-6 text-accent" />
+            Energy Prosecutor
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">Forensic anomaly investigations — AI-powered root cause analysis</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Per-unit monthly cases — actual kWh vs CDD-expected at the unit's baseline efficiency
+          </p>
         </div>
 
-        {/* Case Selector */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {caseFiles.map((c) => {
-            const StatusIcon = statusIcons[c.status] || AlertTriangle;
-            return (
-              <motion.div key={c.id} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <Card
-                  className={`cursor-pointer transition-all ${selectedCase.id === c.id ? "ring-2 ring-accent border-accent/50" : "hover:border-muted-foreground/30"}`}
-                  onClick={() => setSelectedCase(c)}
-                >
-                  <CardContent className="pt-4 pb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-mono text-muted-foreground">{c.id}</span>
-                      <Badge className={severityColors[c.severity]}>{c.severity}</Badge>
-                    </div>
-                    <p className="text-sm font-medium text-foreground truncate">{c.site}</p>
-                    <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
-                      <StatusIcon className="h-3 w-3" />
-                      {c.status}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </div>
+        {wasteful.length === 0 ? (
+          <Card className="border-primary/30 bg-primary/5">
+            <CardContent className="pt-6 pb-6 flex items-center gap-4">
+              <CheckCircle2 className="h-8 w-8 text-primary" />
+              <div>
+                <p className="font-semibold text-foreground">No prosecutable waste detected</p>
+                <p className="text-sm text-muted-foreground">All units are at or below their CDD-expected baseline.</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {[
+                { label: "Open Cases", value: wasteful.length, sub: "Unit-months above baseline", icon: AlertTriangle },
+                { label: "Total Excess kWh", value: Math.round(totalExcessKwh).toLocaleString(), sub: `Across ${wasteful.length} cases`, icon: AlertTriangle },
+                { label: "Total Excess SAR", value: `﷼ ${Math.round(totalExcessSar).toLocaleString()}`, sub: `@ ${intel.tariffSarPerKwh.toFixed(3)} SAR/kWh`, icon: Banknote },
+                { label: "Top Offender", value: topCase ? `${topCase.unit} ${topCase.monthLabel.slice(5)}` : "—", sub: topCase ? `+${Math.round(topCase.excessKwh).toLocaleString()} kWh (${topCase.excessPct.toFixed(0)}%)` : "", icon: Shield },
+              ].map((k, i) => (
+                <motion.div key={k.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
+                  <Card>
+                    <CardContent className="pt-5 pb-4">
+                      <k.icon className="h-4 w-4 text-muted-foreground mb-1" />
+                      <p className="text-xs text-muted-foreground">{k.label}</p>
+                      <p className="text-xl font-bold font-mono text-foreground mt-1">{k.value}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">{k.sub}</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
 
-        {/* Active Case Detail */}
-        <AnimatePresence mode="wait">
-          <motion.div key={selectedCase.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-            {/* Case Header */}
-            <Card className={`border ${severityColors[selectedCase.severity].replace("bg-", "border-").split(" ")[0]}/30 mb-6`}>
-              <CardContent className="pt-5 pb-4">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <FileSearch className="h-5 w-5 text-accent" />
-                    <span className="font-mono text-lg font-bold text-foreground">{selectedCase.id}</span>
-                  </div>
-                  <Badge className={severityColors[selectedCase.severity]}>{selectedCase.severity}</Badge>
-                  <Badge variant="outline">{selectedCase.status}</Badge>
-                  <span className="text-sm text-muted-foreground">Site: <strong className="text-foreground">{selectedCase.site}</strong></span>
-                  <span className="text-xs text-muted-foreground ml-auto flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    Opened {new Date(selectedCase.openedAt).toLocaleTimeString()}
-                  </span>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Top Cases — Excess kWh vs CDD-Expected</CardTitle>
+                <CardDescription>Higher = more energy used than baseline efficiency predicts</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={260}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis dataKey="label" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }} />
+                    <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }} />
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                    <Bar dataKey="excess" radius={[4, 4, 0, 0]} name="Excess kWh">
+                      {chartData.map((d, i) => (
+                        <Cell key={i} fill={d.pct >= 20 ? "hsl(var(--destructive))" : d.pct >= 10 ? "hsl(var(--warning))" : "hsl(var(--accent))"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Case Files</CardTitle>
+                <CardDescription>Ranked by excess kWh</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {top.map((c, i) => (
+                    <motion.div
+                      key={`${c.unit}-${c.monthLabel}`}
+                      initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}
+                      className={`p-3 rounded-lg border ${c.excessPct >= 20 ? "border-destructive/40 bg-destructive/5" : c.excessPct >= 10 ? "border-warning/40 bg-warning/5" : "border-border bg-card"}`}
+                    >
+                      <div className="flex justify-between items-start gap-3 flex-wrap">
+                        <div>
+                          <p className="font-semibold text-foreground">Case #{i + 1} — Unit {c.unit} • {c.monthLabel}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {c.days} days analysed • baseline efficiency derived from this unit's first-third of history
+                          </p>
+                        </div>
+                        <Badge variant="outline" className={c.excessPct >= 20 ? "border-destructive text-destructive" : c.excessPct >= 10 ? "border-warning text-warning" : ""}>
+                          {c.excessPct >= 20 ? "Critical" : c.excessPct >= 10 ? "Material" : "Minor"} • +{c.excessPct.toFixed(1)}%
+                        </Badge>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 mt-3 font-mono text-sm">
+                        <div><p className="text-xs text-muted-foreground">Expected</p><p className="text-foreground">{Math.round(c.expectedKwh).toLocaleString()} kWh</p></div>
+                        <div><p className="text-xs text-muted-foreground">Actual</p><p className="text-foreground">{Math.round(c.actualKwh).toLocaleString()} kWh</p></div>
+                        <div><p className="text-xs text-muted-foreground">Excess</p><p className="text-destructive">+{Math.round(c.excessKwh).toLocaleString()} kWh • ﷼ {Math.round(c.excessSar).toLocaleString()}</p></div>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2 italic">
+                        Finding: Unit {c.unit} consumed {c.excessPct.toFixed(1)}% above its CDD-adjusted baseline in {c.monthLabel}.
+                        At {intel.tariffSarPerKwh.toFixed(3)} SAR/kWh (avg from <code>sceco_monthly_bills</code>), this represents ﷼ {Math.round(c.excessSar).toLocaleString()} of avoidable cost.
+                      </p>
+                    </motion.div>
+                  ))}
                 </div>
               </CardContent>
             </Card>
+          </>
+        )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Evidence Timeline */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-accent" />
-                    Evidence Timeline
-                  </CardTitle>
-                  <CardDescription>Chronological evidence collection</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <EvidenceTimeline evidence={selectedCase.evidence} />
-                </CardContent>
-              </Card>
-
-              {/* Suspect Analysis */}
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Suspect Analysis</CardTitle>
-                    <CardDescription>Probability of root cause</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <SuspectBars suspects={selectedCase.suspects} />
-                  </CardContent>
-                </Card>
-
-                <Card className="border-destructive/20">
-                  <CardContent className="pt-5 pb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg gradient-warning flex items-center justify-center">
-                        <DollarSign className="h-5 w-5 text-primary-foreground" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-muted-foreground">Estimated Financial Damage</p>
-                        <p className="text-xl font-bold text-destructive">{selectedCase.financialImpact.toLocaleString()} SAR / month</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-
-            {/* AI Narrative */}
-            <Card className="mt-6 glass-card border-accent/20">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-accent" />
-                  AI Forensic Narrative
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <NarrativeText text={selectedCase.narrative} />
-              </CardContent>
-            </Card>
-          </motion.div>
-        </AnimatePresence>
+        <Card className="glass-card">
+          <CardContent className="pt-4 pb-4 flex items-start gap-3">
+            <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              <strong className="text-foreground">Method:</strong> for each unit-month,
+              expected kWh = Σ(CDD) × the unit's baseline kWh-per-CDD (computed from its first-third of available history).
+              Excess = actual − expected. Tariff {intel.tariffSarPerKwh.toFixed(4)} SAR/kWh is the running average from
+              <code> sceco_monthly_bills</code>. Cases use real DB rows only — no manufactured incidents.
+            </p>
+          </CardContent>
+        </Card>
       </div>
     </PageTransition>
   );
