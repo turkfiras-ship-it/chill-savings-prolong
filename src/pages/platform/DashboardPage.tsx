@@ -247,11 +247,16 @@ export default function DashboardPage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 Recent Alerts
-                <Badge variant="destructive" className="text-[9px] h-4">{alerts.filter(a => !a.acknowledged).length}</Badge>
+                <Badge variant="destructive" className="text-[9px] h-4">{activeAlertsCount}</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
-              {recentAlerts.map((a, i) => (
+              {liveAlerts.length === 0 && (
+                <div className="text-xs text-muted-foreground py-4 text-center">
+                  {intel.loading ? 'Scanning unit readings…' : 'No anomalies detected (|z| ≥ 2)'}
+                </div>
+              )}
+              {liveAlerts.map((a, i) => (
                 <motion.div
                   key={a.id}
                   initial={{ opacity: 0, x: -12 }}
