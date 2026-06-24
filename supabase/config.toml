@@ -2,3 +2,6 @@ project_id = "zxgiwgrbrigpavngziyx"
 
 [functions.eyedro-proxy]
 verify_jwt = false
+
+[functions.sync-weather]
+verify_jwt = false
