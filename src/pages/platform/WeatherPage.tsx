@@ -14,6 +14,7 @@ import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip,
 import { YtdWeatherSavings } from "@/components/platform/YtdWeatherSavings";
 import { WeatherNormalizationPanel } from "@/components/platform/WeatherNormalizationPanel";
 import { WeatherCoordsDiagnostic } from "@/components/platform/WeatherCoordsDiagnostic";
+import { WeatherNarrativePanel } from "@/components/platform/WeatherNarrativePanel";
 
 const chartTooltipStyle = { background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(215, 20%, 16%)";
@@ -251,6 +252,9 @@ export default function WeatherPage() {
 
       {/* Persistent daily-weather normalization engine (CDD + temp-delta vs 2024) */}
       {isRawdah && <WeatherNormalizationPanel />}
+
+      {/* Plain-language narrative — live-computed from cooling-season basis */}
+      {isRawdah && <WeatherNarrativePanel />}
 
       {/* Diagnostic: Airport vs Rawdah vs Sol-air adjusted */}
       {isRawdah && <WeatherCoordsDiagnostic />}
