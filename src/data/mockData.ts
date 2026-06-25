@@ -1,4 +1,4 @@
-import { LockedFinancials } from "@/data/lockedPerformanceModel";
+import { LockedFinancials, GridEmissionConstants } from "@/data/lockedPerformanceModel";
 import { unitMonthlyData2025 } from "@/data/unitMonthlyData";
 
 // ═══════════════════════════════════════════════════════════════
@@ -225,9 +225,9 @@ export const portfolioKPIs = {
   totalDemand: sites.reduce((a, s) => a + s.demand_kw, 0),
   totalPeak: sites.reduce((a, s) => a + s.peak_kw, 0),
   avgEfficiency: LockedFinancials.efficiencyImprovement,
-  // Carbon reduced = locked weather-adjusted kWh avoided × Saudi grid factor (0.65 kgCO2/kWh)
-  // 102,194 kWh/yr × 0.65 = 66,426 kg ≈ 66.43 tCO₂/yr avoided.
-  carbonReduction: Math.round(LockedFinancials.weatherAdjustedEnergyAvoided * 0.65 / 1000 * 100) / 100,
+  // Carbon reduced = locked weather-adjusted kWh avoided × Saudi grid factor (single shared constant)
+  // 102,194 kWh/yr × 0.651 kgCO₂/kWh = 66,528 kg ≈ 66.53 tCO₂/yr avoided.
+  carbonReduction: LockedFinancials.co2AvoidedTons,
   activeAlerts: alerts.filter(a => !a.acknowledged).length,
   criticalAlerts: alerts.filter(a => a.severity === 'critical' && !a.acknowledged).length,
   openProjects: projects.filter(p => !['Closed / Renewed', 'Monitoring Live'].includes(p.stage)).length,
