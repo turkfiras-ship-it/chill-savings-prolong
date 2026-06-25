@@ -164,9 +164,10 @@ export default function CarbonIntelligencePage() {
             <p className="text-xs text-muted-foreground leading-relaxed">
               <span className="text-foreground font-semibold">Method:</span> CO₂ = kWh × grid emission factor.
               Saudi grid range per credible sources: <span className="font-mono">0.52</span> (IEA) to{" "}
-              <span className="font-mono">0.65</span> (operational baseline) kgCO₂/kWh. We use{" "}
+              <span className="font-mono">0.651</span> (operational baseline) kgCO₂/kWh. We use{" "}
               <span className="font-mono">{GRID_EMISSION_FACTOR_KGCO2_PER_KWH}</span> (conservative). Avoided CO₂ uses
-              the TDE-verified locked savings basis ({annualAvoidedKwh.toLocaleString()} kWh/yr). Monthly emitted comes
+              the TDE-verified locked savings basis ({annualAvoidedKwh.toLocaleString()} kWh/yr →{" "}
+              <span className="font-mono">{annualAvoidedTons.toFixed(2)}</span> tCO₂/yr). Monthly emitted comes
               from <span className="font-mono">sceco_monthly_bills</span>; daily from{" "}
               <span className="font-mono">daily_unit_readings.fleet_total</span>.
             </p>
