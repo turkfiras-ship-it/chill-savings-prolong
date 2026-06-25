@@ -1,4 +1,5 @@
-import { useGlobalWeather } from "@/context/WeatherContext";
+import { useEffect, useState, useCallback } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { estimateCoolingLoadMultiplier, getWeatherInfo } from "@/lib/weatherService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,10 +12,46 @@ import { cn } from "@/lib/utils";
 const DAILY_BASELINE_KWH = Math.round(portfolioKPIs.totalConsumption / 30);
 const COST_PER_KWH = 0.30; // SAR
 
-export function CoolingForecast() {
-  const { weather, loading, error, refresh } = useGlobalWeather();
+interface ForecastDay {
+  date: string;
+  tMax: number;
+  tMin: number;
+  tMean: number;
+  solar: number;
+  weatherCode?: number;
+  precipitation?: number;
+  cdd: number;
+}
 
-  if (loading || error || !weather || !weather.daily?.length) {
+function useEdgeForecast() {
+  const [days, setDays] = useState<ForecastDay[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("forecast-weather");
+      if (error) throw error;
+      if (!data?.days?.length) throw new Error("Empty forecast payload");
+      setDays(data.days as ForecastDay[]);
+    } catch (e: any) {
+      setError(e?.message || "Failed to load forecast");
+      setDays(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+  return { days, loading, error, refresh: load };
+}
+
+export function CoolingForecast() {
+  const { days, loading, error, refresh } = useEdgeForecast();
+
+  if (loading || error || !days || !days.length) {
     const message = error
       ? `Forecast unavailable: ${error}`
       : loading
@@ -45,20 +82,22 @@ export function CoolingForecast() {
     );
   }
 
-  const forecastData = weather.daily.map(day => {
-    const avgTemp = (day.tempMax + day.tempMin) / 2;
-    const multiplier = estimateCoolingLoadMultiplier(day.tempMax);
+  const forecastData = days.map(day => {
+    const tempMax = day.tMax;
+    const tempMin = day.tMin;
+    const avgTemp = day.tMean ?? (tempMax + tempMin) / 2;
+    const multiplier = estimateCoolingLoadMultiplier(tempMax);
     const projectedKwh = Math.round(DAILY_BASELINE_KWH * (multiplier || 1));
     const projectedCost = Math.round(projectedKwh * COST_PER_KWH);
     const extraKwh = projectedKwh - DAILY_BASELINE_KWH;
-    const weatherInfo = getWeatherInfo(day.weatherCode);
+    const weatherInfo = getWeatherInfo(day.weatherCode ?? 0);
     const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
 
     return {
       day: dayName,
       date: day.date,
-      tempMax: day.tempMax,
-      tempMin: day.tempMin,
+      tempMax,
+      tempMin,
       avgTemp: Math.round(avgTemp),
       multiplier,
       projectedKwh,
