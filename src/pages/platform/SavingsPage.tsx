@@ -9,6 +9,7 @@ import { LockedFinancials, ClimateConstants } from "@/data/lockedPerformanceMode
 import { maintenanceSavings, downtimeSavings, calculateROI, energySavings, systemConfig, lifespanExtension, acReplacementCosts, environmentalImpact } from "@/data/roiCalculations";
 import { showroomsData, totalYearlySavings25, totalYearlySavings30, totalConsumption, totalUnits } from "@/data/savingsData";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
+import { ExpectedVsActualChart } from "@/components/platform/ExpectedVsActualChart";
 
 const chartTooltipStyle = { background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(215, 20%, 16%)";
@@ -72,6 +73,7 @@ export default function SavingsPage() {
 
         {/* Portfolio Tab */}
         <TabsContent value="portfolio" className="space-y-4">
+          <ExpectedVsActualChart />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="bg-card border-border">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Cumulative Savings</CardTitle></CardHeader>
