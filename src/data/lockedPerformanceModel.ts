@@ -25,6 +25,16 @@ export const ClimateConstants = Object.freeze({
   weatherNormalizationFactor: 1.1262, // READ ONLY — TDE-audited (CDD-derived)
 });
 
+// ─── Grid Emission Factor — SINGLE SOURCE OF TRUTH ────────────────────────
+// Saudi grid CO₂ intensity. Credible range:
+//   • IEA ≈ 0.52 kgCO₂/kWh
+//   • Operational baseline ≈ 0.65–0.651 kgCO₂/kWh (SEC fuel mix, conservative)
+// We use 0.651 kgCO₂/kWh site-wide. Change here to update every module.
+export const GridEmissionConstants = Object.freeze({
+  kgCo2PerKwh: 0.651,
+  source: 'Saudi grid operational baseline (SEC fuel-mix; conservative). IEA reports ~0.52 kgCO₂/kWh.',
+});
+
 // ─── SECTION 4: Weather Normalization Engine ──────────────────────────────
 // Expected_2025_kWh = Measured_2025_kWh × WeatherNormalizationFactor
 // TrueSavings_kWh = Expected_2025_kWh − Measured_2025_kWh
@@ -130,8 +140,11 @@ export const LockedFinancials = Object.freeze({
   peakDemandReductionMax: 55, // %
   peakDemandReduction: 44, // % — midpoint of audited 33–55% band
 
-  // CO₂ & qualitative (TDE B.1)
-  co2AvoidedTons: 64.1, // tCO₂/year
+  // CO₂ & qualitative — DERIVED from locked kWh avoided × grid factor.
+  // 102,194 kWh × 0.651 kgCO₂/kWh / 1000 ≈ 66.5 tCO₂/year
+  get co2AvoidedTons() {
+    return +((this.weatherAdjustedEnergyAvoided * GridEmissionConstants.kgCo2PerKwh) / 1000).toFixed(2);
+  },
   treeEquivalent: 2914, // trees
   complaintReductionPct: 90, // % — non-F1 units
 

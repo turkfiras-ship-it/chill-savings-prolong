@@ -8,14 +8,13 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { PageTransition } from "@/components/platform/PageTransition";
 import { useCountUp } from "@/hooks/useCountUp";
 import { supabase } from "@/integrations/supabase/client";
-import { LockedFinancials } from "@/data/lockedPerformanceModel";
+import { LockedFinancials, GridEmissionConstants } from "@/data/lockedPerformanceModel";
 
 /**
- * Saudi grid emission factor.
- * Credible range: IEA ≈ 0.52 kgCO₂/kWh; operational baseline ≈ 0.65 kgCO₂/kWh.
- * Default = 0.65 (conservative). Change in one place to update site-wide.
+ * Saudi grid emission factor — re-exported from LockedPerformanceModel
+ * (GridEmissionConstants). Single source of truth lives there; do not redefine here.
  */
-export const GRID_EMISSION_FACTOR_KGCO2_PER_KWH = 0.65;
+export const GRID_EMISSION_FACTOR_KGCO2_PER_KWH = GridEmissionConstants.kgCo2PerKwh;
 
 const MONTH_ORDER = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -165,9 +164,10 @@ export default function CarbonIntelligencePage() {
             <p className="text-xs text-muted-foreground leading-relaxed">
               <span className="text-foreground font-semibold">Method:</span> CO₂ = kWh × grid emission factor.
               Saudi grid range per credible sources: <span className="font-mono">0.52</span> (IEA) to{" "}
-              <span className="font-mono">0.65</span> (operational baseline) kgCO₂/kWh. We use{" "}
+              <span className="font-mono">0.651</span> (operational baseline) kgCO₂/kWh. We use{" "}
               <span className="font-mono">{GRID_EMISSION_FACTOR_KGCO2_PER_KWH}</span> (conservative). Avoided CO₂ uses
-              the TDE-verified locked savings basis ({annualAvoidedKwh.toLocaleString()} kWh/yr). Monthly emitted comes
+              the TDE-verified locked savings basis ({annualAvoidedKwh.toLocaleString()} kWh/yr →{" "}
+              <span className="font-mono">{annualAvoidedTons.toFixed(2)}</span> tCO₂/yr). Monthly emitted comes
               from <span className="font-mono">sceco_monthly_bills</span>; daily from{" "}
               <span className="font-mono">daily_unit_readings.fleet_total</span>.
             </p>
