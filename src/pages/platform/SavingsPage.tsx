@@ -21,7 +21,8 @@ export default function SavingsPage() {
   const totalInvestment = LockedFinancials.systemInvestment;
   const annualRecurring = LockedFinancials.annualRecurringSavings;
   const payback = Math.round(totalInvestment / annualRecurring * 10) / 10;
-  const carbonSaved = Math.round(totalKwhSaved * 0.000727 * 100) / 100;
+  // Carbon avoided = locked kWh avoided × Saudi grid factor (derived in LockedFinancials.co2AvoidedTons)
+  const carbonSaved = LockedFinancials.co2AvoidedTons;
 
   const roi = calculateROI();
 
