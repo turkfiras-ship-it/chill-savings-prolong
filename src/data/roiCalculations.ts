@@ -1,6 +1,6 @@
 // ROI and Operational Cost Savings Data for Rawdah Showroom
 // Imports locked values from LockedPerformanceModel — Single Source of Truth
-import { LockedFinancials, ClimateConstants } from "@/data/lockedPerformanceModel";
+import { LockedFinancials, ClimateConstants, GridEmissionConstants } from "@/data/lockedPerformanceModel";
 // System Configuration
 export const systemConfig = {
   numberOfUnits: 7,
@@ -18,18 +18,19 @@ export const systemConfig = {
 // CO2 & Environmental Impact
 export const environmentalImpact = {
   electricityRate: 0.30, // SAR/kWh
-  co2FactorKgPerKwh: 0.7, // Saudi grid CO2 intensity (kg CO2/kWh)
+  // Saudi grid factor — single shared constant (see GridEmissionConstants)
+  co2FactorKgPerKwh: GridEmissionConstants.kgCo2PerKwh, // 0.651 kg CO₂/kWh
   treeCo2AbsorptionKgPerYear: 22, // kg CO2 absorbed per mature tree per year
   
-  // Calculated from energy savings
+  // Locked weather-normalized kWh avoided (TDE-verified, IPMVP Option C)
   get annualKwhSaved() {
-    return Math.round(energySavings.annualSavingsRawdah / this.electricityRate);
+    return LockedFinancials.weatherAdjustedEnergyAvoided; // 102,194 kWh/yr
   },
   get annualCo2SavedKg() {
     return Math.round(this.annualKwhSaved * this.co2FactorKgPerKwh);
   },
   get annualCo2SavedTons() {
-    return +(this.annualCo2SavedKg / 1000).toFixed(1);
+    return +(this.annualCo2SavedKg / 1000).toFixed(2);
   },
   get treesEquivalent() {
     return Math.round(this.annualCo2SavedKg / this.treeCo2AbsorptionKgPerYear);
