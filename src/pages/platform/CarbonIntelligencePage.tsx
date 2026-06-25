@@ -8,14 +8,13 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { PageTransition } from "@/components/platform/PageTransition";
 import { useCountUp } from "@/hooks/useCountUp";
 import { supabase } from "@/integrations/supabase/client";
-import { LockedFinancials } from "@/data/lockedPerformanceModel";
+import { LockedFinancials, GridEmissionConstants } from "@/data/lockedPerformanceModel";
 
 /**
- * Saudi grid emission factor.
- * Credible range: IEA ≈ 0.52 kgCO₂/kWh; operational baseline ≈ 0.65 kgCO₂/kWh.
- * Default = 0.65 (conservative). Change in one place to update site-wide.
+ * Saudi grid emission factor — re-exported from LockedPerformanceModel
+ * (GridEmissionConstants). Single source of truth lives there; do not redefine here.
  */
-export const GRID_EMISSION_FACTOR_KGCO2_PER_KWH = 0.65;
+export const GRID_EMISSION_FACTOR_KGCO2_PER_KWH = GridEmissionConstants.kgCo2PerKwh;
 
 const MONTH_ORDER = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
