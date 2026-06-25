@@ -74,8 +74,11 @@ export function useCoolingIntel(): CoolingIntel {
             .select("reading_date,fleet_total,fleet_sar")
             .order("reading_date", { ascending: true })
             .limit(5000),
-          fetch(`https://api.open-meteo.com/v1/forecast?latitude=${RAWDAH_LAT}&longitude=${RAWDAH_LON}&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,shortwave_radiation_sum&timezone=Asia%2FRiyadh&forecast_days=7`)
-            .then(r => r.json()).catch(() => null),
+          supabase.functions.invoke("forecast-weather", { body: {} })
+            .then(({ data, error }) => {
+              if (error) { console.error("forecast-weather invoke error", error); return null; }
+              return data;
+            }).catch((e) => { console.error("forecast-weather threw", e); return null; }),
         ]);
 
         if (wRes.error) throw wRes.error;
@@ -115,25 +118,21 @@ export function useCoolingIntel(): CoolingIntel {
         }
         const kwhPerCdd = ratios.length ? ratios.reduce((a, b) => a + b, 0) / ratios.length : 0;
 
-        // 7-day forecast → CDD → projected kWh
+        // 7-day forecast → CDD → projected kWh (server-fetched via edge function)
         const forecast: ForecastDay[] = [];
-        if (fRes?.daily?.time?.length) {
-          const d = fRes.daily;
-          for (let i = 0; i < d.time.length; i++) {
-            const tMean = Number(d.temperature_2m_mean[i]);
-            const cdd = Math.max(0, tMean - CDD_BASE_C);
-            const projectedKwh = cdd * kwhPerCdd;
-            forecast.push({
-              date: d.time[i],
-              tMax: Number(d.temperature_2m_max[i]),
-              tMin: Number(d.temperature_2m_min[i]),
-              tMean,
-              solar: Number(d.shortwave_radiation_sum?.[i] ?? 0),
-              cdd,
-              projectedKwh,
-              projectedSar: projectedKwh * SAR_PER_KWH,
-            });
-          }
+        const days: any[] = Array.isArray(fRes?.days) ? fRes.days : [];
+        for (const day of days) {
+          const projectedKwh = Number(day.cdd) * kwhPerCdd;
+          forecast.push({
+            date: day.date,
+            tMax: Number(day.tMax),
+            tMin: Number(day.tMin),
+            tMean: Number(day.tMean),
+            solar: Number(day.solar ?? 0),
+            cdd: Number(day.cdd),
+            projectedKwh,
+            projectedSar: projectedKwh * SAR_PER_KWH,
+          });
         }
 
         if (cancelled) return;
