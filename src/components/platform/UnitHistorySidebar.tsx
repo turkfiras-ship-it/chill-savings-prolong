@@ -28,22 +28,54 @@ export function UnitHistorySidebar({ trigger }: Props) {
   // Sidebar unit -> sheet unit (F1 <-> FF1)
   const sheetUnit = (u: UnitKey) => (u.startsWith("F") && u !== "G8" ? `F${u.slice(1)}` : u).replace(/^F(\d)$/, "FF$1");
 
+  const [liveMonths, setLiveMonths] = useState<{ label: string; kwh: number; days: number }[]>([]);
+
   const loadDaily = useCallback(async (u: UnitKey) => {
     setLoadingDaily(true);
-    const { data, error } = await supabase
-      .from("daily_unit_readings")
-      .select("reading_date,kwh,status")
-      .eq("unit", sheetUnit(u))
-      .order("reading_date", { ascending: false })
-      .limit(60);
-    if (error) console.error(error);
-    setDaily(data ?? []);
+    const unit = sheetUnit(u);
+    const [recent, all] = await Promise.all([
+      supabase
+        .from("daily_unit_readings")
+        .select("reading_date,kwh,status")
+        .eq("unit", unit)
+        .order("reading_date", { ascending: false })
+        .limit(60),
+      supabase
+        .from("daily_unit_readings")
+        .select("reading_date,kwh")
+        .eq("unit", unit)
+        .gt("reading_date", "2026-02-28")
+        .order("reading_date", { ascending: true })
+        .limit(2000),
+    ]);
+    if (recent.error) console.error(recent.error);
+    setDaily(recent.data ?? []);
+
+    // Roll up post-Feb-2026 days into monthly totals
+    const buckets = new Map<string, { kwh: number; days: number }>();
+    for (const r of all.data ?? []) {
+      if (r.kwh == null) continue;
+      const key = r.reading_date.slice(0, 7);
+      const b = buckets.get(key) ?? { kwh: 0, days: 0 };
+      b.kwh += Number(r.kwh);
+      b.days += 1;
+      buckets.set(key, b);
+    }
+    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    setLiveMonths(
+      [...buckets.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => ({
+        label: `${MONTHS[Number(k.slice(5, 7)) - 1]} '${k.slice(2, 4)}`,
+        kwh: v.kwh,
+        days: v.days,
+      })),
+    );
     setLoadingDaily(false);
   }, []);
 
   useEffect(() => {
     if (open) loadDaily(active);
   }, [open, active, loadDaily]);
+
 
   const handleSync = async () => {
     setSyncing(true);
@@ -60,15 +92,21 @@ export function UnitHistorySidebar({ trigger }: Props) {
     loadDaily(active);
   };
 
-  const series = unitMonthlyData2025.map(m => ({
+  const staticSeries = unitMonthlyData2025.map(m => ({
     month: m.month.replace(" 2024", " '24").replace(" 2026", " '26"),
     kWh: m[active],
+    days: null as number | null,
   }));
+
+  // Live monthly rollup from daily_unit_readings for months after the static history ends
+  const liveSeries = liveMonths.map(m => ({ month: m.label, kWh: Math.round(m.kwh), days: m.days }));
+  const series = [...staticSeries, ...liveSeries];
 
   const total = series.reduce((a, b) => a + b.kWh, 0);
   const peak = series.reduce((a, b) => (b.kWh > a.kWh ? b : a), series[0]);
   const min = series.reduce((a, b) => (b.kWh < a.kWh ? b : a), series[0]);
   const annual = unitAnnualTotals[active as keyof typeof unitAnnualTotals] as number;
+
 
   // YoY: Jan/Feb 2026 vs Jan/Feb 2025
   const jan25 = unitMonthlyData2025.find(m => m.month === "January")?.[active] ?? 0;
@@ -95,7 +133,7 @@ export function UnitHistorySidebar({ trigger }: Props) {
             Per-Unit Monthly History
           </SheetTitle>
           <p className="text-xs text-muted-foreground">
-            Dec 2024 – Feb 2026 · kWh per billing cycle · Jarir Bookstore Rawdah
+            Dec 2024 – present · kWh per month (2026 months live from daily meter data) · Jarir Bookstore Rawdah
           </p>
         </SheetHeader>
 
@@ -219,7 +257,13 @@ export function UnitHistorySidebar({ trigger }: Props) {
                   <tbody>
                     {series.map(row => (
                       <tr key={row.month} className="border-b border-border/50 hover:bg-secondary/40">
-                        <td className="px-3 py-1.5 font-medium">{row.month}</td>
+                        <td className="px-3 py-1.5 font-medium">
+                          {row.month}
+                          {row.days != null && row.days < 28 && (
+                            <span className="ml-1.5 text-[9px] text-warning">partial · {row.days}d</span>
+                          )}
+                        </td>
+
                         <td className="px-3 py-1.5 text-right font-mono">{row.kWh.toLocaleString()}</td>
                         <td className="px-3 py-1.5 text-right font-mono text-muted-foreground">
                           {((row.kWh / total) * 100).toFixed(1)}%
