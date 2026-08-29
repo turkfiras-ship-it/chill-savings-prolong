@@ -60,15 +60,21 @@ export function UnitHistorySidebar({ trigger }: Props) {
     loadDaily(active);
   };
 
-  const series = unitMonthlyData2025.map(m => ({
+  const staticSeries = unitMonthlyData2025.map(m => ({
     month: m.month.replace(" 2024", " '24").replace(" 2026", " '26"),
     kWh: m[active],
+    days: null as number | null,
   }));
+
+  // Live monthly rollup from daily_unit_readings for months after the static history ends
+  const liveSeries = liveMonths.map(m => ({ month: m.label, kWh: Math.round(m.kwh), days: m.days }));
+  const series = [...staticSeries, ...liveSeries];
 
   const total = series.reduce((a, b) => a + b.kWh, 0);
   const peak = series.reduce((a, b) => (b.kWh > a.kWh ? b : a), series[0]);
   const min = series.reduce((a, b) => (b.kWh < a.kWh ? b : a), series[0]);
   const annual = unitAnnualTotals[active as keyof typeof unitAnnualTotals] as number;
+
 
   // YoY: Jan/Feb 2026 vs Jan/Feb 2025
   const jan25 = unitMonthlyData2025.find(m => m.month === "January")?.[active] ?? 0;
