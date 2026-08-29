@@ -28,22 +28,54 @@ export function UnitHistorySidebar({ trigger }: Props) {
   // Sidebar unit -> sheet unit (F1 <-> FF1)
   const sheetUnit = (u: UnitKey) => (u.startsWith("F") && u !== "G8" ? `F${u.slice(1)}` : u).replace(/^F(\d)$/, "FF$1");
 
+  const [liveMonths, setLiveMonths] = useState<{ label: string; kwh: number; days: number }[]>([]);
+
   const loadDaily = useCallback(async (u: UnitKey) => {
     setLoadingDaily(true);
-    const { data, error } = await supabase
-      .from("daily_unit_readings")
-      .select("reading_date,kwh,status")
-      .eq("unit", sheetUnit(u))
-      .order("reading_date", { ascending: false })
-      .limit(60);
-    if (error) console.error(error);
-    setDaily(data ?? []);
+    const unit = sheetUnit(u);
+    const [recent, all] = await Promise.all([
+      supabase
+        .from("daily_unit_readings")
+        .select("reading_date,kwh,status")
+        .eq("unit", unit)
+        .order("reading_date", { ascending: false })
+        .limit(60),
+      supabase
+        .from("daily_unit_readings")
+        .select("reading_date,kwh")
+        .eq("unit", unit)
+        .gt("reading_date", "2026-02-28")
+        .order("reading_date", { ascending: true })
+        .limit(2000),
+    ]);
+    if (recent.error) console.error(recent.error);
+    setDaily(recent.data ?? []);
+
+    // Roll up post-Feb-2026 days into monthly totals
+    const buckets = new Map<string, { kwh: number; days: number }>();
+    for (const r of all.data ?? []) {
+      if (r.kwh == null) continue;
+      const key = r.reading_date.slice(0, 7);
+      const b = buckets.get(key) ?? { kwh: 0, days: 0 };
+      b.kwh += Number(r.kwh);
+      b.days += 1;
+      buckets.set(key, b);
+    }
+    const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+    setLiveMonths(
+      [...buckets.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => ({
+        label: `${MONTHS[Number(k.slice(5, 7)) - 1]} '${k.slice(2, 4)}`,
+        kwh: v.kwh,
+        days: v.days,
+      })),
+    );
     setLoadingDaily(false);
   }, []);
 
   useEffect(() => {
     if (open) loadDaily(active);
   }, [open, active, loadDaily]);
+
 
   const handleSync = async () => {
     setSyncing(true);
