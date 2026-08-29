@@ -133,7 +133,7 @@ export function UnitHistorySidebar({ trigger }: Props) {
             Per-Unit Monthly History
           </SheetTitle>
           <p className="text-xs text-muted-foreground">
-            Dec 2024 – Feb 2026 · kWh per billing cycle · Jarir Bookstore Rawdah
+            Dec 2024 – present · kWh per month (2026 months live from daily meter data) · Jarir Bookstore Rawdah
           </p>
         </SheetHeader>
 
