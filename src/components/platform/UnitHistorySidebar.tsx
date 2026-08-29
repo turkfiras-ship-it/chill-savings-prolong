@@ -257,7 +257,13 @@ export function UnitHistorySidebar({ trigger }: Props) {
                   <tbody>
                     {series.map(row => (
                       <tr key={row.month} className="border-b border-border/50 hover:bg-secondary/40">
-                        <td className="px-3 py-1.5 font-medium">{row.month}</td>
+                        <td className="px-3 py-1.5 font-medium">
+                          {row.month}
+                          {row.days != null && row.days < 28 && (
+                            <span className="ml-1.5 text-[9px] text-warning">partial · {row.days}d</span>
+                          )}
+                        </td>
+
                         <td className="px-3 py-1.5 text-right font-mono">{row.kWh.toLocaleString()}</td>
                         <td className="px-3 py-1.5 text-right font-mono text-muted-foreground">
                           {((row.kWh / total) * 100).toFixed(1)}%
