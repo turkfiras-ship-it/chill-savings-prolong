@@ -11,6 +11,7 @@ import { showroomsData, totalYearlySavings25, totalYearlySavings30, totalConsump
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { ExpectedVsActualChart } from "@/components/platform/ExpectedVsActualChart";
 import { YearOverYearNormalized } from "@/components/platform/YearOverYearNormalized";
+import { CoolingLoadCostImpact } from "@/components/platform/CoolingLoadCostImpact";
 
 const chartTooltipStyle = { background: 'hsl(222, 40%, 9%)', border: '1px solid hsl(215, 20%, 16%)', borderRadius: 8, fontSize: 12 };
 const gridStroke = "hsl(215, 20%, 16%)";
@@ -76,6 +77,7 @@ export default function SavingsPage() {
         <TabsContent value="portfolio" className="space-y-4">
           <ExpectedVsActualChart />
           <YearOverYearNormalized />
+          <CoolingLoadCostImpact />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card className="bg-card border-border">
               <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Cumulative Savings</CardTitle></CardHeader>
