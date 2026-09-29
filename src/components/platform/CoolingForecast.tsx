@@ -34,7 +34,7 @@ function useEdgeForecast() {
     try {
       const { data, error } = await supabase.functions.invoke("forecast-weather");
       if (error) throw error;
-      if (!data?.days?.length) throw new Error("Empty forecast payload");
+      if (!data?.days?.length) throw new Error(data?.error || "Empty forecast payload");
       setDays(data.days as ForecastDay[]);
     } catch (e: any) {
       setError(e?.message || "Failed to load forecast");
