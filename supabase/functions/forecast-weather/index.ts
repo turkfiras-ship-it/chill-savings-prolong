@@ -5,9 +5,13 @@ const OPEN_METEO_URL =
   '&daily=temperature_2m_max,temperature_2m_min,temperature_2m_mean,shortwave_radiation_sum,weather_code,precipitation_sum' +
   '&timezone=Asia/Riyadh&forecast_days=7'
 
-async function fetchWithRetry(url: string, timeoutMs = 8000, attempts = 2): Promise<Response> {
+// Warm-instance cache of the last successful forecast (fallback on upstream outages)
+let lastGood: { days: unknown[]; fetchedAt: string } | null = null
+
+async function fetchWithRetry(url: string, timeoutMs = 8000, attempts = 4): Promise<Response> {
   let lastErr: unknown = null
   for (let i = 0; i < attempts; i++) {
+    if (i > 0) await new Promise((r) => setTimeout(r, 500 * 2 ** (i - 1)))
     const ctrl = new AbortController()
     const t = setTimeout(() => ctrl.abort(), timeoutMs)
     try {
@@ -15,6 +19,9 @@ async function fetchWithRetry(url: string, timeoutMs = 8000, attempts = 2): Prom
       clearTimeout(t)
       if (r.ok) return r
       lastErr = new Error(`status ${r.status}`)
+      console.warn(`forecast-weather attempt ${i + 1} upstream status ${r.status}`)
+      await r.body?.cancel()
+      if (r.status < 500 && r.status !== 429) break
     } catch (e) {
       clearTimeout(t)
       lastErr = e
@@ -24,6 +31,12 @@ async function fetchWithRetry(url: string, timeoutMs = 8000, attempts = 2): Prom
   throw lastErr instanceof Error ? lastErr : new Error('fetch failed')
 }
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    status,
+  })
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -32,13 +45,7 @@ Deno.serve(async (req) => {
     const r = await fetchWithRetry(OPEN_METEO_URL)
     const data = await r.json()
     const d = data?.daily
-    if (!d?.time?.length) {
-      console.error('Open-Meteo returned empty daily payload', data)
-      return new Response(
-        JSON.stringify({ error: 'Empty forecast payload' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 502 },
-      )
-    }
+    if (!d?.time?.length) throw new Error('Empty forecast payload')
     const days = d.time.map((date: string, i: number) => {
       const tMean = Number(d.temperature_2m_mean[i])
       const cdd = Math.max(0, tMean - 18)
@@ -53,15 +60,13 @@ Deno.serve(async (req) => {
         cdd,
       }
     })
-    return new Response(
-      JSON.stringify({ days, fetchedAt: new Date().toISOString() }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 },
-    )
+    lastGood = { days, fetchedAt: new Date().toISOString() }
+    return json(lastGood)
   } catch (e) {
-    console.error('forecast-weather failure', e)
-    return new Response(
-      JSON.stringify({ error: (e as Error).message ?? 'unknown' }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 },
-    )
+    const reason = (e as Error)?.message ?? 'unknown'
+    console.error('forecast-weather upstream failure:', reason)
+    // Soft-fail with 200 so the client never crashes; serve cached data if we have it
+    if (lastGood) return json({ ...lastGood, stale: true, error: reason })
+    return json({ days: [], unavailable: true, error: `Open-Meteo unavailable (${reason})` })
   }
 })
