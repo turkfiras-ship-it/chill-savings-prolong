@@ -42,6 +42,11 @@ export default function CoolingForecastPage() {
               7-day projection — Open-Meteo forecast at Rawdah coords × site historical {intel.kwhPerCdd.toFixed(1)} kWh per CDD-day
             </p>
           </div>
+          {intel.stale && (
+            <Badge variant="outline" className="text-xs border-warning/40 text-warning">
+              Cached data — weather feed unreachable; verify before planning
+            </Badge>
+          )}
           <Badge variant="outline" className="text-xs">Forecast / projection — not actual</Badge>
         </div>
 
