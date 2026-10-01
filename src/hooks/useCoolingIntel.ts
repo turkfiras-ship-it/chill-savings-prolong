@@ -42,6 +42,7 @@ export interface CoolingIntel {
   } | null;
   kwhPerCdd: number;                      // historical site ratio
   forecast: ForecastDay[];                // 7 days from Open-Meteo
+  stale: boolean;                         // true when forecast served from edge-function cache
   fetchedAt: string;
 }
 
@@ -58,7 +59,7 @@ export function useCoolingIntel(): CoolingIntel {
   const [state, setState] = useState<CoolingIntel>({
     loading: true, error: null,
     weather: [], readings: [], baseline2024: null,
-    kwhPerCdd: 0, forecast: [], fetchedAt: "",
+    kwhPerCdd: 0, forecast: [], stale: false, fetchedAt: "",
   });
 
   useEffect(() => {
@@ -139,7 +140,8 @@ export function useCoolingIntel(): CoolingIntel {
         setState({
           loading: false, error: null,
           weather, readings, baseline2024, kwhPerCdd, forecast,
-          fetchedAt: new Date().toISOString(),
+          stale: Boolean(fRes?.stale),
+          fetchedAt: (typeof fRes?.fetchedAt === "string" && fRes.fetchedAt) ? fRes.fetchedAt : new Date().toISOString(),
         });
       } catch (e: any) {
         if (cancelled) return;
