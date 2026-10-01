@@ -57,7 +57,7 @@ function useEdgeForecast() {
 }
 
 export function CoolingForecast() {
-  const { days, loading, error, refresh } = useEdgeForecast();
+  const { days, loading, error, stale, refresh } = useEdgeForecast();
 
   if (loading || error || !days || !days.length) {
     const message = error
@@ -136,11 +136,29 @@ export function CoolingForecast() {
             <Snowflake className="h-4 w-4 text-energy" />
             7-Day Cooling Load Forecast
           </CardTitle>
-          <Badge variant="outline" className="text-[9px] h-5 gap-1">
-            <Thermometer className="h-2.5 w-2.5" /> Live Weather Data
-          </Badge>
+          {stale ? (
+            <Badge variant="outline" className="text-[9px] h-5 gap-1 border-warning/40 text-warning">
+              <AlertTriangle className="h-2.5 w-2.5" /> Cached — not live
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="text-[9px] h-5 gap-1">
+              <Thermometer className="h-2.5 w-2.5" /> Live Weather Data
+            </Badge>
+          )}
         </div>
       </CardHeader>
+      {stale && (
+        <div className="px-6 pb-1">
+          <div className="rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-[11px] leading-relaxed text-warning flex items-start gap-2">
+            <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+            <span>
+              Weather service unreachable — showing a cached forecast
+              {stale.fetchedAt ? ` from ${new Date(stale.fetchedAt).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}` : ''}
+              . Do not plan cooling costs from these figures until the live feed is restored.
+            </span>
+          </div>
+        </div>
+      )}
       <CardContent className="space-y-4">
         {/* Summary KPIs */}
         <div className="grid grid-cols-3 gap-2">
