@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { estimateCoolingLoadMultiplier, getWeatherInfo } from "@/lib/weatherService";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Thermometer, TrendingUp, Zap, Snowflake } from "lucide-react";
+import { Thermometer, TrendingUp, Zap, Snowflake, AlertTriangle } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from "recharts";
 import { portfolioKPIs } from "@/data/mockData";
 import { cn } from "@/lib/utils";
@@ -23,8 +23,14 @@ interface ForecastDay {
   cdd: number;
 }
 
+interface StaleInfo {
+  fetchedAt?: string;
+  error?: string;
+}
+
 function useEdgeForecast() {
   const [days, setDays] = useState<ForecastDay[] | null>(null);
+  const [stale, setStale] = useState<StaleInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,16 +42,18 @@ function useEdgeForecast() {
       if (error) throw error;
       if (!data?.days?.length) throw new Error(data?.error || "Empty forecast payload");
       setDays(data.days as ForecastDay[]);
+      setStale(data.stale ? { fetchedAt: data.fetchedAt, error: data.error } : null);
     } catch (e: any) {
       setError(e?.message || "Failed to load forecast");
       setDays(null);
+      setStale(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => { load(); }, [load]);
-  return { days, loading, error, refresh: load };
+  return { days, loading, error, stale, refresh: load };
 }
 
 export function CoolingForecast() {
